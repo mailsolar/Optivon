@@ -29,21 +29,21 @@ class RiskManager {
 
                 const currentEquity = acc.balance + openPnL;
 
-                // 1. Max Drawdown (8% of Size)
-                const maxLoss = acc.size * 0.08;
+                // 1. Max Drawdown (4% of Size)
+                const maxLoss = acc.size * 0.04;
                 const minEquityAllowed = acc.size - maxLoss;
 
                 if (currentEquity < minEquityAllowed) {
-                    this.failAccount(acc.id, 'Max Drawdown Violation');
+                    this.failAccount(acc.id, 'Max Drawdown Violation (4%)');
                     return;
                 }
 
-                // 2. Daily Drawdown (4% of Daily Start Balance)
-                const dailyLossLimit = acc.daily_start_balance * 0.04;
+                // 2. Daily Drawdown (2% of Daily Start Balance)
+                const dailyLossLimit = acc.daily_start_balance * 0.02;
                 const minDailyEquity = acc.daily_start_balance - dailyLossLimit;
 
                 if (currentEquity < minDailyEquity) {
-                    this.failAccount(acc.id, 'Daily Drawdown Violation');
+                    this.failAccount(acc.id, 'Daily Drawdown Violation (2%)');
                     return;
                 }
 

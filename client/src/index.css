@@ -2,7 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* Remove arrow/spin buttons from input type number */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+html,
 body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  /* Force no scroll on body */
   background-color: #000;
   color: #fff;
+}
+
+/* Custom scrollbar for trading terminal */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

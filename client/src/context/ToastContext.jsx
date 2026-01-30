@@ -9,7 +9,7 @@ export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
 
     const addToast = useCallback((message, type = 'info') => {
-        const id = Date.now();
+        const id = crypto.randomUUID(); // Unique ID
         setToasts(prev => [...prev, { id, message, type }]);
 
         // Auto remove after 3 seconds
@@ -33,7 +33,7 @@ export const ToastProvider = ({ children }) => {
                         className={`
                             pointer-events-auto min-w-[200px] max-w-sm p-4 rounded-lg shadow-xl border-l-4 text-sm font-medium animate-slide-in
                             ${toast.type === 'success' ? 'bg-[#1e1e24] border-green-500 text-white' : ''}
-                            ${toast.type === 'error' ? 'bg-[#1e1e24] border-red-500 text-white' : ''}
+                            ${toast.type === 'sell' || toast.type === 'error' ? 'bg-[#1e1e24] border-red-500 text-white' : ''}
                             ${toast.type === 'info' ? 'bg-[#1e1e24] border-blue-500 text-white' : ''}
                         `}
                     >

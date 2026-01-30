@@ -50,11 +50,28 @@ function initializeTables() {
             lots INTEGER,
             entry_price REAL,
             exit_price REAL,
+            sl REAL, -- Stop Loss
+            tp REAL, -- Take Profit
             status TEXT, -- open, closed
             volume REAL, -- simulated volume impact
             open_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             close_time DATETIME,
             pnl REAL,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
+        )`);
+
+        // Limit Orders
+        db.run(`CREATE TABLE IF NOT EXISTS limit_orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id INTEGER,
+            symbol TEXT,
+            side TEXT,
+            lots INTEGER,
+            limit_price REAL,
+            sl REAL,
+            tp REAL,
+            status TEXT, -- pending, filled, cancelled
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )`);
 

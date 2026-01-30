@@ -233,7 +233,7 @@ const Footer = () => (
 // --- MAIN PAGE ---
 export default function Landing({ onAuthRequest }) {
     return (
-        <div className="bg-cyber-black text-white selection:bg-cyber-cyan selection:text-black font-sans relative overflow-x-hidden">
+        <div className="bg-cyber-black text-white selection:bg-cyber-cyan selection:text-black font-sans relative h-screen overflow-y-auto overflow-x-hidden">
             {/* Background Atmosphere */}
             <div className="fixed inset-0 bg-[#050505] z-0" />
             <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(0,243,255,0.03)_0%,transparent_70%)] pointer-events-none z-0" />

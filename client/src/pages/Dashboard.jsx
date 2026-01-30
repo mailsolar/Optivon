@@ -6,6 +6,7 @@ import Settings from '../components/Settings';
 import { useToast } from '../context/ToastContext';
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
+import { AlertProvider } from '../context/AlertContext';
 
 export default function Dashboard({ user }) {
     return <DashboardContent user={user} />;
@@ -196,151 +197,153 @@ function DashboardContent({ user }) {
 
             {/* MAIN CONTENT AREA */}
             <main className="flex-1 overflow-hidden relative">
-                {/* Background Grid */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none opacity-20"></div>
+                <AlertProvider quotes={quotes}>
+                    {/* Background Grid */}
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none opacity-20"></div>
 
-                {/* OVERVIEW TAB */}
-                {activeTab === 'overview' && (
-                    <div className="h-full overflow-y-auto p-8 max-w-7xl mx-auto w-full relative z-10">
-                        {accounts.length === 0 ? (
-                            <div className="text-center py-20">
-                                <h2 className="text-2xl text-gray-500 font-orb mb-4">NO ACTIVE PROTOCOLS</h2>
-                                <button onClick={() => setActiveTab('challenges')} className="text-cyber-cyan underline underline-offset-4 hover:text-white">Initialize a Challenge</button>
-                            </div>
-                        ) : (
-                            <div className="space-y-8">
-                                <h2 className="text-xl font-bold font-orb text-white/50 tracking-widest border-b border-white/5 pb-4">ACTIVE SESSIONS</h2>
-                                <div className="grid gap-6">
-                                    {accounts.map(acc => (
-                                        <div key={acc.id} className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col md:flex-row items-center justify-between hover:border-cyber-cyan/30 transition-colors">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-2xl font-black font-orb text-white">#{acc.id}</span>
-                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${acc.status === 'active' ? 'border-green-500/50 text-green-400 bg-green-500/10' :
-                                                        acc.status === 'failed' || acc.status === 'expired' ? 'border-red-500/50 text-red-400 bg-red-500/10' :
-                                                            'border-yellow-500/50 text-yellow-400 bg-yellow-500/10'
-                                                        }`}>
-                                                        {acc.status.toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <span className="text-sm text-gray-500 font-mono">{acc.type} Protocol • ${acc.size.toLocaleString()}</span>
-                                            </div>
-
-                                            <div className="flex gap-12 font-mono text-sm py-4 md:py-0">
-                                                <div className="flex flex-col">
-                                                    <span className="text-gray-500 text-[10px] uppercase">Equity</span>
-                                                    <span className="text-white font-bold text-lg">${acc.equity.toLocaleString()}</span>
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-gray-500 text-[10px] uppercase">Balance</span>
-                                                    <span className="text-gray-300">${acc.balance.toLocaleString()}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-4">
-                                                {acc.status === 'active' && (
-                                                    <button
-                                                        onClick={() => { setSelectedAccountId(acc.id); setActiveTab('terminal'); }}
-                                                        className="px-6 py-2 bg-white text-black font-bold uppercase tracking-wider text-xs rounded hover:scale-105 transition-transform"
-                                                    >
-                                                        Access Terminal
-                                                    </button>
-                                                )}
-                                                {acc.status === 'pending' && (
-                                                    <button
-                                                        onClick={() => handleLaunch(acc.id)}
-                                                        className="px-6 py-2 bg-cyber-cyan text-black font-bold uppercase tracking-wider text-xs rounded shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:scale-105 transition-transform"
-                                                    >
-                                                        Launch Session
-                                                    </button>
-                                                )}
-                                                {(acc.status === 'failed' || acc.status === 'expired') && (
-                                                    <button className="px-6 py-2 border border-red-500/30 text-red-500 font-bold uppercase tracking-wider text-xs rounded cursor-not-allowed opacity-50">
-                                                        Terminated
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
+                    {/* OVERVIEW TAB */}
+                    {activeTab === 'overview' && (
+                        <div className="h-full overflow-y-auto p-8 max-w-7xl mx-auto w-full relative z-10">
+                            {accounts.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <h2 className="text-2xl text-gray-500 font-orb mb-4">NO ACTIVE PROTOCOLS</h2>
+                                    <button onClick={() => setActiveTab('challenges')} className="text-cyber-cyan underline underline-offset-4 hover:text-white">Initialize a Challenge</button>
                                 </div>
+                            ) : (
+                                <div className="space-y-8">
+                                    <h2 className="text-xl font-bold font-orb text-white/50 tracking-widest border-b border-white/5 pb-4">ACTIVE SESSIONS</h2>
+                                    <div className="grid gap-6">
+                                        {accounts.map(acc => (
+                                            <div key={acc.id} className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col md:flex-row items-center justify-between hover:border-cyber-cyan/30 transition-colors">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-2xl font-black font-orb text-white">#{acc.id}</span>
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${acc.status === 'active' ? 'border-green-500/50 text-green-400 bg-green-500/10' :
+                                                            acc.status === 'failed' || acc.status === 'expired' ? 'border-red-500/50 text-red-400 bg-red-500/10' :
+                                                                'border-yellow-500/50 text-yellow-400 bg-yellow-500/10'
+                                                            }`}>
+                                                            {acc.status.toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-sm text-gray-500 font-mono">{acc.type} Protocol • ${acc.size.toLocaleString()}</span>
+                                                </div>
+
+                                                <div className="flex gap-12 font-mono text-sm py-4 md:py-0">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-gray-500 text-[10px] uppercase">Equity</span>
+                                                        <span className="text-white font-bold text-lg">${acc.equity.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-gray-500 text-[10px] uppercase">Balance</span>
+                                                        <span className="text-gray-300">${acc.balance.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-4">
+                                                    {acc.status === 'active' && (
+                                                        <button
+                                                            onClick={() => { setSelectedAccountId(acc.id); setActiveTab('terminal'); }}
+                                                            className="px-6 py-2 bg-white text-black font-bold uppercase tracking-wider text-xs rounded hover:scale-105 transition-transform"
+                                                        >
+                                                            Access Terminal
+                                                        </button>
+                                                    )}
+                                                    {acc.status === 'pending' && (
+                                                        <button
+                                                            onClick={() => handleLaunch(acc.id)}
+                                                            className="px-6 py-2 bg-cyber-cyan text-black font-bold uppercase tracking-wider text-xs rounded shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:scale-105 transition-transform"
+                                                        >
+                                                            Launch Session
+                                                        </button>
+                                                    )}
+                                                    {(acc.status === 'failed' || acc.status === 'expired') && (
+                                                        <button className="px-6 py-2 border border-red-500/30 text-red-500 font-bold uppercase tracking-wider text-xs rounded cursor-not-allowed opacity-50">
+                                                            Terminated
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* TERMINAL TAB */}
+                    {activeTab === 'terminal' && activeAccount && (
+                        <TerminalLayout
+                            key={activeAccount.id} // Force remount on account switch
+                            user={user}
+                            quotes={quotes}
+                            account={activeAccount}
+                            onTrade={fetchAccounts}
+                        />
+                    )}
+                    {activeTab === 'terminal' && !activeAccount && (
+                        <div className="h-full flex items-center justify-center text-gray-500 font-mono">
+                            Select an active account to initialize terminal.
+                        </div>
+                    )}
+
+                    {/* CHALLENGES TAB */}
+                    {activeTab === 'challenges' && (
+                        <div className="h-full overflow-y-auto p-8 relative z-10 flex flex-col items-center justify-center">
+                            <div className="text-center mb-10 mt-10">
+                                <h2 className="text-3xl font-bold text-white mb-2 font-orb">INITIATE NEW PROTOCOL</h2>
+                                <p className="text-gray-400 font-mono text-sm max-w-lg mx-auto">Select the challenge that matches your skill level. Pass the evaluation to earn performance-based rewards.</p>
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {/* TERMINAL TAB */}
-                {activeTab === 'terminal' && activeAccount && (
-                    <TerminalLayout
-                        key={activeAccount.id} // Force remount on account switch
-                        user={user}
-                        quotes={quotes}
-                        account={activeAccount}
-                        onTrade={fetchAccounts}
-                    />
-                )}
-                {activeTab === 'terminal' && !activeAccount && (
-                    <div className="h-full flex items-center justify-center text-gray-500 font-mono">
-                        Select an active account to initialize terminal.
-                    </div>
-                )}
-
-                {/* CHALLENGES TAB */}
-                {activeTab === 'challenges' && (
-                    <div className="h-full overflow-y-auto p-8 relative z-10 flex flex-col items-center justify-center">
-                        <div className="text-center mb-10 mt-10">
-                            <h2 className="text-3xl font-bold text-white mb-2 font-orb">INITIATE NEW PROTOCOL</h2>
-                            <p className="text-gray-400 font-mono text-sm max-w-lg mx-auto">Select the challenge that matches your skill level. Pass the evaluation to earn performance-based rewards.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-4 mb-20">
+                                <PricingCard
+                                    title="Starter"
+                                    price="₹2,999"
+                                    subtitle="Perfect for beginners testing their skills"
+                                    features={[
+                                        "₹1,00,000 simulated capital",
+                                        "₹8,000 profit target",
+                                        "5% max drawdown",
+                                        "30 days duration",
+                                        "Basic analytics",
+                                        "Email support"
+                                    ]}
+                                    onSelect={() => handlePurchase('Starter', 100000)}
+                                />
+                                <PricingCard
+                                    title="Intermediate"
+                                    price="₹5,999"
+                                    subtitle="For traders ready to scale up"
+                                    isPopular={true}
+                                    features={[
+                                        "₹3,00,000 simulated capital",
+                                        "₹24,000 profit target",
+                                        "6% max drawdown",
+                                        "45 days duration",
+                                        "Advanced analytics",
+                                        "Priority support",
+                                        "Risk management tools"
+                                    ]}
+                                    onSelect={() => handlePurchase('Intermediate', 300000)}
+                                />
+                                <PricingCard
+                                    title="Advanced"
+                                    price="₹9,999"
+                                    subtitle="Maximum capital for experienced traders"
+                                    features={[
+                                        "₹5,00,000 simulated capital",
+                                        "₹40,000 profit target",
+                                        "7% max drawdown",
+                                        "60 days duration",
+                                        "Premium analytics",
+                                        "24/7 support",
+                                        "Advanced risk tools",
+                                        "API access"
+                                    ]}
+                                    onSelect={() => handlePurchase('Advanced', 500000)}
+                                />
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-4 mb-20">
-                            <PricingCard
-                                title="Starter"
-                                price="₹2,999"
-                                subtitle="Perfect for beginners testing their skills"
-                                features={[
-                                    "₹1,00,000 simulated capital",
-                                    "₹8,000 profit target",
-                                    "5% max drawdown",
-                                    "30 days duration",
-                                    "Basic analytics",
-                                    "Email support"
-                                ]}
-                                onSelect={() => handlePurchase('Starter', 100000)}
-                            />
-                            <PricingCard
-                                title="Intermediate"
-                                price="₹5,999"
-                                subtitle="For traders ready to scale up"
-                                isPopular={true}
-                                features={[
-                                    "₹3,00,000 simulated capital",
-                                    "₹24,000 profit target",
-                                    "6% max drawdown",
-                                    "45 days duration",
-                                    "Advanced analytics",
-                                    "Priority support",
-                                    "Risk management tools"
-                                ]}
-                                onSelect={() => handlePurchase('Intermediate', 300000)}
-                            />
-                            <PricingCard
-                                title="Advanced"
-                                price="₹9,999"
-                                subtitle="Maximum capital for experienced traders"
-                                features={[
-                                    "₹5,00,000 simulated capital",
-                                    "₹40,000 profit target",
-                                    "7% max drawdown",
-                                    "60 days duration",
-                                    "Premium analytics",
-                                    "24/7 support",
-                                    "Advanced risk tools",
-                                    "API access"
-                                ]}
-                                onSelect={() => handlePurchase('Advanced', 500000)}
-                            />
-                        </div>
-                    </div>
-                )}
+                    )}
+                </AlertProvider>
             </main>
         </div>
     );

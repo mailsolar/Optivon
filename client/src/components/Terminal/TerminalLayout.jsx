@@ -1,165 +1,358 @@
-
-import React, { useEffect, useState, useRef } from 'react';
-import TerminalHeader from './TerminalHeader';
-import TerminalSidebar from './TerminalSidebar';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import TerminalChart from './TerminalChart';
+import UnifiedRightPanel from './UnifiedRightPanel';
+import TerminalHeader from './TerminalHeader';
+import TimeframeSelector from './TimeframeSelector';
+import ChartToolbar from './ChartToolbar';
+import AlertModal from './AlertModal';
+import PositionOverlay from './PositionOverlay';
+import SettingsPanel from './SettingsPanel';
 import { useToast } from '../../context/ToastContext';
+import { useAlerts } from '../../context/AlertContext';
+import { RiskManagementProvider, useRiskManagement, RiskStatusBanner } from '../../context/RiskManagementContext';
+import { AlgoProvider } from '../../context/AlgoContext';
 
-export default function TerminalLayout({ user, quotes, account, onTrade }) {
-    const [selectedSymbol, setSelectedSymbol] = useState('NIFTY');
-    const [chartData, setChartData] = useState([]);
-    const [positions, setPositions] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const seriesRef = useRef(null);
+function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccount, onTrade }) {
     const { addToast } = useToast();
+    const { alerts } = useAlerts();
+    const { accountLocked, lockReason } = useRiskManagement();
 
-    // Simulate History on Symbol Change
+    // Data State
+    const [quotes, setQuotes] = useState(initialQuotes || {});
+    // Account state is managed by parent wrapper to sync with RiskProvider
+    const [positions, setPositions] = useState([]);
+    const [chartData, setChartData] = useState([]);
+    const [selectedSymbol, setSelectedSymbol] = useState('NIFTY');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [timeframe, setTimeframe] = useState('1M');
+
+    // UI State
+    const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+    const [activeTool, setActiveTool] = useState('cursor');
+    const [chartType, setChartType] = useState('candlestick');
+    const [showSettings, setShowSettings] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+
+    // Chart Refs
+    const chartAPI = useRef(null);
+    const seriesAPI = useRef(null);
+
+    // 1. WebSocket / EventSource for Price Updates
     useEffect(() => {
-        const generateData = () => {
-            let data = [];
-            let time = new Date('2024-01-01').getTime() / 1000;
-            let price = selectedSymbol === 'NIFTY' ? 21500 : (selectedSymbol === 'BANKNIFTY' ? 46000 : 1000);
-            const volatility = selectedSymbol === 'NIFTY' ? 50 : 150;
-
-            for (let i = 0; i < 200; i++) {
-                let change = (Math.random() - 0.5) * volatility;
-                let open = price;
-                let close = price + change;
-                let high = Math.max(open, close) + Math.random() * (volatility / 2);
-                let low = Math.min(open, close) - Math.random() * (volatility / 2);
-                data.push({ time: time + i * 300, open, high, low, close });
-                price = close;
-            }
-            return data;
-        };
-        setChartData(generateData());
-    }, [selectedSymbol]);
-
-    // Live Ticks Update
-    useEffect(() => {
-        if (!quotes) return;
-        const tick = quotes[selectedSymbol];
-        if (tick && seriesRef.current) {
-            const time = Math.floor(new Date(tick.timestamp).getTime() / 1000);
-            if (isNaN(time)) return; // Prevent crash on invalid date
-
+        const eventSource = new EventSource('http://localhost:5000/api/market/stream');
+        eventSource.onmessage = (event) => {
             try {
-                seriesRef.current.update({
-                    time: time,
-                    open: tick.ltp,
-                    high: tick.ltp,
-                    low: tick.ltp,
-                    close: tick.ltp
-                });
-            } catch (err) {
-                console.warn("Chart update error:", err);
-            }
-        }
-    }, [quotes, selectedSymbol]);
+                const tick = JSON.parse(event.data);
+                if (tick && tick.symbol) {
+                    setQuotes(prev => ({ ...prev, [tick.symbol]: tick }));
 
-    // Fetch Positions
-    const fetchPositions = async () => {
-        if (!account) return;
+                    // Update Active Chart if symbol matches
+                    if (tick.symbol === selectedSymbol && seriesAPI.current) {
+                        const lastBar = chartData[chartData.length - 1];
+                        if (lastBar && typeof tick.ltp === 'number' && !isNaN(tick.ltp)) {
+                            // Ensure lastBar has valid numbers too, otherwise we might propagate NaNs
+                            const currentHigh = typeof lastBar.high === 'number' ? lastBar.high : tick.ltp;
+                            const currentLow = typeof lastBar.low === 'number' ? lastBar.low : tick.ltp;
+
+                            seriesAPI.current.update({
+                                time: lastBar.time,
+                                open: lastBar.open,
+                                high: Math.max(currentHigh, tick.ltp),
+                                low: Math.min(currentLow, tick.ltp),
+                                close: tick.ltp
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Tick Error:", e);
+            }
+        };
+        return () => eventSource.close();
+    }, [selectedSymbol, chartData]);
+
+    // 2. Fetch Historical Data & Account State
+    const fetchData = useCallback(async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/trade/positions/${account.id}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const data = await res.json();
-            if (res.ok) setPositions(data);
+            const token = localStorage.getItem('token');
+            // Check if we have an account ID to fetch. If not, retry or use props.
+            const accId = account?.id;
+            if (!accId) return;
+
+            const [dataRes, posRes, accRes] = await Promise.all([
+                fetch(`http://localhost:5000/api/market/history/${selectedSymbol}?timeframe=${timeframe}`),
+                fetch('http://localhost:5000/api/trade/positions', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`http://localhost:5000/api/trade/account/${accId}`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
+            if (dataRes.ok) {
+                const history = await dataRes.json();
+                setChartData(history);
+            }
+
+            if (posRes.ok) {
+                const pos = await posRes.json();
+                setPositions(pos.filter(p => p.account_id === accId));
+            }
+
+            if (accRes.ok) {
+                const acc = await accRes.json();
+                setAccount(acc);
+            }
         } catch (e) {
-            console.error("Failed to fetch positions", e);
+            console.error("Fetch Data Error:", e);
         }
-    };
+    }, [selectedSymbol, timeframe, account?.id]);
 
     useEffect(() => {
-        fetchPositions();
-        const interval = setInterval(fetchPositions, 2000);
+        // Initial fetch
+        fetchData();
+        // Polling interval
+        const interval = setInterval(fetchData, 2000);
         return () => clearInterval(interval);
-    }, [account]);
+    }, [fetchData]);
 
-    const handleChartReady = (chart, series) => {
-        seriesRef.current = series;
-    };
+    // 3. Trade Handlers
+    const handleOrder = async (symbol, side, lots, type, price, limitPrice, sl, tp, isClose = false) => {
+        // GLOBAL RISK LOCK CHECK
+        if (!isClose && accountLocked) {
+            addToast(`BLOCKED: ${lockReason}`, 'error');
+            return;
+        }
 
-    const handleOrder = async (sym, side, qty, type, strike) => {
         try {
-            let tradeSymbol = sym;
-            if (strike) {
-                tradeSymbol = `${sym} ${strike} ${type === 'call' ? 'CE' : 'PE'}`;
-            }
+            const token = localStorage.getItem('token');
+            const endpoint = isClose ? '/api/trade/close' : '/api/trade/place';
+            const body = isClose ? { tradeId: symbol.id } : { accountId: account.id, symbol, side, lots, type, price: limitPrice, sl, tp };
 
-            if (!account) return addToast('No Active Account', 'error');
-
-            const res = await fetch('http://localhost:5000/api/trade/place', {
+            const res = await fetch(`http://localhost:5000${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    accountId: account.id,
-                    symbol: tradeSymbol,
-                    side: side,
-                    lots: parseInt(qty || 1),
-                    type: 'market'
-                })
+                body: JSON.stringify(body)
             });
-            const data = await res.json();
-            if (!res.ok) addToast(data.error, 'error');
-            else {
-                addToast(`${side.toUpperCase()} Order Placed for ${tradeSymbol}`, 'success');
-                fetchPositions(); // Refresh immediately
+
+            const result = await res.json();
+            if (res.ok) {
+                addToast(isClose ? 'Position Closed' : 'Order Executed', 'success');
+                fetchData();
                 if (onTrade) onTrade();
+            } else {
+                addToast(result.error || 'Execution Error', 'error');
             }
         } catch (e) {
-            console.error(e);
+            addToast('Pipeline Connection Lost', 'error');
         }
     };
 
-    const handleClosePosition = async (pos) => {
-        // Find opposite side
-        const side = pos.side === 'buy' ? 'sell' : 'buy';
-        await handleOrder(pos.symbol, side, pos.lots);
+    const handleChartReady = (chart, series) => {
+        chartAPI.current = chart;
+        seriesAPI.current = series;
     };
 
+    // Chart Control Handlers
+    const handleZoomIn = () => chartAPI.current?.timeScale().zoomIn();
+    const handleZoomOut = () => chartAPI.current?.timeScale().zoomOut();
+    const handleReset = () => chartAPI.current?.timeScale().fitContent();
+
     return (
-        <div className="flex flex-col h-screen bg-[#000000] text-gray-300 overflow-hidden">
-            <TerminalHeader quotes={quotes} onSearch={setSearchTerm} />
+        <div className="flex flex-col h-full bg-[#070b1a] overflow-hidden font-sans relative">
+            {/* Risk Banner Injection */}
+            <RiskStatusBanner />
 
-            <div className="flex-1 flex overflow-hidden">
-                {/* Center Chart Area */}
-                <div className="flex-1 relative flex flex-col border-r border-white/5">
-                    <TerminalChart
-                        symbol={selectedSymbol}
-                        data={chartData}
-                        onChartReady={handleChartReady}
-                    />
+            <TerminalHeader
+                account={account}
+                quotes={quotes}
+                onSearch={setSearchTerm}
+                onToggleRightPanel={() => setIsRightPanelOpen(!isRightPanelOpen)}
+                chartType={chartType}
+                setChartType={setChartType}
+                isPanelOpen={isRightPanelOpen}
+                onOpenSettings={() => setShowSettings(true)}
+                onOpenAlerts={() => setShowAlertModal(true)}
+            />
 
-                    {/* Floating Buy/Sell Panel */}
-                    <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 bg-[#1e1e24] p-3 rounded shadow-xl border border-white/5">
-                        <div className="flex justify-between items-center text-xs mb-2">
-                            <span className="font-bold text-white">{selectedSymbol}</span>
-                            <span className="text-blue-400">{quotes[selectedSymbol]?.ltp?.toFixed(2)}</span>
+            <div className="flex-1 flex min-h-0 relative overflow-hidden">
+                <div
+                    className={`flex-1 relative flex flex-col min-w-0 bg-[#0a0e27] border-r border-white/5 transition-all duration-300 ease-in-out ${isRightPanelOpen ? 'mr-0' : 'flex-1'}`}
+                >
+                    {/* CHART AREA with proper Flex container */}
+                    <div className="flex-1 flex overflow-hidden relative">
+                        <div className="flex-none">
+                            <ChartToolbar
+                                activeTool={activeTool}
+                                setActiveTool={setActiveTool}
+                                onOpenAlerts={() => setShowAlertModal(true)}
+                            />
                         </div>
-                        <div className="flex gap-2">
-                            <button onClick={() => handleOrder(selectedSymbol, 'buy')} className="px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded shadow-lg transition-transform active:scale-95">BUY</button>
-                            <button onClick={() => handleOrder(selectedSymbol, 'sell')} className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded shadow-lg transition-transform active:scale-95">SELL</button>
+
+                        <div className="flex-1 relative h-full min-h-0 min-w-0">
+                            <TerminalChart
+                                symbol={selectedSymbol}
+                                data={chartData}
+                                chartType={chartType}
+                                onChartReady={handleChartReady}
+                            />
+
+                            {/* LIVE POSITION OVERLAYS */}
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+                                {positions
+                                    .filter(p => p.symbol === selectedSymbol)
+                                    .map(pos => {
+                                        let topPosition = '50%';
+                                        try {
+                                            if (chartAPI.current && chartAPI.current.priceScale) {
+                                                const entry = parseFloat(pos.entry_price || pos.price || 0);
+                                                const coordinate = chartAPI.current.priceScale('right').priceToCoordinate(entry);
+                                                if (coordinate !== null) {
+                                                    topPosition = `${coordinate}px`;
+                                                }
+                                            }
+                                        } catch (e) {
+                                            // Fallback to center if chart is not ready
+                                        }
+
+                                        return (
+                                            <div
+                                                key={pos.id}
+                                                className="absolute w-full"
+                                                style={{ top: topPosition }}
+                                            >
+                                                <PositionOverlay
+                                                    position={pos}
+                                                    currentPrice={quotes[selectedSymbol]?.ltp}
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                            </div>
                         </div>
                     </div>
+
+                    <TimeframeSelector
+                        timeframe={timeframe}
+                        setTimeframe={setTimeframe}
+                        onZoomIn={handleZoomIn}
+                        onZoomOut={handleZoomOut}
+                        onReset={handleReset}
+                    />
+
+                    {/* ALERT MODAL OVERLAY */}
+                    <AlertModal
+                        isOpen={showAlertModal}
+                        onClose={() => setShowAlertModal(false)}
+                        symbol={selectedSymbol}
+                        quotes={quotes}
+                        currentPrice={quotes[selectedSymbol]?.ltp}
+                    />
                 </div>
 
-                {/* Right Sidebar */}
-                <TerminalSidebar
-                    quotes={quotes}
-                    positions={positions}
-                    selectedSymbol={selectedSymbol}
-                    onSelectSymbol={setSelectedSymbol}
-                    spotPrice={quotes[selectedSymbol]?.ltp}
-                    onOrder={handleOrder}
-                    searchTerm={searchTerm}
-                    onClosePosition={handleClosePosition}
-                />
+                {/* Right Panel with Slide Animation */}
+                <div
+                    className={`transition-all duration-300 ease-in-out bg-[#0a0e27] border-l border-white/5 ${isRightPanelOpen ? 'w-[360px] translate-x-0 opacity-100' : 'w-0 translate-x-full opacity-0 overflow-hidden'
+                        }`}
+                >
+                    <UnifiedRightPanel
+                        isOpen={true} // Always mounted but hidden by CSS width
+                        account={account}
+                        quotes={quotes}
+                        positions={positions}
+                        selectedSymbol={selectedSymbol}
+                        onSelectSymbol={setSelectedSymbol}
+                        searchTerm={searchTerm}
+                        onOrder={handleOrder}
+                        onClosePosition={(pos) => handleOrder(pos, null, null, null, null, null, null, null, true)}
+                        onOpenSettings={() => setShowSettings(true)}
+                    />
+                </div>
             </div>
+
+            {/* NEW GLOBAL SETTINGS PANEL */}
+            <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
         </div>
+    );
+}
+
+// Wrapper for Provider
+export default function TerminalLayout(props) {
+    const { account } = props;
+    // We pass initial account data to the provider. 
+    // Even if it updates inside, the logic inside context uses 'currentBalance' which we should arguably pass down from inner state.
+    // However, the context is designed to receive props. 
+    // To make it fully reactive to the INNER state (which updates via fetch), we might need to lift state up.
+    // But since TerminalLayoutContent is where the state lives, we have a disconnect.
+
+    // SOLUTION: The 'RiskManagementProvider' needs access to the live account balance.
+    // We can't easily pass the live state from 'TerminalLayoutContent' to its PARENT 'RiskManagementProvider'.
+
+    // Better Approach: Put the Logic INSIDE the content, maybe as a hook, OR move the Fetching up.
+    // Since 'TerminalLayout' is the main page, moving fetching here (to the Wrapper) is cleaner.
+
+    // REFACTORING: Moving "FETCH DATA" logic to the Wrapper so we can pass data to both Provider and Content.
+
+    const [accountState, setAccountState] = useState(account);
+
+    // We need to keep the "fetchData" logic active.
+    // Since we are doing a quick integration, let's keep the fetch inside 'TerminalLayoutContent' 
+    // BUT we will also emit the account updates up? No, that's messy.
+
+    // Let's just trust 'props.account' for now as the initial seed, 
+    // and modify the Provider to accept NO balance initially, or handle it gracefully?
+    // Actually, 'RiskManagementContext' was written to take props:  { children, initialBalance, currentBalance }
+    // If we wrap it here, it only sees initial props.
+
+    // ALTERNATIVE: Use the Context's internal state?
+    // No, the context calculates derived state from balance.
+
+    // Let's inject a "RiskUpdater" component inside 'TerminalLayoutContent' that pushes updates to the Context? 
+    // Or simpler: Just Render the Context Provider INSIDE 'TerminalLayoutContent' wrapping the children?
+    // Yes! But 'TerminalLayoutContent' handles the LAYOUT. 
+    // So we can wrap the JSX return of 'TerminalLayoutContent' with the Provider.
+
+    // But hooks like 'useRiskManagement' are used inside 'TerminalLayoutContent' (for handleOrder).
+    // So the Provider MUST be above 'TerminalLayoutContent'.
+
+    // Okay, implies 'fetching' must be moved to 'TerminalLayout' (wrapper).
+    // I will simply duplicate the fetch logic to the wrapper for now to ensure robustness, 
+    // or just accept that we use the initial account for the session start.
+
+    // Actually, `account` changes as trades happen (Balance updates).
+    // If trade happens inside Content, Wrapper won't know unless we lift state.
+
+    // I'll stick to the "Wrapper" pattern and lift the `account` state to this wrapper.
+
+    return (
+        <TerminalLayoutStateWrapper {...props} />
+    );
+}
+
+
+
+function TerminalLayoutStateWrapper(props) {
+    const [account, setAccount] = useState(props.account);
+
+    // Sync with props
+    useEffect(() => {
+        if (props.account) setAccount(props.account);
+    }, [props.account]);
+
+    // We also need to be able to UPDATE this account from inside.
+    const updateAccount = (newAcc) => setAccount(newAcc);
+
+    return (
+        <RiskManagementProvider
+            initialBalance={account?.daily_start_balance || props.account?.daily_start_balance || account?.balance || 100000}
+            currentBalance={account?.equity || account?.balance || 100000}
+        >
+            <AlgoProvider>
+                <TerminalLayoutContent
+                    {...props}
+                    account={account}
+                    setAccount={updateAccount}
+                />
+            </AlgoProvider>
+        </RiskManagementProvider>
     );
 }

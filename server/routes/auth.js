@@ -20,11 +20,11 @@ router.post('/register', async (req, res) => {
     const { email, password } = req.body;
     const ip = req.ip || req.connection.remoteAddress;
 
-    // Anti-Duplication: Check IP limit (Strict: Max 1 account per IP)
+    // Anti-Duplication: Check IP limit (Relaxed for dev)
     db.get('SELECT COUNT(*) as count FROM users WHERE ip_address = ?', [ip], async (err, row) => {
         if (err) return res.status(500).send({ error: 'Database error' });
 
-        if (row.count >= 1) {
+        if (row && row.count >= 10) {
             return res.status(403).send({ error: 'Anti-Cheat: Maximum accounts reached for this IP address.' });
         }
 
