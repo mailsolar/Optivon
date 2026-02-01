@@ -54,7 +54,7 @@ export default function App() {
                             user.isAdmin ?
                                 <AdminPanel user={user} onLogout={handleLogout} /> :
                                 <DashboardLayout user={user} onLogout={handleLogout}>
-                                    <Dashboard user={user} />
+                                    <Dashboard user={user} onLogout={handleLogout} />
                                 </DashboardLayout>
                         ) : (
                             <Landing onAuthRequest={handleAuthRequest} />

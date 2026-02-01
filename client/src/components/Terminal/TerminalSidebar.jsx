@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Watchlist from './RightPanel/Watchlist';
 import Positions from './RightPanel/Positions';
@@ -8,38 +7,33 @@ import Orders from './RightPanel/Orders';
 export default function TerminalSidebar({ quotes, positions, account, onClosePosition }) {
     const [activeTab, setActiveTab] = useState('positions');
 
+    const tabs = [
+        { id: 'watchlist', label: 'WATCH' },
+        { id: 'positions', label: `POS (${positions?.length || 0})` },
+        { id: 'orders', label: 'ORDERS' },
+        { id: 'chain', label: 'CHAIN' }
+    ];
+
     return (
-        <div className="w-80 bg-[#1e1e24] border-l border-white/5 flex flex-col h-full">
+        <div className="w-80 bg-surface border-l border-border flex flex-col h-full shrink-0">
             {/* Tabs */}
-            <div className="flex border-b border-white/5 text-xs font-bold text-gray-400">
-                <button
-                    onClick={() => setActiveTab('watchlist')}
-                    className={`flex-1 py-3 hover:text-white transition-colors ${activeTab === 'watchlist' ? 'text-cyber-cyan border-b-2 border-cyber-cyan bg-white/5' : ''}`}
-                >
-                    WATCH
-                </button>
-                <button
-                    onClick={() => setActiveTab('positions')}
-                    className={`flex-1 py-3 hover:text-white transition-colors ${activeTab === 'positions' ? 'text-cyber-cyan border-b-2 border-cyber-cyan bg-white/5' : ''}`}
-                >
-                    POS ({positions?.length || 0})
-                </button>
-                <button
-                    onClick={() => setActiveTab('orders')}
-                    className={`flex-1 py-3 hover:text-white transition-colors ${activeTab === 'orders' ? 'text-cyber-cyan border-b-2 border-cyber-cyan bg-white/5' : ''}`}
-                >
-                    ORDERS
-                </button>
-                <button
-                    onClick={() => setActiveTab('chain')}
-                    className={`flex-1 py-3 hover:text-white transition-colors ${activeTab === 'chain' ? 'text-cyber-cyan border-b-2 border-cyber-cyan bg-white/5' : ''}`}
-                >
-                    CHAIN
-                </button>
+            <div className="flex border-b border-border bg-surface">
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex-1 py-4 text-[10px] font-black tracking-widest transition-all uppercase relative ${activeTab === tab.id
+                            ? 'text-brand-dark bg-accent'
+                            : 'text-secondary hover:text-white hover:bg-white/5'
+                            }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative bg-background/50">
                 {activeTab === 'watchlist' && (
                     <Watchlist quotes={quotes} />
                 )}

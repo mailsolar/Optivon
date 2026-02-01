@@ -44,8 +44,8 @@ export default function ChartToolbar({ activeTool, setActiveTool, onOpenAlerts }
                             key={tool.id}
                             onClick={() => setActiveTool(tool.id)}
                             className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90 ${isActive
-                                ? 'bg-[#2962ff] text-white shadow-lg shadow-blue-900/40 translate-x-1'
-                                : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                ? 'bg-accent text-brand-dark shadow-[0_0_10px_rgba(var(--accent-primary),0.3)] translate-x-1'
+                                : 'text-secondary hover:text-white hover:bg-white/5'
                                 }`}
                             title={tool.label}
                         >

@@ -136,78 +136,75 @@ export default function UnifiedRightPanel({
     if (!isOpen) return null;
 
     return (
-        <div className="flex flex-col h-full bg-[#0a0e27] border-l border-white/5 relative overflow-hidden select-none">
+        <div className="flex flex-col h-full bg-surface border-l border-border relative overflow-hidden select-none transition-colors duration-300">
 
             {/* TAB HEADER */}
-            <div className="flex bg-[#070b1a] border-b border-white/5 h-12 shrink-0">
+            <div className="flex bg-background border-b border-border h-12 shrink-0">
                 {['trade', 'positions', 'orders'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 flex items-center justify-center text-[10px] font-black uppercase tracking-[1px] relative transition-all ${activeTab === tab ? 'text-blue-400 bg-white/[0.02]' : 'text-gray-500 hover:text-gray-300'
+                        className={`flex-1 flex items-center justify-center text-[10px] font-black uppercase tracking-[1px] relative transition-all ${activeTab === tab ? 'text-brand-dark bg-accent' : 'text-secondary hover:text-white'
                             }`}
                     >
                         {tab}
-                        {activeTab === tab && (
-                            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 shadow-[0_0_15px_rgba(41,98,255,1)]"></div>
-                        )}
                     </button>
                 ))}
             </div>
 
             {/* MAIN CONTENT */}
-            <div className="flex-1 overflow-hidden relative flex flex-col min-h-0">
+            <div className="flex-1 overflow-hidden relative flex flex-col min-h-0 bg-surface">
                 {activeTab === 'trade' && (
                     <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 space-y-6">
 
                         {/* Market Overview Header */}
                         <div className="flex justify-between items-start">
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">Active Symbol</span>
-                                <h2 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">{selectedSymbol}</h2>
+                                <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">Active Symbol</span>
+                                <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none">{selectedSymbol}</h2>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <div className={`w-1.5 h-1.5 rounded-full ${quote.dayChange >= 0 ? 'bg-[#00c853]' : 'bg-[#ff1744]'} animate-pulse`}></div>
-                                    <span className="text-[10px] text-white/30 font-black tracking-widest uppercase">Protocol RT Feed</span>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${quote.dayChange >= 0 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
+                                    <span className="text-[10px] text-secondary/30 font-black tracking-widest uppercase">Protocol RT Feed</span>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] rounded-xl border border-white/5">
-                                    <Clock className="w-3.5 h-3.5 text-blue-400" />
-                                    <span className="text-[11px] font-mono font-black text-white/70">{currentTime.toLocaleTimeString([], { hour12: false })} IST</span>
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-xl">
+                                    <Clock className="w-3.5 h-3.5 text-accent" />
+                                    <span className="text-[11px] font-mono font-black text-secondary">{currentTime.toLocaleTimeString([], { hour12: false })} IST</span>
                                 </div>
                                 <OneClickOrderToggle enabled={oneClickEnabled} onToggle={setOneClickEnabled} />
                             </div>
                         </div>
 
                         {/* Account Health Matrix */}
-                        <div className="flex flex-col gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl relative overflow-hidden group">
+                        <div className="flex flex-col gap-3 p-4 bg-background border border-border rounded-2xl relative overflow-hidden group">
                             <div className="flex justify-between items-center relative z-10">
                                 <div className="flex flex-col">
-                                    <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-1">Portfolio Balance</span>
-                                    <span className="text-sm font-mono font-black text-white">
+                                    <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-1">Portfolio Balance</span>
+                                    <span className="text-sm font-mono font-black text-primary">
                                         ${(parseFloat(account?.balance) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </div>
-                                <div className="flex flex-col items-end border-l border-white/5 pl-4">
-                                    <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-1">Liquid Equity</span>
-                                    <span className={`text-sm font-mono font-black ${account?.equity >= account?.balance ? 'text-[#00c853]' : 'text-[#ff1744]'}`}>
+                                <div className="flex flex-col items-end border-l border-border pl-4">
+                                    <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-1">Liquid Equity</span>
+                                    <span className={`text-sm font-mono font-black ${account?.equity >= account?.balance ? 'text-green-500' : 'text-red-500'}`}>
                                         ${(parseFloat(account?.equity) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="h-1 bg-white/5 rounded-full overflow-hidden relative z-10">
+                            <div className="h-1 bg-border rounded-full overflow-hidden relative z-10">
                                 <div
-                                    className={`h-full transition-all duration-1000 ${account?.equity >= account?.balance ? 'bg-[#00c853] shadow-[0_0_8px_rgba(0,200,83,0.5)]' : 'bg-[#ff1744] shadow-[0_0_8px_rgba(255,23,68,0.5)]'}`}
+                                    className={`h-full transition-all duration-1000 ${account?.equity >= account?.balance ? 'bg-green-500 shadow-[0_0_8px_rgba(0,200,83,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(255,23,68,0.5)]'}`}
                                     style={{ width: `${Math.min(100, (account?.equity / account?.balance) * 100)}%` }}
                                 ></div>
                             </div>
 
                             <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-[2px] relative z-10">
-                                <span className="text-white/20">Protocol Link Optimized</span>
-                                <span className="text-blue-400/50">Node Sync: 100%</span>
+                                <span className="text-secondary/20">Protocol Link Optimized</span>
+                                <span className="text-accent/50">Node Sync: 100%</span>
                             </div>
-                            <Shield className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-all" />
+                            <Shield className="absolute -right-4 -bottom-4 w-20 h-20 text-accent/[0.02] group-hover:text-accent/[0.04] transition-all" />
                         </div>
 
                         {/* Order Configuration */}
@@ -215,23 +212,23 @@ export default function UnifiedRightPanel({
                             {/* Quantity Control */}
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center px-1">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                                    <label className="text-[10px] font-black text-secondary uppercase tracking-widest flex items-center gap-2">
                                         Execution Lots
-                                        <div className="w-1 h-1 rounded-full bg-gray-700"></div>
-                                        <span className="text-blue-500/50">{lotSize}x</span>
+                                        <div className="w-1 h-1 rounded-full bg-border"></div>
+                                        <span className="text-accent/50">{lotSize}x</span>
                                     </label>
-                                    <button onClick={() => setLots(1)} className="text-[9px] font-black text-gray-600 hover:text-white uppercase transition-colors">Reset</button>
+                                    <button onClick={() => setLots(1)} className="text-[9px] font-black text-secondary hover:text-primary uppercase transition-colors">Reset</button>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="flex-1 flex items-center bg-[#1a1e2e] rounded-2xl border border-white/5 overflow-hidden group focus-within:border-blue-500/50 transition-all shadow-inner">
-                                        <button onClick={() => setLots(Math.max(1, lots - 1))} className="px-4 py-4 text-gray-500 hover:text-white hover:bg-white/5 transition-all"><Minus className="w-4 h-4" /></button>
+                                    <div className="flex-1 flex items-center bg-background rounded-2xl border border-border overflow-hidden group focus-within:border-accent/50 transition-all shadow-inner">
+                                        <button onClick={() => setLots(Math.max(1, lots - 1))} className="px-4 py-4 text-secondary hover:text-primary hover:bg-surface transition-all"><Minus className="w-4 h-4" /></button>
                                         <input
                                             type="number"
                                             value={lots}
                                             onChange={(e) => setLots(Math.max(1, parseInt(e.target.value) || 0))}
-                                            className="w-full bg-transparent text-center font-mono font-black text-xl text-white outline-none"
+                                            className="w-full bg-transparent text-center font-mono font-black text-xl text-primary outline-none"
                                         />
-                                        <button onClick={() => setLots(lots + 1)} className="px-4 py-4 text-gray-500 hover:text-white hover:bg-white/5 transition-all"><Plus className="w-4 h-4" /></button>
+                                        <button onClick={() => setLots(lots + 1)} className="px-4 py-4 text-secondary hover:text-primary hover:bg-surface transition-all"><Plus className="w-4 h-4" /></button>
                                     </div>
                                 </div>
                             </div>
@@ -240,26 +237,25 @@ export default function UnifiedRightPanel({
                             {!oneClickEnabled && (
                                 <div className="space-y-5 animate-in slide-in-from-top-2 duration-300">
                                     {/* Order Side and Type Selection */}
-                                    <div className="grid grid-cols-2 gap-2 bg-[#070b1a] p-1.5 rounded-2xl border border-white/5">
-                                        <button onClick={() => setOrderType('market')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-[#1a1e2e] text-white shadow-lg' : 'text-gray-600 hover:text-gray-400'}`}>MARKET</button>
-                                        <button onClick={() => setOrderType('limit')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'limit' ? 'bg-[#1a1e2e] text-white shadow-lg' : 'text-gray-600 hover:text-gray-400'}`}>LIMIT</button>
+                                    <div className="grid grid-cols-2 gap-2 bg-background p-1.5 rounded-2xl border border-border">
+                                        <button onClick={() => setOrderType('market')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>MARKET</button>
+                                        <button onClick={() => setOrderType('limit')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'limit' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>LIMIT</button>
                                     </div>
 
                                     {/* Side Selector (Visual Only since button determines action) */}
-                                    {/* Actually we need to toggle side for SL/TP PnL estimation to be correct before clicking */}
                                     <div className="grid grid-cols-2 gap-2">
-                                        <button onClick={() => setSide('buy')} className={`py-2 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all ${side === 'buy' ? 'bg-green-500/10 text-green-400 border-green-500/30' : 'bg-transparent border-transparent text-gray-600 hover:bg-white/5'}`}>Long</button>
-                                        <button onClick={() => setSide('sell')} className={`py-2 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all ${side === 'sell' ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-transparent border-transparent text-gray-600 hover:bg-white/5'}`}>Short</button>
+                                        <button onClick={() => setSide('buy')} className={`py-2 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all ${side === 'buy' ? 'bg-green-500/10 text-green-500 border-green-500/30' : 'bg-transparent border-transparent text-secondary hover:bg-surface'}`}>Long</button>
+                                        <button onClick={() => setSide('sell')} className={`py-2 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all ${side === 'sell' ? 'bg-red-500/10 text-red-500 border-red-500/30' : 'bg-transparent border-transparent text-secondary hover:bg-surface'}`}>Short</button>
                                     </div>
 
                                     {orderType === 'limit' && (
                                         <div className="space-y-2">
-                                            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest px-1">Trigger Price</span>
+                                            <span className="text-[9px] font-black text-secondary uppercase tracking-widest px-1">Trigger Price</span>
                                             <input
                                                 type="number"
                                                 value={limitPrice}
                                                 onChange={(e) => setLimitPrice(parseFloat(e.target.value))}
-                                                className="w-full bg-[#1a1e2e] border border-white/5 rounded-2xl py-4 px-6 text-center font-mono text-lg font-black text-blue-400 outline-none focus:border-blue-500 transition-all shadow-inner"
+                                                className="w-full bg-background border border-border rounded-2xl py-4 px-6 text-center font-mono text-lg font-black text-accent outline-none focus:border-accent transition-all shadow-inner"
                                             />
                                         </div>
                                     )}
@@ -269,7 +265,7 @@ export default function UnifiedRightPanel({
                                         {/* STOP LOSS */}
                                         <div className={`
                                             rounded-2xl border transition-all overflow-hidden
-                                            ${slEnabled ? 'bg-[#ff1744]/5 border-[#ff1744]/30' : 'bg-white/[0.02] border-white/5'}
+                                            ${slEnabled ? 'bg-red-500/5 border-red-500/30' : 'bg-background border-border'}
                                         `}>
                                             <div className="flex items-center justify-between p-4">
                                                 <div className="flex items-center gap-2">
@@ -277,14 +273,14 @@ export default function UnifiedRightPanel({
                                                         type="checkbox"
                                                         checked={slEnabled}
                                                         onChange={(e) => setSlEnabled(e.target.checked)}
-                                                        className="w-4 h-4 accent-[#ff1744] cursor-pointer"
+                                                        className="w-4 h-4 accent-red-500 cursor-pointer"
                                                     />
-                                                    <span className={`text-[9px] font-black uppercase tracking-widest ${slEnabled ? 'text-[#ff1744]' : 'text-gray-500'}`}>
+                                                    <span className={`text-[9px] font-black uppercase tracking-widest ${slEnabled ? 'text-red-500' : 'text-secondary'}`}>
                                                         Stop Loss
                                                     </span>
                                                 </div>
                                                 {slEnabled && slPrice && (
-                                                    <span className="text-[9px] font-mono font-bold text-[#ff1744]">
+                                                    <span className="text-[9px] font-mono font-bold text-red-500">
                                                         Est: ${calculatePnL(slPrice, true).toFixed(2)}
                                                     </span>
                                                 )}
@@ -297,14 +293,14 @@ export default function UnifiedRightPanel({
                                                         placeholder="Price..."
                                                         value={slPrice}
                                                         onChange={(e) => setSlPrice(e.target.value)}
-                                                        className="w-full bg-black/40 p-3 text-xs font-mono font-bold text-[#ff1744] outline-none rounded-xl border border-white/5 focus:border-[#ff1744]/50 text-right"
+                                                        className="w-full bg-surface p-3 text-xs font-mono font-bold text-red-500 outline-none rounded-xl border border-border focus:border-red-500/50 text-right"
                                                     />
                                                     <div className="flex gap-2">
                                                         {[1, 2, 5].map(pct => (
                                                             <button
                                                                 key={pct}
                                                                 onClick={() => setPresetSL(pct)}
-                                                                className="flex-1 py-2 bg-white/5 hover:bg-[#ff1744]/20 rounded-lg text-[9px] font-bold text-[#ff1744] transition-colors border border-transparent hover:border-[#ff1744]/30"
+                                                                className="flex-1 py-2 bg-surface hover:bg-red-500/20 rounded-lg text-[9px] font-bold text-red-500 transition-colors border border-transparent hover:border-red-500/30"
                                                             >
                                                                 {pct}%
                                                             </button>
@@ -317,7 +313,7 @@ export default function UnifiedRightPanel({
                                         {/* TAKE PROFIT */}
                                         <div className={`
                                             rounded-2xl border transition-all overflow-hidden
-                                            ${tpEnabled ? 'bg-[#00c853]/5 border-[#00c853]/30' : 'bg-white/[0.02] border-white/5'}
+                                            ${tpEnabled ? 'bg-green-500/5 border-green-500/30' : 'bg-background border-border'}
                                         `}>
                                             <div className="flex items-center justify-between p-4">
                                                 <div className="flex items-center gap-2">
@@ -325,14 +321,14 @@ export default function UnifiedRightPanel({
                                                         type="checkbox"
                                                         checked={tpEnabled}
                                                         onChange={(e) => setTpEnabled(e.target.checked)}
-                                                        className="w-4 h-4 accent-[#00c853] cursor-pointer"
+                                                        className="w-4 h-4 accent-green-500 cursor-pointer"
                                                     />
-                                                    <span className={`text-[9px] font-black uppercase tracking-widest ${tpEnabled ? 'text-[#00c853]' : 'text-gray-500'}`}>
+                                                    <span className={`text-[9px] font-black uppercase tracking-widest ${tpEnabled ? 'text-green-500' : 'text-secondary'}`}>
                                                         Take Profit
                                                     </span>
                                                 </div>
                                                 {tpEnabled && tpPrice && (
-                                                    <span className="text-[9px] font-mono font-bold text-[#00c853]">
+                                                    <span className="text-[9px] font-mono font-bold text-green-500">
                                                         Est: +${calculatePnL(tpPrice, false).toFixed(2)}
                                                     </span>
                                                 )}
@@ -345,14 +341,14 @@ export default function UnifiedRightPanel({
                                                         placeholder="Price..."
                                                         value={tpPrice}
                                                         onChange={(e) => setTpPrice(e.target.value)}
-                                                        className="w-full bg-black/40 p-3 text-xs font-mono font-bold text-[#00c853] outline-none rounded-xl border border-white/5 focus:border-[#00c853]/50 text-right"
+                                                        className="w-full bg-surface p-3 text-xs font-mono font-bold text-green-500 outline-none rounded-xl border border-border focus:border-green-500/50 text-right"
                                                     />
                                                     <div className="flex gap-2">
                                                         {[1, 2, 5].map(pct => (
                                                             <button
                                                                 key={pct}
                                                                 onClick={() => setPresetTP(pct)}
-                                                                className="flex-1 py-2 bg-white/5 hover:bg-[#00c853]/20 rounded-lg text-[9px] font-bold text-[#00c853] transition-colors border border-transparent hover:border-[#00c853]/30"
+                                                                className="flex-1 py-2 bg-surface hover:bg-green-500/20 rounded-lg text-[9px] font-bold text-green-500 transition-colors border border-transparent hover:border-green-500/30"
                                                             >
                                                                 {pct}%
                                                             </button>
@@ -373,7 +369,7 @@ export default function UnifiedRightPanel({
                                     <button
                                         disabled={orderExecuting}
                                         onClick={() => handlePlaceOrder('sell')}
-                                        className="relative group bg-[#ff1744] hover:bg-[#ff1744]/90 disabled:opacity-50 text-white py-6 rounded-2xl flex flex-col items-center shadow-2xl shadow-red-900/20 transition-all active:scale-95 overflow-hidden"
+                                        className="relative group bg-red-500 hover:bg-red-500/90 disabled:opacity-50 text-white py-6 rounded-2xl flex flex-col items-center shadow-lg shadow-red-900/20 transition-all active:scale-95 overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingDown className="w-12 h-12" /></div>
                                         <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">DIRECT SELL</span>
@@ -384,7 +380,7 @@ export default function UnifiedRightPanel({
                                     <button
                                         disabled={orderExecuting}
                                         onClick={() => handlePlaceOrder('buy')}
-                                        className="relative group bg-[#00c853] hover:bg-[#00c853]/90 disabled:opacity-50 text-white py-6 rounded-2xl flex flex-col items-center shadow-2xl shadow-green-900/20 transition-all active:scale-95 overflow-hidden"
+                                        className="relative group bg-green-500 hover:bg-green-500/90 disabled:opacity-50 text-white py-6 rounded-2xl flex flex-col items-center shadow-lg shadow-green-900/20 transition-all active:scale-95 overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingUp className="w-12 h-12" /></div>
                                         <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">DIRECT BUY</span>
@@ -397,7 +393,7 @@ export default function UnifiedRightPanel({
                                 <button
                                     disabled={orderExecuting}
                                     onClick={() => handlePlaceOrder()}
-                                    className={`w-full py-6 rounded-[24px] font-black text-sm uppercase tracking-[5px] shadow-2xl transition-all active:scale-90 relative overflow-hidden group ${side === 'buy' ? 'bg-[#00c853] hover:bg-[#00c853]/90 text-white' : 'bg-[#ff1744] hover:bg-[#ff1744]/90 text-white'
+                                    className={`w-full py-6 rounded-[24px] font-black text-sm uppercase tracking-[5px] shadow-lg transition-all active:scale-90 relative overflow-hidden group ${side === 'buy' ? 'bg-green-500 hover:bg-green-500/90 text-white' : 'bg-red-500 hover:bg-red-500/90 text-white'
                                         } ${orderExecuting ? 'opacity-50' : ''}`}
                                 >
                                     {orderExecuting ? (
@@ -418,30 +414,31 @@ export default function UnifiedRightPanel({
                 )}
 
                 {activeTab === 'positions' && (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#0a0e27]">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-surface/50">
                         <Positions positions={positions} quotes={quotes} onClosePosition={onClosePosition} />
                     </div>
                 )}
                 {activeTab === 'orders' && (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#0a0e27]">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-surface/50">
                         <Orders accountId={account?.id} />
                     </div>
                 )}
             </div>
 
             {/* PANEL FOOTER */}
-            <div className="shrink-0 h-10 border-t border-white/5 flex items-center justify-between px-5 bg-[#070b1a]">
+            <div className="shrink-0 h-10 border-t border-border flex items-center justify-between px-5 bg-background">
                 <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#00c853] shadow-[0_0_8px_rgba(0,200,83,0.5)]"></div>
-                    <span className="text-[9px] font-black text-white/30 uppercase tracking-[2px]">Pipeline Stable</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,200,83,0.5)]"></div>
+                    <span className="text-[9px] font-black text-secondary/50 uppercase tracking-[2px]">Pipeline Stable</span>
                 </div>
-                <button onClick={onOpenSettings} className="p-1 px-2 text-gray-700 hover:text-white hover:bg-white/5 rounded-md transition-all flex items-center gap-2">
+                <button onClick={onOpenSettings} className="p-1 px-2 text-secondary hover:text-primary hover:bg-surface rounded-md transition-all flex items-center gap-2">
                     <Settings className="w-3.5 h-3.5" />
                     <span className="text-[8px] font-black uppercase tracking-widest hidden xl:block">Config</span>
                 </button>
             </div>
         </div >
     );
+
 }
 
 const TrendingUp = ({ className }) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>;

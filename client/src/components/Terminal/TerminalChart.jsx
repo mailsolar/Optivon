@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart } from 'lightweight-charts';
+import { createChart, ColorType, CrosshairMode } from 'lightweight-charts';
 import { formatChartTime } from '../../utils/timezone';
 import DrawingCanvas from './DrawingCanvas';
+import { useTheme } from '../../context/ThemeContext';
 
 // Helper to render different chart types
 const renderChartType = (chart, type, data, candlestickSeriesRef) => {
+    // console.log("Rendering Chart:", type, "Data Points:", data?.length);
     try {
         // Remove existing series
         try {
@@ -105,24 +107,43 @@ const renderChartType = (chart, type, data, candlestickSeriesRef) => {
                 // Candlestick / Bar
                 formattedData = data
                     .filter(d => {
-                        if (!d || d.time === undefined) return false;
-                        return d.open !== undefined && !isNaN(parseFloat(d.open)) &&
-                            d.high !== undefined && !isNaN(parseFloat(d.high)) &&
-                            d.low !== undefined && !isNaN(parseFloat(d.low)) &&
-                            d.close !== undefined && !isNaN(parseFloat(d.close));
+                        if (!d) return false;
+                        // Support capitalization variants
+                        const o = d.open ?? d.Open;
+                        const h = d.high ?? d.High;
+                        const l = d.low ?? d.Low;
+                        const c = d.close ?? d.Close;
+                        return o !== undefined && !isNaN(parseFloat(o)) &&
+                            h !== undefined && !isNaN(parseFloat(h)) &&
+                            l !== undefined && !isNaN(parseFloat(l)) &&
+                            c !== undefined && !isNaN(parseFloat(c));
                     })
-                    .map(d => ({
-                        time: d.time,
-                        open: parseFloat(d.open),
-                        high: parseFloat(d.high),
-                        low: parseFloat(d.low),
-                        close: parseFloat(d.close)
-                    }));
+                    .map(d => {
+                        // Intelligent time conversion (Detect ms vs seconds)
+                        // If time > 10000000000 (year 2286), it's likely MS
+                        let t = d.time ?? d.Time;
+                        // Handle ISO strings if passed
+                        if (typeof t === 'string' && isNaN(t)) {
+                            t = new Date(t).getTime() / 1000;
+                        } else if (typeof t === 'number' && t > 10000000000) {
+                            t = t / 1000;
+                        }
+
+                        return {
+                            time: t,
+                            open: parseFloat(d.open ?? d.Open),
+                            high: parseFloat(d.high ?? d.High),
+                            low: parseFloat(d.low ?? d.Low),
+                            close: parseFloat(d.close ?? d.Close)
+                        };
+                    })
+                    .sort((a, b) => a.time - b.time); // Ensure sorted order for library safety
             }
         }
 
         if (formattedData.length > 0) {
             series.setData(formattedData);
+            chart.timeScale().fitContent();
         }
 
         candlestickSeriesRef.current = series;
@@ -139,89 +160,124 @@ export default function TerminalChart({ symbol, data, onChartReady, chartType = 
     const chartRef = useRef(null);
     const candlestickSeriesRef = useRef(null);
     const [isChartReady, setIsChartReady] = useState(false);
+    const { theme } = useTheme();
 
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
-        // Resize Handling with ResizeObserver
-        const resizeObserver = new ResizeObserver(entries => {
-            if (entries.length === 0 || !entries[0].contentRect) return;
-            const { width, height } = entries[0].contentRect;
+        // Theme Configuration
+        const isDark = theme === 'dark';
+        const bgColor = isDark ? '#0a0e27' : '#ffffff';
+        const textColor = isDark ? '#9CA3AF' : '#111827';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+        const crosshairColor = isDark ? '#2962FF' : '#2563eb';
 
-            if (chartRef.current) {
-                chartRef.current.applyOptions({ width, height });
-            }
-        });
-
-        resizeObserver.observe(chartContainerRef.current);
-
-        // Create chart with proper configuration
         const chart = createChart(chartContainerRef.current, {
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight,
             layout: {
-                backgroundColor: '#0a0e27',
-                textColor: '#9CA3AF',
+                background: { type: ColorType.Solid, color: bgColor },
+                textColor: textColor,
                 fontFamily: 'Inter, -apple-system, sans-serif',
             },
             grid: {
-                vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-                horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
+                vertLines: { color: gridColor },
+                horzLines: { color: gridColor },
             },
             crosshair: {
-                mode: 1,
+                mode: CrosshairMode.Normal,
                 vertLine: {
-                    color: '#2962FF',
+                    color: crosshairColor,
                     width: 1,
                     style: 3,
-                    labelBackgroundColor: '#2962FF',
+                    labelBackgroundColor: crosshairColor,
                 },
                 horzLine: {
-                    color: '#2962FF',
+                    color: crosshairColor,
                     width: 1,
                     style: 3,
-                    labelBackgroundColor: '#2962FF',
+                    labelBackgroundColor: crosshairColor,
                 },
             },
+            rightPriceScale: {
+                borderColor: gridColor,
+                visible: true,
+            },
             timeScale: {
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: gridColor,
                 timeVisible: true,
                 secondsVisible: false,
                 tickMarkFormatter: (time) => formatChartTime(time),
             },
-            rightPriceScale: {
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-            },
-            handleScroll: { vertTouchDrag: activeTool === 'cursor' }, // Allow drag only if cursor
+            handleScroll: { vertTouchDrag: activeTool === 'cursor' },
         });
 
         chartRef.current = chart;
 
-        // Initialize with correct chart type
+        const handleResize = () => {
+            if (chartContainerRef.current) {
+                chart.applyOptions({
+                    width: chartContainerRef.current.clientWidth,
+                    height: chartContainerRef.current.clientHeight,
+                });
+            }
+        };
+
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(chartContainerRef.current);
+
+        // Render initial chart type
+        // Note: dataRef.current is not defined in the original code, assuming 'data' prop should be used.
         const series = renderChartType(chart, chartType, data || [], candlestickSeriesRef);
 
         if (onChartReady) {
             onChartReady(chart, series);
         }
-
         setIsChartReady(true);
 
         return () => {
             resizeObserver.disconnect();
-            chart.remove();
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+            }
         };
-    }, []); // Only run once on mount
+    }, [theme]); // Dependencies for chart creation and theme changes
 
-    // Update data or chart type when they change
+    // Effect for updating chart type, data, and activeTool
     useEffect(() => {
         if (chartRef.current) {
+            // Apply theme options if theme changes after initial render
+            const isDark = theme === 'dark';
+            const bgColor = isDark ? '#0a0e27' : '#ffffff';
+            const textColor = isDark ? '#9CA3AF' : '#111827';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            const crosshairColor = isDark ? '#2962FF' : '#2563eb';
+
+            chartRef.current.applyOptions({
+                layout: {
+                    background: { type: ColorType.Solid, color: bgColor },
+                    textColor: textColor,
+                },
+                grid: {
+                    vertLines: { color: gridColor },
+                    horzLines: { color: gridColor },
+                },
+                crosshair: {
+                    vertLine: { color: crosshairColor, labelBackgroundColor: crosshairColor },
+                    horzLine: { color: crosshairColor, labelBackgroundColor: crosshairColor },
+                },
+                rightPriceScale: { borderColor: gridColor },
+                timeScale: { borderColor: gridColor },
+            });
+
             renderChartType(chartRef.current, chartType, data || [], candlestickSeriesRef);
             // Also update drag behavior
             chartRef.current.applyOptions({
                 handleScroll: { vertTouchDrag: activeTool === 'cursor', pressedMouseMove: activeTool === 'cursor' }
             });
         }
-    }, [chartType, data, activeTool]);
+    }, [chartType, data, activeTool, theme]); // Dependencies for chart updates
 
     return (
         <div
@@ -234,12 +290,13 @@ export default function TerminalChart({ symbol, data, onChartReady, chartType = 
             }}
         >
             {/* Header Legend */}
+            {/* Header Legend */}
             <div className="absolute top-5 left-5 pointer-events-none flex flex-col gap-1.5 z-10">
                 <div className="flex items-center gap-3">
-                    <span className="text-white font-black text-sm tracking-tighter uppercase">{symbol}</span>
+                    <span className="text-primary font-black text-sm tracking-tighter uppercase">{symbol}</span>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span className="text-[9px] text-emerald-400/80 font-black uppercase tracking-widest">Live Node Active</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
+                        <span className="text-[9px] text-accent font-black uppercase tracking-widest opacity-80">Live Node Active</span>
                     </div>
                 </div>
             </div>
@@ -255,7 +312,7 @@ export default function TerminalChart({ symbol, data, onChartReady, chartType = 
 
             {/* Subtle Watermark */}
             <div className="absolute bottom-16 right-8 pointer-events-none opacity-[0.04] select-none">
-                <h1 className="text-9xl font-black italic text-white tracking-tighter leading-none">OPTIVON</h1>
+                <h1 className="text-9xl font-black italic text-primary tracking-tighter leading-none">OPTIVON</h1>
             </div>
         </div>
     );

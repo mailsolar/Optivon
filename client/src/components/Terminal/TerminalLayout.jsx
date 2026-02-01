@@ -158,13 +158,15 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     const handleReset = () => chartAPI.current?.timeScale().fitContent();
 
     return (
-        <div className="flex flex-col h-full bg-[#070b1a] overflow-hidden font-sans relative">
+        <div className="flex flex-col h-full bg-background overflow-hidden font-sans relative transition-colors duration-300">
             {/* Risk Banner Injection */}
             <RiskStatusBanner />
 
             <TerminalHeader
                 account={account}
                 quotes={quotes}
+                selectedSymbol={selectedSymbol}
+                onSelectSymbol={setSelectedSymbol}
                 onSearch={setSearchTerm}
                 onToggleRightPanel={() => setIsRightPanelOpen(!isRightPanelOpen)}
                 chartType={chartType}
@@ -176,7 +178,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
 
             <div className="flex-1 flex min-h-0 relative overflow-hidden">
                 <div
-                    className={`flex-1 relative flex flex-col min-w-0 bg-[#0a0e27] border-r border-white/5 transition-all duration-300 ease-in-out ${isRightPanelOpen ? 'mr-0' : 'flex-1'}`}
+                    className={`flex-1 relative flex flex-col min-w-0 bg-background border-r border-border transition-all duration-300 ease-in-out ${isRightPanelOpen ? 'mr-0' : 'flex-1'}`}
                 >
                     {/* CHART AREA with proper Flex container */}
                     <div className="flex-1 flex overflow-hidden relative">
@@ -251,7 +253,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
 
                 {/* Right Panel with Slide Animation */}
                 <div
-                    className={`transition-all duration-300 ease-in-out bg-[#0a0e27] border-l border-white/5 ${isRightPanelOpen ? 'w-[360px] translate-x-0 opacity-100' : 'w-0 translate-x-full opacity-0 overflow-hidden'
+                    className={`transition-all duration-300 ease-in-out bg-surface border-l border-border ${isRightPanelOpen ? 'w-[360px] translate-x-0 opacity-100' : 'w-0 translate-x-full opacity-0 overflow-hidden'
                         }`}
                 >
                     <UnifiedRightPanel

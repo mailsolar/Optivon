@@ -1,44 +1,41 @@
-
 import React, { useEffect, useState } from 'react';
-import Terminal from '../components/Terminal'; // Ensure this points to index.js which exports TerminalLayout?? No, usually default export
-import TerminalLayout from '../components/Terminal/TerminalLayout'; // Direct import to be safe
-import Settings from '../components/Settings';
+import TerminalLayout from '../components/Terminal/TerminalLayout';
 import { useToast } from '../context/ToastContext';
-import { motion } from 'framer-motion';
-import { CheckCircle2 } from 'lucide-react';
 import { AlertProvider } from '../context/AlertContext';
+import { CheckCircle2, Terminal, Plus, ArrowRight, Activity, ShieldCheck, Clock } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
-export default function Dashboard({ user }) {
-    return <DashboardContent user={user} />;
+export default function Dashboard({ user, onLogout }) {
+    return <DashboardContent user={user} onLogout={onLogout} />;
 }
 
-// Reused & Adapted Pricing Component from Landing
+// Reused & Adapted Pricing Component
 const PricingCard = ({ title, price, subtitle, features, isPopular, onSelect }) => (
-    <div className={`relative flex-1 bg-[#0a0a0f] border ${isPopular ? 'border-cyber-cyan' : 'border-white/10'} p-6 rounded-2xl flex flex-col items-start w-full hover:transform hover:-translate-y-2 transition-all duration-300 group`}>
+    <div className={`relative flex-1 bg-surface border ${isPopular ? 'border-accent' : 'border-border'} p-8 rounded-3xl flex flex-col items-start w-full hover:border-accent/80 transition-all duration-300 group overflow-hidden ${isPopular ? 'bg-gradient-to-b from-surface to-accent/5' : ''}`}>
         {isPopular && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-cyber-cyan text-black px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(0,243,255,0.4)]">
+            <div className="absolute top-0 right-0 bg-accent text-white px-4 py-1.5 rounded-bl-2xl text-[10px] font-black uppercase tracking-wider">
                 Most Popular
             </div>
         )}
 
-        <h3 className={`text-xl font-bold mb-2 font-orb ${isPopular ? 'text-white' : 'text-white'}`}>{title}</h3>
-        <div className="text-2xl font-bold text-cyber-cyan mb-1">{price} <span className="text-xs font-normal text-gray-400">one-time</span></div>
-        <p className="text-gray-400 text-xs mb-6 font-mono">{subtitle}</p>
+        <h3 className="text-2xl font-black mb-2 text-primary tracking-tight">{title}</h3>
+        <div className="text-3xl font-black text-accent mb-1 font-mono tracking-tight">{price} <span className="text-xs font-bold text-secondary tracking-normal">/ one-time</span></div>
+        <p className="text-secondary text-xs mb-8 font-medium">{subtitle}</p>
 
         <button
             onClick={onSelect}
-            className={`w-full py-3 mb-6 rounded font-bold uppercase tracking-widest text-xs transition-all ${isPopular
-                ? 'bg-cyber-cyan text-black hover:bg-white hover:scale-[1.02]'
-                : 'border border-gray-600 text-white hover:border-cyber-cyan hover:text-cyber-cyan'
+            className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-transform hover:scale-[1.02] active:scale-[0.98] ${isPopular
+                ? 'bg-accent text-brand-dark shadow-lg shadow-accent/20'
+                : 'bg-primary text-background group-hover:bg-accent group-hover:text-brand-dark'
                 }`}
         >
             Select Protocol
         </button>
 
-        <ul className="space-y-2 w-full flex-1">
+        <ul className="space-y-4 w-full flex-1 mt-8">
             {features.map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs text-gray-300 font-mono">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-cyber-cyan shrink-0 mt-0.5" />
+                <li key={idx} className="flex items-start gap-3 text-xs text-secondary font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
                     <span>{feature}</span>
                 </li>
             ))}
@@ -46,11 +43,12 @@ const PricingCard = ({ title, price, subtitle, features, isPopular, onSelect }) 
     </div>
 );
 
-function DashboardContent({ user }) {
+function DashboardContent({ user, onLogout }) {
     const [accounts, setAccounts] = useState([]);
     const [selectedAccountId, setSelectedAccountId] = useState(null);
     const [quotes, setQuotes] = useState({ NIFTY: null, BANKNIFTY: null });
     const { addToast } = useToast();
+    const { theme } = useTheme();
 
     // View State
     const [activeTab, setActiveTab] = useState('overview'); // overview, terminal, challenges
@@ -68,7 +66,6 @@ function DashboardContent({ user }) {
             const data = await res.json();
             if (res.ok) {
                 setAccounts(data);
-                // Auto-select first account if none selected
                 if (!selectedAccountId && data.length > 0) {
                     setSelectedAccountId(data[0].id);
                 }
@@ -82,7 +79,7 @@ function DashboardContent({ user }) {
 
     useEffect(() => {
         fetchAccounts();
-        const interval = setInterval(fetchAccounts, 5000); // Polling for updates
+        const interval = setInterval(fetchAccounts, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -100,7 +97,6 @@ function DashboardContent({ user }) {
         return () => eventSource.close();
     }, []);
 
-    // Handlers
     const handlePurchase = async (type, size) => {
         try {
             const res = await fetch('http://localhost:5000/api/trade/purchase', {
@@ -114,7 +110,7 @@ function DashboardContent({ user }) {
             if (res.ok) {
                 addToast(`Purchased ${type} Challenge`, 'success');
                 fetchAccounts();
-                setActiveTab('overview'); // Go back to list
+                setActiveTab('overview');
             } else {
                 addToast('Purchase Failed', 'error');
             }
@@ -134,7 +130,6 @@ function DashboardContent({ user }) {
             if (res.ok) {
                 addToast('Session Launched', 'success');
                 fetchAccounts();
-                // Ensure we select this account and go to terminal
                 setSelectedAccountId(accId);
                 setActiveTab('terminal');
             } else {
@@ -143,33 +138,33 @@ function DashboardContent({ user }) {
         } catch (e) { addToast('Launch Failed', 'error'); }
     };
 
-    if (loading) return <div className="min-h-screen bg-cyber-black flex items-center justify-center text-cyber-cyan font-mono animate-pulse">SYSTEM LOADING...</div>;
+    if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-accent font-black animate-pulse tracking-widest text-xs uppercase">System Initializing...</div>;
 
-    // Derived Logic for Account Switcher
     const handleAccountSwitch = (e) => {
         const newId = e.target.value;
         setSelectedAccountId(newId);
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[#050505] text-white font-sans overflow-hidden">
+        <div className="flex flex-col h-screen bg-background text-primary font-sans overflow-hidden transition-colors duration-300">
             {/* TOP BAR */}
-            <header className="h-16 border-b border-white/5 bg-[#0a0a0a] flex items-center justify-between px-6 z-20">
+            <header className="h-16 border-b border-border bg-surface/50 backdrop-blur-md flex items-center justify-between px-6 z-20 shrink-0">
                 <div className="flex items-center gap-8">
-                    <h1 className="text-2xl font-black font-orb tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-white">OPTIVON</h1>
+                    <h1 className="text-xl font-black tracking-tighter text-primary">OPTIVON <span className="text-accent">COMMAND</span></h1>
 
                     {/* Account Switcher */}
                     {accounts.length > 0 && (
-                        <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded border border-white/10">
-                            <span className="text-[10px] text-gray-500 font-bold tracking-widest uppercase">Active Link</span>
+                        <div className="flex items-center gap-3 bg-surface px-3 py-1.5 rounded-lg border border-border group hover:border-accent/50 transition-colors">
+                            <span className="text-[9px] text-secondary font-black tracking-widest uppercase group-hover:text-primary transition-colors">Active Link</span>
+                            <div className="h-4 w-px bg-border"></div>
                             <select
                                 value={selectedAccountId || ''}
                                 onChange={handleAccountSwitch}
-                                className="bg-transparent text-sm font-mono text-cyber-cyan outline-none border-none cursor-pointer"
+                                className="bg-transparent text-xs font-mono font-bold text-accent outline-none border-none cursor-pointer"
                             >
                                 {accounts.map(acc => (
-                                    <option key={acc.id} value={acc.id} className="bg-black text-gray-300">
-                                        #{acc.id} - {acc.type} (${acc.balance.toLocaleString()}) - {acc.status.toUpperCase()}
+                                    <option key={acc.id} value={acc.id} className="bg-brand-dark text-white">
+                                        #{acc.id} • {acc.type}
                                     </option>
                                 ))}
                             </select>
@@ -177,88 +172,117 @@ function DashboardContent({ user }) {
                     )}
                 </div>
 
-                {/* Nav Tabs */}
-                <div className="flex bg-black/50 p-1 rounded-lg border border-white/5">
-                    {[
-                        { id: 'overview', label: 'Command Center' },
-                        { id: 'terminal', label: 'Terminal Matrix' },
-                        { id: 'challenges', label: 'New Protocol' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all rounded ${activeTab === tab.id ? 'bg-cyber-cyan text-black shadow-[0_0_10px_rgba(0,243,255,0.4)]' : 'text-gray-500 hover:text-white'}`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                {/* Nav Tabs & Logout */}
+                <div className="flex items-center gap-4">
+                    <div className="flex bg-surface p-1 rounded-xl border border-border">
+                        {[
+                            { id: 'overview', label: 'Dashboard' },
+                            { id: 'terminal', label: 'Terminal' },
+                            { id: 'challenges', label: 'New Challenge' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-lg ${activeTab === tab.id ? 'bg-accent text-brand-dark shadow-md' : 'text-secondary hover:text-white'}`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={onLogout}
+                        className="px-5 py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
+                    >
+                        Disconnect
+                    </button>
                 </div>
             </header>
 
             {/* MAIN CONTENT AREA */}
             <main className="flex-1 overflow-hidden relative">
                 <AlertProvider quotes={quotes}>
-                    {/* Background Grid */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none opacity-20"></div>
 
                     {/* OVERVIEW TAB */}
                     {activeTab === 'overview' && (
-                        <div className="h-full overflow-y-auto p-8 max-w-7xl mx-auto w-full relative z-10">
+                        <div className="h-full overflow-y-auto p-8 max-w-[1600px] mx-auto w-full relative z-10">
                             {accounts.length === 0 ? (
-                                <div className="text-center py-20">
-                                    <h2 className="text-2xl text-gray-500 font-orb mb-4">NO ACTIVE PROTOCOLS</h2>
-                                    <button onClick={() => setActiveTab('challenges')} className="text-cyber-cyan underline underline-offset-4 hover:text-white">Initialize a Challenge</button>
+                                <div className="text-center py-32 flex flex-col items-center">
+                                    <div className="w-20 h-20 bg-surface border border-border rounded-3xl flex items-center justify-center mb-6 text-accent">
+                                        <Activity className="w-10 h-10" />
+                                    </div>
+                                    <h2 className="text-3xl font-black text-primary mb-2">No Active Protocols</h2>
+                                    <p className="text-secondary max-w-sm mb-8">Initialize your first evaluation challenge to access the trading terminal.</p>
+                                    <button onClick={() => setActiveTab('challenges')} className="px-8 py-4 bg-primary text-background rounded-full font-bold uppercase tracking-widest text-xs hover:scale-105 transition-transform">
+                                        Start Evaluation
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="space-y-8">
-                                    <h2 className="text-xl font-bold font-orb text-white/50 tracking-widest border-b border-white/5 pb-4">ACTIVE SESSIONS</h2>
-                                    <div className="grid gap-6">
+                                    <div className="flex items-center justify-between border-b border-border pb-6">
+                                        <div>
+                                            <h2 className="text-2xl font-black text-primary tracking-tight">Active Sessions</h2>
+                                            <p className="text-secondary text-sm font-medium mt-1">Monitor all your accounts in real-time.</p>
+                                        </div>
+                                        <button onClick={() => setActiveTab('challenges')} className="flex items-center gap-2 px-4 py-2 bg-surface text-primary border border-border rounded-xl font-bold text-xs uppercase hover:border-accent hover:text-accent transition-all">
+                                            <Plus className="w-4 h-4" /> New Account
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                         {accounts.map(acc => (
-                                            <div key={acc.id} className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col md:flex-row items-center justify-between hover:border-cyber-cyan/30 transition-colors">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-2xl font-black font-orb text-white">#{acc.id}</span>
-                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${acc.status === 'active' ? 'border-green-500/50 text-green-400 bg-green-500/10' :
-                                                            acc.status === 'failed' || acc.status === 'expired' ? 'border-red-500/50 text-red-400 bg-red-500/10' :
-                                                                'border-yellow-500/50 text-yellow-400 bg-yellow-500/10'
-                                                            }`}>
-                                                            {acc.status.toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <span className="text-sm text-gray-500 font-mono">{acc.type} Protocol • ${acc.size.toLocaleString()}</span>
-                                                </div>
+                                            <div key={acc.id} className="bg-surface border border-border p-8 rounded-3xl flex flex-col justify-between hover:border-accent/40 transition-all group relative overflow-hidden h-[300px]">
+                                                {/* Background Accent */}
+                                                <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] rounded-full opacity-10 pointer-events-none transition-colors ${acc.equity >= acc.balance ? 'bg-green-500' : 'bg-red-500'}`}></div>
 
-                                                <div className="flex gap-12 font-mono text-sm py-4 md:py-0">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-gray-500 text-[10px] uppercase">Equity</span>
-                                                        <span className="text-white font-bold text-lg">${acc.equity.toLocaleString()}</span>
+                                                <div className="flex justify-between items-start z-10">
+                                                    <div>
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <span className="text-3xl font-black font-mono text-primary">#{acc.id}</span>
+                                                            <span className={`text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider ${acc.status === 'active' ? 'bg-green-500/10 text-green-500' :
+                                                                acc.status === 'failed' || acc.status === 'expired' ? 'bg-red-500/10 text-red-500' :
+                                                                    'bg-yellow-500/10 text-yellow-500'
+                                                                }`}>
+                                                                {acc.status}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-xs font-bold text-secondary uppercase tracking-wider">{acc.type} Protocol</span>
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-gray-500 text-[10px] uppercase">Balance</span>
-                                                        <span className="text-gray-300">${acc.balance.toLocaleString()}</span>
+                                                    <div className="w-10 h-10 border border-border rounded-xl flex items-center justify-center text-primary bg-background shadow-sm">
+                                                        <Terminal className="w-5 h-5" />
                                                     </div>
                                                 </div>
 
-                                                <div className="flex gap-4">
+                                                <div className="grid grid-cols-2 gap-8 my-6 z-10">
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">Equity</p>
+                                                        <p className={`text-2xl font-black font-mono tracking-tight ${acc.equity >= acc.balance ? 'text-green-500' : 'text-red-500'}`}>${acc.equity.toLocaleString()}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">Balance</p>
+                                                        <p className="text-2xl font-black font-mono tracking-tight text-primary">${acc.balance.toLocaleString()}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="z-10 mt-auto">
                                                     {acc.status === 'active' && (
                                                         <button
                                                             onClick={() => { setSelectedAccountId(acc.id); setActiveTab('terminal'); }}
-                                                            className="px-6 py-2 bg-white text-black font-bold uppercase tracking-wider text-xs rounded hover:scale-105 transition-transform"
+                                                            className="w-full py-4 bg-primary text-background font-bold uppercase tracking-widest text-xs rounded-xl flex items-center justify-center gap-2 group-hover:gap-4 transition-all"
                                                         >
-                                                            Access Terminal
+                                                            Enter Terminal <ArrowRight className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                     {acc.status === 'pending' && (
                                                         <button
                                                             onClick={() => handleLaunch(acc.id)}
-                                                            className="px-6 py-2 bg-cyber-cyan text-black font-bold uppercase tracking-wider text-xs rounded shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:scale-105 transition-transform"
+                                                            className="w-full py-4 bg-accent text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-accent/20 hover:bg-accent/90 transition-all"
                                                         >
                                                             Launch Session
                                                         </button>
                                                     )}
                                                     {(acc.status === 'failed' || acc.status === 'expired') && (
-                                                        <button className="px-6 py-2 border border-red-500/30 text-red-500 font-bold uppercase tracking-wider text-xs rounded cursor-not-allowed opacity-50">
-                                                            Terminated
+                                                        <button className="w-full py-4 bg-surface border border-border text-red-500 font-bold uppercase tracking-widest text-xs rounded-xl cursor-not-allowed opacity-50">
+                                                            Account Closed
                                                         </button>
                                                     )}
                                                 </div>
@@ -281,19 +305,20 @@ function DashboardContent({ user }) {
                         />
                     )}
                     {activeTab === 'terminal' && !activeAccount && (
-                        <div className="h-full flex items-center justify-center text-gray-500 font-mono">
-                            Select an active account to initialize terminal.
+                        <div className="h-full flex flex-col items-center justify-center gap-4 text-secondary">
+                            <ShieldCheck className="w-12 h-12 text-border" />
+                            <p className="font-medium text-sm">Select an active account from the dashboard to initialize the terminal.</p>
                         </div>
                     )}
 
                     {/* CHALLENGES TAB */}
                     {activeTab === 'challenges' && (
                         <div className="h-full overflow-y-auto p-8 relative z-10 flex flex-col items-center justify-center">
-                            <div className="text-center mb-10 mt-10">
-                                <h2 className="text-3xl font-bold text-white mb-2 font-orb">INITIATE NEW PROTOCOL</h2>
-                                <p className="text-gray-400 font-mono text-sm max-w-lg mx-auto">Select the challenge that matches your skill level. Pass the evaluation to earn performance-based rewards.</p>
+                            <div className="text-center mb-12 mt-10">
+                                <h2 className="text-4xl font-black text-primary font-display mb-4">INITIATE PROTOCOL</h2>
+                                <p className="text-secondary font-medium text-sm max-w-lg mx-auto leading-relaxed">Select the challenge that matches your skill level. Pass the evaluation to earn performance-based rewards.</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-4 mb-20">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl w-full px-4 mb-20 mx-auto">
                                 <PricingCard
                                     title="Starter"
                                     price="₹2,999"
@@ -350,9 +375,9 @@ function DashboardContent({ user }) {
 }
 
 const StatBox = ({ label, value, color, isActive }) => (
-    <div className={`p-4 border rounded-xl backdrop-blur-sm transition-all ${isActive ? 'border-cyber-cyan bg-cyber-cyan/5 shadow-[0_0_15px_rgba(0,243,255,0.1)]' : 'border-white/10 bg-black/40'}`}>
-        <div className="text-[10px] text-gray-400 mb-1 uppercase tracking-widest font-bold">{label}</div>
-        <div className={`text-xl font-bold font-mono tracking-tight ${color || 'text-white'}`}>
+    <div className={`p-4 border rounded-xl backdrop-blur-sm transition-all ${isActive ? 'border-accent bg-accent/5 shadow-sm' : 'border-border bg-surface'}`}>
+        <div className="text-[10px] text-secondary mb-1 uppercase tracking-widest font-black">{label}</div>
+        <div className={`text-xl font-black font-mono tracking-tight ${color || 'text-primary'}`}>
             ${value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
     </div>
