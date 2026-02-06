@@ -39,6 +39,13 @@ export default {
                     dark: '#17172B',   // Deep Purple/Navy
                     lime: '#F5FFAB',   // Acid Lime
                     blue: '#3431A5',   // Royal Blue
+                },
+                optivon: {
+                    primary: 'rgb(var(--optivon-primary) / <alpha-value>)',
+                    surface: 'rgb(var(--optivon-surface) / <alpha-value>)',
+                    bg: 'rgb(var(--optivon-bg) / <alpha-value>)',
+                    text: 'rgb(var(--optivon-text) / <alpha-value>)',
+                    muted: 'rgb(var(--optivon-muted) / <alpha-value>)',
                 }
             },
             fontFamily: {

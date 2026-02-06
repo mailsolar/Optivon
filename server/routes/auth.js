@@ -11,7 +11,12 @@ const { SECRET_KEY, authenticateToken } = require('../middleware/auth');
 router.get('/me', authenticateToken, (req, res) => {
     db.get('SELECT id, email, is_admin, two_fa_secret FROM users WHERE id = ?', [req.user.id], (err, row) => {
         if (err || !row) return res.status(404).send({ error: 'User not found' });
-        res.send({ user: { id: row.id, email: row.email, isAdmin: row.is_admin, has2FA: !!row.two_fa_secret } });
+
+        // Derive name from email (e.g., john.doe@... -> John Doe)
+        const namePart = row.email.split('@')[0];
+        const name = namePart.split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+
+        res.send({ user: { id: row.id, email: row.email, name, isAdmin: row.is_admin, has2FA: !!row.two_fa_secret } });
     });
 });
 
@@ -58,7 +63,12 @@ router.post('/login', (req, res) => {
 
         // Generate JWT
         const token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
-        res.send({ token, user: { id: user.id, email: user.email, isAdmin: user.is_admin, has2FA: !!user.two_fa_secret } });
+
+        // Derive name
+        const namePart = user.email.split('@')[0];
+        const name = namePart.split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+
+        res.send({ token, user: { id: user.id, email: user.email, name, isAdmin: user.is_admin, has2FA: !!user.two_fa_secret } });
     });
 });
 
@@ -80,29 +90,38 @@ router.post('/2fa/setup', authenticateToken, (req, res) => {
 });
 
 // 2FA Verify (Can be used for setup confirmation or login challenge)
-router.post('/2fa/verify', authenticateToken, (req, res) => {
-    const { token, secret } = req.body;
-    // If secret is provided (client testing), use it. Else use from DB.
+router.post('/2fa/verify', async (req, res) => {
+    const { token, userId } = req.body;
 
-    if (secret) {
-        const verified = speakeasy.totp.verify({
-            secret: secret,
-            encoding: 'base32',
-            token: token
-        });
-        return res.send({ verified });
-    }
+    if (!userId) return res.status(400).send({ error: 'User ID required' });
 
-    db.get('SELECT two_fa_secret FROM users WHERE id = ?', [req.user.id], (err, row) => {
-        if (err || !row) return res.status(400).send({ error: 'User check failed' });
+    db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user) => {
+        if (err || !user) return res.status(404).send({ error: 'User not found' });
+
+        if (!user.two_fa_secret) return res.status(400).send({ error: '2FA not setup for this user' });
 
         const verified = speakeasy.totp.verify({
-            secret: row.two_fa_secret,
+            secret: user.two_fa_secret,
             encoding: 'base32',
             token: token
         });
 
-        res.send({ verified });
+        if (verified) {
+            // Generate JWT
+            const authToken = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
+
+            // Derive name
+            const namePart = user.email.split('@')[0];
+            const name = namePart.split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+
+            res.send({
+                verified: true,
+                token: authToken,
+                user: { id: user.id, email: user.email, name, isAdmin: user.is_admin, has2FA: true }
+            });
+        } else {
+            res.send({ verified: false });
+        }
     });
 });
 

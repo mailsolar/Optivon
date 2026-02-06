@@ -7,18 +7,26 @@ const db = require('../database');
 // Purchase Challenge
 router.post('/purchase', authenticateToken, (req, res) => {
     const { type, size } = req.body;
-    // Simplified logic: Create active account immediately? 
-    // Or create 'pending' account that needs 'launch'?
-    // User requirement: "after which the challeneg they chose will be shown int their profile and after clicking launch terminal their timing should start"
-    // So status = 'pending' initially.
 
-    // ALLOW MULTIPLE ACCOUNTS - Removed restriction check
-    db.run(`INSERT INTO accounts (user_id, type, size, balance, equity, daily_start_balance, status, phase) 
-            VALUES (?, ?, ?, ?, ?, ?, 'pending', 1)`,
-        [req.user.id, type, size, size, size, size],
-        function (err) {
-            if (err) return res.status(500).send({ error: 'Purchase failed' });
-            res.status(201).send({ message: 'Challenge Purchased', accountId: this.lastID });
+    // Check for existing active/pending challenges of the same type/size
+    db.get('SELECT COUNT(*) as count FROM accounts WHERE user_id = ? AND size = ? AND status IN (?, ?)',
+        [req.user.id, size, 'pending', 'active'],
+        (err, row) => {
+            if (err) return res.status(500).send({ error: 'Database check failed' });
+
+            if (row.count > 0) {
+                return res.status(400).send({ error: 'You already have an active or pending challenge of this level. Complete or expire it first.' });
+            }
+
+            // Create Account
+            db.run(`INSERT INTO accounts (user_id, type, size, balance, equity, daily_start_balance, status, phase) 
+                    VALUES (?, ?, ?, ?, ?, ?, 'pending', 1)`,
+                [req.user.id, type, size, size, size, size],
+                function (err) {
+                    if (err) return res.status(500).send({ error: 'Purchase failed' });
+                    res.status(201).send({ message: 'Challenge Purchased', accountId: this.lastID });
+                }
+            );
         }
     );
 });

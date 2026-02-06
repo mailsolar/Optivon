@@ -39,6 +39,20 @@
     /* Red-500 */
     --status-warning: 234 179 8;
     /* Yellow-500 */
+
+    /* OPTIVON THEME COLORS */
+    --optivon-primary: 109 40 217;
+    /* #6d28d9 (Purple-700) */
+    --optivon-primary-hover: 124 58 237;
+    /* #7c3aed (Purple-600) */
+    --optivon-surface: 255 255 255;
+    /* White */
+    --optivon-bg: 243 244 246;
+    /* Gray-100 */
+    --optivon-text: 17 24 39;
+    /* Gray-900 */
+    --optivon-muted: 107 114 128;
+    /* Gray-500 */
   }
 
   /* Force Dark logic even if class remains for compatibility */

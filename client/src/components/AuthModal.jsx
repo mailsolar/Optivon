@@ -33,7 +33,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
                     setShowMfaInput(true);
                 } else {
                     localStorage.setItem('token', data.token);
-                    onLoginSuccess(data.user);
+                    onLoginSuccess({ user: data.user, token: data.token });
                 }
             } else {
                 setUserId(data.userId);
@@ -57,7 +57,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
 
             if (data.verified) {
                 localStorage.setItem('token', data.token);
-                onLoginSuccess(data.user); // Ideally fetch full user if needed
+                onLoginSuccess({ user: data.user, token: data.token }); // Ideally fetch full user if needed
             }
         } catch (err) {
             setError(err.message);
@@ -66,7 +66,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -272,6 +272,42 @@ class AlgoEngine {
         return false;
     }
 
+    // --- BOT MANAGEMENT ---
+
+    startBot(userId, { accountId, symbol, strategy, risk }) {
+        const id = uuidv4();
+        const bot = {
+            id,
+            userId,
+            accountId,
+            symbol,
+            strategy,
+            risk,
+            status: 'active',
+            createdAt: new Date(),
+            tradesCount: 0,
+            currentTradeId: null,
+            position: null
+        };
+        this.bots.set(id, bot);
+        console.log(`Bot Started: ${id} for ${symbol} (${strategy})`);
+        return bot;
+    }
+
+    stopBot(botId) {
+        const bot = this.bots.get(botId);
+        if (bot) {
+            bot.status = 'stopped';
+            console.log(`Bot Stopped: ${botId}`);
+            return true;
+        }
+        return false;
+    }
+
+    getBots(userId) {
+        return Array.from(this.bots.values()).filter(b => b.userId === userId);
+    }
+
     getUserBots(userId) {
         return this.getBots(userId);
     }

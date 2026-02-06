@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search,
     ChevronDown,
@@ -34,6 +35,7 @@ export default function TerminalHeader({
     onOpenSettings,
     onOpenAlerts
 }) {
+    const navigate = useNavigate();
     const [showChartMenu, setShowChartMenu] = useState(false);
     const { alerts } = useAlerts();
     const [timeLeft, setTimeLeft] = useState("");
@@ -88,7 +90,11 @@ export default function TerminalHeader({
         <div className="h-14 bg-surface border-b border-border flex items-center px-4 justify-between font-sans shrink-0 z-40 relative shadow-md transition-colors duration-300">
             {/* Left Section: Branding & Metrics */}
             <div className="flex items-center gap-10">
-                <div className="flex items-center gap-3 group cursor-pointer">
+                <div
+                    className="flex items-center gap-3 group cursor-pointer"
+                    onClick={() => navigate('/dashboard')}
+                    title="Back to Dashboard"
+                >
                     <div className="w-10 h-10 rounded-xl bg-brand-dark border border-brand-lime/20 flex items-center justify-center shadow-[0_0_15px_rgba(var(--accent-primary),0.1)] group-hover:scale-105 transition-transform">
                         <Activity className="w-5 h-5 text-brand-lime" />
                     </div>

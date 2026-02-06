@@ -10,6 +10,7 @@ import {
     Shield,
     Globe
 } from 'lucide-react';
+import CrystalMarket from '../components/Landing/CrystalMarket';
 import LandingChart from '../components/LandingChart';
 
 // --- ANIMATION VARIANTS ---
@@ -30,7 +31,7 @@ export default function Landing({ onAuthRequest }) {
             <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-6 flex justify-between items-center mix-blend-difference pointer-events-none text-white">
                 <div className="font-display font-black text-xl tracking-[0.2em] pointer-events-auto">OPTIVON</div>
                 <button
-                    onClick={onAuthRequest}
+                    onClick={() => { console.log('Nav Login Clicked'); onAuthRequest(); }}
                     className="pointer-events-auto px-6 py-2 bg-white text-brand-dark rounded-full font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform"
                 >
                     Get Funded
@@ -42,28 +43,20 @@ export default function Landing({ onAuthRequest }) {
                 {/* Background Grid */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 
-                <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    variants={staggerContainer}
-                    className="relative z-10"
-                >
-                    <motion.div variants={fadeInUp} className="mb-8">
+                <div className="relative z-10">
+                    <div className="mb-8">
                         <span className="text-brand-lime font-mono text-sm uppercase tracking-widest border border-brand-lime/20 px-3 py-1 rounded-full">
                             Since 2024 / System v2.0
                         </span>
-                    </motion.div>
+                    </div>
 
-                    <motion.h1
-                        variants={fadeInUp}
-                        className="text-[14vw] leading-[0.8] font-black tracking-tighter font-display uppercase mix-blend-screen"
-                    >
+                    <h1 className="text-[14vw] leading-[0.8] font-black tracking-tighter font-display uppercase mix-blend-screen">
                         Design<span className="text-brand-lime">.</span><br />
                         Trade<span className="text-brand-lime">.</span><br />
                         Scale<span className="text-brand-lime">.</span>
-                    </motion.h1>
+                    </h1>
 
-                    <motion.div variants={fadeInUp} className="max-w-xl mt-12 flex flex-col gap-8">
+                    <div className="max-w-xl mt-12 flex flex-col gap-8">
                         <p className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed">
                             We handle the capital. You handle the execution.
                             <br />
@@ -75,12 +68,13 @@ export default function Landing({ onAuthRequest }) {
                         >
                             Start Evaluation
                         </button>
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
 
                 {/* Hero Chart Overlay */}
-                <div className="absolute top-32 right-[-10%] w-[60%] opacity-40 mix-blend-screen pointer-events-none hidden lg:block rotate-[-10deg]">
-                    <LandingChart forcedTheme="dark" />
+                {/* Hero Chart Overlay - Crystal Market */}
+                <div className="absolute top-20 right-[-5%] w-[65%] h-[800px] pointer-events-none hidden lg:block z-0 mix-blend-screen">
+                    <CrystalMarket />
                 </div>
             </header>
 
