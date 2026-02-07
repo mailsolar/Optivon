@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import TerminalChart from './TerminalChart';
 import UnifiedRightPanel from './UnifiedRightPanel';
 import TerminalHeader from './TerminalHeader';
@@ -193,6 +194,11 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             return;
         }
 
+        if (!account && !isClose) {
+            addToast("No Active Account Selected", "error");
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             const endpoint = isClose ? '/api/trade/close' : '/api/trade/place';
@@ -352,54 +358,14 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
 
 // Wrapper for Provider
 export default function TerminalLayout(props) {
-    const { account } = props;
-    // We pass initial account data to the provider. 
-    // Even if it updates inside, the logic inside context uses 'currentBalance' which we should arguably pass down from inner state.
-    // However, the context is designed to receive props. 
-    // To make it fully reactive to the INNER state (which updates via fetch), we might need to lift state up.
-    // But since TerminalLayoutContent is where the state lives, we have a disconnect.
+    const location = useLocation();
+    const accountFromState = location.state?.account;
 
-    // SOLUTION: The 'RiskManagementProvider' needs access to the live account balance.
-    // We can't easily pass the live state from 'TerminalLayoutContent' to its PARENT 'RiskManagementProvider'.
-
-    // Better Approach: Put the Logic INSIDE the content, maybe as a hook, OR move the Fetching up.
-    // Since 'TerminalLayout' is the main page, moving fetching here (to the Wrapper) is cleaner.
-
-    // REFACTORING: Moving "FETCH DATA" logic to the Wrapper so we can pass data to both Provider and Content.
-
-    const [accountState, setAccountState] = useState(account);
-
-    // We need to keep the "fetchData" logic active.
-    // Since we are doing a quick integration, let's keep the fetch inside 'TerminalLayoutContent' 
-    // BUT we will also emit the account updates up? No, that's messy.
-
-    // Let's just trust 'props.account' for now as the initial seed, 
-    // and modify the Provider to accept NO balance initially, or handle it gracefully?
-    // Actually, 'RiskManagementContext' was written to take props:  { children, initialBalance, currentBalance }
-    // If we wrap it here, it only sees initial props.
-
-    // ALTERNATIVE: Use the Context's internal state?
-    // No, the context calculates derived state from balance.
-
-    // Let's inject a "RiskUpdater" component inside 'TerminalLayoutContent' that pushes updates to the Context? 
-    // Or simpler: Just Render the Context Provider INSIDE 'TerminalLayoutContent' wrapping the children?
-    // Yes! But 'TerminalLayoutContent' handles the LAYOUT. 
-    // So we can wrap the JSX return of 'TerminalLayoutContent' with the Provider.
-
-    // But hooks like 'useRiskManagement' are used inside 'TerminalLayoutContent' (for handleOrder).
-    // So the Provider MUST be above 'TerminalLayoutContent'.
-
-    // Okay, implies 'fetching' must be moved to 'TerminalLayout' (wrapper).
-    // I will simply duplicate the fetch logic to the wrapper for now to ensure robustness, 
-    // or just accept that we use the initial account for the session start.
-
-    // Actually, `account` changes as trades happen (Balance updates).
-    // If trade happens inside Content, Wrapper won't know unless we lift state.
-
-    // I'll stick to the "Wrapper" pattern and lift the `account` state to this wrapper.
+    // Priority: Props > Location State > Undefined (will fetch in wrapper)
+    const initialAccount = props.account || accountFromState;
 
     return (
-        <TerminalLayoutStateWrapper {...props} />
+        <TerminalLayoutStateWrapper {...props} account={initialAccount} />
     );
 }
 
@@ -407,11 +373,44 @@ export default function TerminalLayout(props) {
 
 function TerminalLayoutStateWrapper(props) {
     const [account, setAccount] = useState(props.account);
+    const { addToast } = useToast();
 
     // Sync with props
     useEffect(() => {
         if (props.account) setAccount(props.account);
     }, [props.account]);
+
+    // Fallback: If no account provided, fetch the most recent active account
+    useEffect(() => {
+        if (!account) {
+            const fetchLastAccount = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) return;
+
+                    const res = await fetch('http://localhost:5000/api/trade/accounts', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (res.ok) {
+                        const accounts = await res.json();
+                        // Find first active, or just the most recent one
+                        const lastAccount = accounts.find(a => a.status === 'active') || accounts[0];
+
+                        if (lastAccount) {
+                            setAccount(lastAccount);
+                            console.log("Restored account from API:", lastAccount);
+                        } else {
+                            addToast('No Trading Accounts Found', 'warning');
+                        }
+                    }
+                } catch (e) {
+                    console.error("Account Restore Error:", e);
+                }
+            };
+            fetchLastAccount();
+        }
+    }, [account]);
 
     // We also need to be able to UPDATE this account from inside.
     const updateAccount = (newAcc) => setAccount(newAcc);

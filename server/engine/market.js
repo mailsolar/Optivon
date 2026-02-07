@@ -40,57 +40,61 @@ class Market extends EventEmitter {
     }
 
     activeLoop() {
-        const now = new Date();
+        try {
+            const now = new Date();
 
-        for (const [symbol, data] of Object.entries(this.instruments)) {
-            // EVIL Market Micro-structure Simulation
+            for (const [symbol, data] of Object.entries(this.instruments)) {
+                // EVIL Market Micro-structure Simulation
 
-            // 1. Trend Persistence (prevent pure random noise)
-            if (this.microDuration <= 0) {
-                this.microDuration = Math.floor(Math.random() * 10) + 5; // Sustain move for 5-15 ticks
-                this.microDirection = Math.random() > 0.5 ? 1 : -1;
-                // 10% Chance of Violent Reversal (Stop Hunt)
-                if (Math.random() > 0.9) {
-                    this.microDirection *= -5; // Violent spike
+                // 1. Trend Persistence (prevent pure random noise)
+                if (this.microDuration <= 0) {
+                    this.microDuration = Math.floor(Math.random() * 10) + 5; // Sustain move for 5-15 ticks
+                    this.microDirection = Math.random() > 0.5 ? 1 : -1;
+                    // 10% Chance of Violent Reversal (Stop Hunt)
+                    if (Math.random() > 0.9) {
+                        this.microDirection *= -5; // Violent spike
+                    }
+                } else {
+                    this.microDuration--;
                 }
-            } else {
-                this.microDuration--;
+
+                // 2. Volatility Regime
+                let currentVol = data.volatility;
+                if (Math.random() > 0.8) currentVol *= 3; // 20% chance of massive volatility spike
+
+                const change = (Math.random() * currentVol * 0.4 * this.microDirection) + ((Math.random() - 0.5) * currentVol * 0.2);
+
+                data.price += change;
+
+                // 3. Whipsaw Correction (Mean Reversion to prevent infinite climb)
+                if (Math.abs(change) > data.volatility) {
+                    // If moved too fast, next tick likely reverts 50%
+                    this.microDirection *= -0.5;
+                }
+
+                data.price = parseFloat(data.price.toFixed(2));
+
+                // 4. Dynamic Evil Spread (Widens during volatility)
+                const spreadMultiplier = Math.abs(change) > 10 ? 3 : 1;
+                const spread = (data.spreadMin + Math.random() * (data.spreadMax - data.spreadMin)) * spreadMultiplier;
+
+                const bid = parseFloat((data.price - (spread / 2)).toFixed(2));
+                const ask = parseFloat((data.price + (spread / 2)).toFixed(2));
+
+                const tickData = {
+                    symbol,
+                    ltp: data.price,
+                    bid,
+                    ask,
+                    spread: parseFloat(spread.toFixed(2)),
+                    timestamp: now.toISOString()
+                };
+
+                this.ticks[symbol] = tickData;
+                this.emit('tick', tickData);
             }
-
-            // 2. Volatility Regime
-            let currentVol = data.volatility;
-            if (Math.random() > 0.8) currentVol *= 3; // 20% chance of massive volatility spike
-
-            const change = (Math.random() * currentVol * 0.4 * this.microDirection) + ((Math.random() - 0.5) * currentVol * 0.2);
-
-            data.price += change;
-
-            // 3. Whipsaw Correction (Mean Reversion to prevent infinite climb)
-            if (Math.abs(change) > data.volatility) {
-                // If moved too fast, next tick likely reverts 50%
-                this.microDirection *= -0.5;
-            }
-
-            data.price = parseFloat(data.price.toFixed(2));
-
-            // 4. Dynamic Evil Spread (Widens during volatility)
-            const spreadMultiplier = Math.abs(change) > 10 ? 3 : 1;
-            const spread = (data.spreadMin + Math.random() * (data.spreadMax - data.spreadMin)) * spreadMultiplier;
-
-            const bid = parseFloat((data.price - (spread / 2)).toFixed(2));
-            const ask = parseFloat((data.price + (spread / 2)).toFixed(2));
-
-            const tickData = {
-                symbol,
-                ltp: data.price,
-                bid,
-                ask,
-                spread: parseFloat(spread.toFixed(2)),
-                timestamp: now.toISOString()
-            };
-
-            this.ticks[symbol] = tickData;
-            this.emit('tick', tickData);
+        } catch (e) {
+            console.error("Market Loop Error:", e);
         }
     }
 

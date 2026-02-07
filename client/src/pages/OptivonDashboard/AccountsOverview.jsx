@@ -13,15 +13,16 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
     if (!isOpen) return null;
 
     const levels = [
-        { id: '5k', label: 'Starter', size: 5000, color: 'text-brand-lime' },
-        { id: '10k', label: 'Pro', size: 10000, color: 'text-brand-blue' },
-        { id: '25k', label: 'Elite', size: 25000, color: 'text-purple-400' },
+        { id: '5k', label: 'Starter', size: 5000, price: 3999, color: 'text-brand-lime' },
+        { id: '10k', label: 'Pro', size: 10000, price: 5999, color: 'text-brand-blue' },
+        { id: '25k', label: 'Elite', size: 25000, price: 8999, color: 'text-purple-400' },
     ];
 
     const handleBuy = async () => {
         setLoading(true);
         try {
-            await onPurchase({ type: 'Regular', size: levels.find(l => l.id === selectedLevel).size });
+            const selected = levels.find(l => l.id === selectedLevel);
+            await onPurchase({ type: 'Regular', size: selected.size, price: selected.price });
             onClose();
         } catch (e) {
             // Error handled by parent
@@ -52,6 +53,7 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                                 <div>
                                     <h4 className={`font-bold ${level.color}`}>{level.label}</h4>
                                     <p className="text-xs text-gray-400 uppercase tracking-widest font-mono">Size: ${level.size.toLocaleString()}</p>
+                                    <p className="text-sm font-bold text-white mt-1">₹{level.price.toLocaleString()}</p>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedLevel === level.id ? 'border-brand-lime' : 'border-gray-600'
                                     }`}>

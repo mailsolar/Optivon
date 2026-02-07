@@ -17,8 +17,8 @@ class OrderManager {
         const contractSize = symbol === 'NIFTY' ? 50 : 15;
         const totalValue = price * lots * contractSize;
 
-        // Leverage: Buy 10x, Sell 5x
-        const leverage = side === 'buy' ? 10 : 5;
+        // Leverage: High Leverage for NIFTY (100x)
+        const leverage = 100;
         const requiredMargin = totalValue / leverage;
 
         // Check Balance (Pseudo)
@@ -84,38 +84,109 @@ class OrderManager {
 
     startMatchingEngine() {
         console.log("Matching Engine Started");
-        setInterval(() => this.matchOrders(), 1000); // Check every 1s
-        setInterval(() => this.monitorStops(), 1000); // Check SL/TP every 1s
+        setInterval(() => {
+            try { this.matchOrders(); } catch (e) { console.error("MatchOrders Error:", e); }
+        }, 1000);
+        setInterval(() => {
+            try { this.monitorStops(); } catch (e) { console.error("MonitorStops Error:", e); }
+        }, 1000);
+        setInterval(() => {
+            try { this.monitorEquity(); } catch (e) { console.error("MonitorEquity Error:", e); }
+        }, 2000);
+    }
+
+    // New: Sync Floating Equity to DB for real-time frontend updates
+    monitorEquity() {
+        try {
+            // Get all active accounts with open trades
+            const query = `
+                SELECT t.account_id, t.symbol, t.side, t.lots, t.entry_price, a.balance 
+                FROM trades t 
+                JOIN accounts a ON t.account_id = a.id 
+                WHERE t.status = 'open'
+            `;
+
+            db.all(query, [], (err, rows) => {
+                if (err) {
+                    console.error("monitorEquity DB Error:", err);
+                    return;
+                }
+                if (!rows || rows.length === 0) return;
+
+                try {
+                    // Group trades by account
+                    const accountTrades = {};
+                    rows.forEach(row => {
+                        if (!accountTrades[row.account_id]) {
+                            accountTrades[row.account_id] = { balance: row.balance, trades: [] };
+                        }
+                        accountTrades[row.account_id].trades.push(row);
+                    });
+
+                    // Calculate Equity for each account
+                    Object.keys(accountTrades).forEach(accountId => {
+                        const { balance, trades } = accountTrades[accountId];
+                        let floatingPnL = 0;
+
+                        trades.forEach(trade => {
+                            const quote = market.getQuote(trade.symbol);
+                            if (quote) {
+                                const price = trade.side === 'buy' ? quote.bid : quote.ask;
+                                const diff = trade.side === 'buy' ? price - trade.entry_price : trade.entry_price - price;
+                                const contractSize = trade.symbol === 'NIFTY' ? 50 : 15;
+                                floatingPnL += diff * trade.lots * contractSize;
+                            }
+                        });
+
+                        // Update DB
+                        const equity = balance + floatingPnL;
+                        // Use a safe wrapper or try-catch for the update too, though db.run handles its own err
+                        db.run("UPDATE accounts SET equity = ? WHERE id = ?", [equity, accountId], (err) => {
+                            if (err) console.error("Update Equity Error:", err);
+                        });
+                    });
+                } catch (innerErr) {
+                    console.error("monitorEquity Logic Error:", innerErr);
+                }
+            });
+        } catch (e) {
+            console.error("monitorEquity Fatal Error:", e);
+        }
     }
 
     // Monitor Open Trades for SL/TP Hits
     monitorStops() {
         db.all("SELECT * FROM trades WHERE status = 'open'", [], (err, trades) => {
-            if (err || !trades) return;
+            if (err) { console.error("monitorStops DB Error", err); return; }
+            if (!trades) return;
 
-            trades.forEach(trade => {
-                const quote = market.getQuote(trade.symbol);
-                if (!quote) return;
+            try {
+                trades.forEach(trade => {
+                    const quote = market.getQuote(trade.symbol);
+                    if (!quote) return;
 
-                // Check SL/TP
-                // Buy: Close if Bid <= SL or Bid >= TP
-                // Sell: Close if Ask >= SL or Ask <= TP
-                const price = trade.side === 'buy' ? quote.bid : quote.ask;
+                    // Check SL/TP
+                    // Buy: Close if Bid <= SL or Bid >= TP
+                    // Sell: Close if Ask >= SL or Ask <= TP
+                    const price = trade.side === 'buy' ? quote.bid : quote.ask;
 
-                let closeReason = null;
-                if (trade.sl) {
-                    if (trade.side === 'buy' && price <= trade.sl) closeReason = 'SL_HIT';
-                    if (trade.side === 'sell' && price >= trade.sl) closeReason = 'SL_HIT';
-                }
-                if (trade.tp) {
-                    if (trade.side === 'buy' && price >= trade.tp) closeReason = 'TP_HIT';
-                    if (trade.side === 'sell' && price <= trade.tp) closeReason = 'TP_HIT';
-                }
+                    let closeReason = null;
+                    if (trade.sl) {
+                        if (trade.side === 'buy' && price <= trade.sl) closeReason = 'SL_HIT';
+                        if (trade.side === 'sell' && price >= trade.sl) closeReason = 'SL_HIT';
+                    }
+                    if (trade.tp) {
+                        if (trade.side === 'buy' && price >= trade.tp) closeReason = 'TP_HIT';
+                        if (trade.side === 'sell' && price <= trade.tp) closeReason = 'TP_HIT';
+                    }
 
-                if (closeReason) {
-                    this.executeClose(trade, price, closeReason);
-                }
-            });
+                    if (closeReason) {
+                        this.executeClose(trade, price, closeReason);
+                    }
+                });
+            } catch (e) {
+                console.error("monitorStops Logic Error:", e);
+            }
         });
     }
 
@@ -128,7 +199,8 @@ class OrderManager {
         db.run("UPDATE trades SET status = 'closed', exit_price = ?, close_time = CURRENT_TIMESTAMP, pnl = ? WHERE id = ?",
             [price, pnl, trade.id],
             (err) => {
-                if (!err) {
+                if (err) { console.error("executeClose DB Error", err); return; }
+                try {
                     console.log(`Trade ${trade.id} Closed (${reason}) at ${price}. PnL: ${pnl.toFixed(2)}`);
                     // Update Account Balance/Equity? 
                     // Usually RiskManager or specific BalanceManager handles this, but for simulation we update balance here
@@ -138,6 +210,8 @@ class OrderManager {
                             db.run("UPDATE accounts SET balance = ?, equity = ? WHERE id = ?", [newBalance, newBalance, trade.account_id]); // Equity syncs on close
                         }
                     });
+                } catch (e) {
+                    console.error("executeClose Logic Error:", e);
                 }
             }
         );
@@ -145,26 +219,34 @@ class OrderManager {
 
     matchOrders() {
         db.all("SELECT * FROM limit_orders WHERE status = 'pending'", [], (err, orders) => {
-            if (err || !orders) return;
+            if (err) {
+                console.error("matchOrders DB Error:", err);
+                return;
+            }
+            if (!orders) return;
 
-            orders.forEach(order => {
-                const quote = market.getQuote(order.symbol);
-                if (!quote) return;
+            try {
+                orders.forEach(order => {
+                    const quote = market.getQuote(order.symbol);
+                    if (!quote) return;
 
-                // Check Trigger
-                // Buy Limit: Market Price <= Limit Price
-                // Sell Limit: Market Price >= Limit Price
-                // Using Ask for Buy, Bid for Sell
-                const marketPrice = order.side === 'buy' ? quote.ask : quote.bid;
+                    // Check Trigger
+                    // Buy Limit: Market Price <= Limit Price
+                    // Sell Limit: Market Price >= Limit Price
+                    // Using Ask for Buy, Bid for Sell
+                    const marketPrice = order.side === 'buy' ? quote.ask : quote.bid;
 
-                let triggered = false;
-                if (order.side === 'buy' && marketPrice <= order.limit_price) triggered = true;
-                if (order.side === 'sell' && marketPrice >= order.limit_price) triggered = true;
+                    let triggered = false;
+                    if (order.side === 'buy' && marketPrice <= order.limit_price) triggered = true;
+                    if (order.side === 'sell' && marketPrice >= order.limit_price) triggered = true;
 
-                if (triggered) {
-                    this.executeLimitOrder(order, marketPrice);
-                }
-            });
+                    if (triggered) {
+                        this.executeLimitOrder(order, marketPrice);
+                    }
+                });
+            } catch (e) {
+                console.error("matchOrders Logic Error:", e);
+            }
         });
     }
 
@@ -174,9 +256,12 @@ class OrderManager {
                 VALUES (?, ?, ?, ?, ?, ?, ?, 'open', 0)`,
             [order.account_id, order.symbol, order.side, order.lots, price, order.sl, order.tp],
             (err) => {
-                if (!err) {
+                if (err) { console.error("executeLimitOrder DB Error", err); return; }
+                try {
                     db.run("UPDATE limit_orders SET status = 'filled' WHERE id = ?", [order.id]);
                     console.log(`Limit Order ${order.id} Filled at ${price}`);
+                } catch (e) {
+                    console.error("executeLimitOrder Logic Error:", e);
                 }
             }
         );
