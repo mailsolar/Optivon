@@ -116,24 +116,29 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     const fetchData = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            // Check if we have an account ID to fetch. If not, retry or use props.
             const accId = account?.id;
-            if (!accId) return;
 
-            const [dataRes, posRes, accRes] = await Promise.all([
-                fetch(`http://localhost:5000/api/market/history/${selectedSymbol}?timeframe=${timeframe}`),
-                fetch('http://localhost:5000/api/trade/positions', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`http://localhost:5000/api/trade/account/${accId}`, { headers: { 'Authorization': `Bearer ${token}` } })
-            ]);
+            // Always fetch chart data, even without account
+            console.log('[Layout] Fetching history for', selectedSymbol);
+            const dataRes = await fetch(`http://localhost:5000/api/market/history/${selectedSymbol}?timeframe=${timeframe}`);
 
             if (dataRes.ok) {
                 const history = await dataRes.json();
+                console.log('[Layout] Received', history.length, 'candles');
                 if (history && history.length > 0) {
                     setChartData(history);
                 } else {
-                    throw new Error("Empty Data"); // Trigger fallback in catch
+                    throw new Error("Empty Data");
                 }
             }
+
+            // Fetch positions and account only if logged in
+            if (!accId) return;
+
+            const [posRes, accRes] = await Promise.all([
+                fetch('http://localhost:5000/api/trade/positions', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`http://localhost:5000/api/trade/account/${accId}`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
 
             if (posRes.ok) {
                 const pos = await posRes.json();

@@ -61,7 +61,9 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
             timeScale: {
                 borderColor: gridColor,
                 timeVisible: true,
-                secondsVisible: true, // Show seconds for Hyper Mode
+                secondsVisible: false,
+                barSpacing: 2, // Show more candles
+                minBarSpacing: 0.5, // Allow zoom out to see all candles
             },
             rightPriceScale: {
                 borderColor: gridColor,
@@ -149,8 +151,10 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                     })
                     .sort((a, b) => a.time - b.time);
 
+                console.log('[TerminalChart] Setting', validData.length, 'candles');
                 series.setData(validData);
                 chart.timeScale().fitContent();
+                console.log('[TerminalChart] fitContent called');
             }
 
             if (onChartReady) onChartReady(chart, series);

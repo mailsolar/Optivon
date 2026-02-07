@@ -155,7 +155,7 @@ export default function UnifiedRightPanel({
             {/* MAIN CONTENT */}
             <div className="flex-1 overflow-hidden relative flex flex-col min-h-0 bg-surface">
                 {activeTab === 'trade' && (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 space-y-6">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-3 space-y-3">
 
                         {/* Market Overview Header */}
                         <div className="flex justify-between items-start">
@@ -208,7 +208,7 @@ export default function UnifiedRightPanel({
                         </div>
 
                         {/* Order Configuration */}
-                        <div className="space-y-5">
+                        <div className="space-y-3">
                             {/* Quantity Control */}
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center px-1">
@@ -235,7 +235,7 @@ export default function UnifiedRightPanel({
 
                             {/* Conditional Rendering for One-Click vs Standard */}
                             {!oneClickEnabled && (
-                                <div className="space-y-5 animate-in slide-in-from-top-2 duration-300">
+                                <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
                                     {/* Order Side and Type Selection */}
                                     <div className="grid grid-cols-2 gap-2 bg-background p-1.5 rounded-2xl border border-border">
                                         <button onClick={() => setOrderType('market')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>MARKET</button>
@@ -363,7 +363,7 @@ export default function UnifiedRightPanel({
                         </div>
 
                         {/* FINAL ACTION SECTION */}
-                        <div className="mt-auto pt-6 pb-10 shrink-0">
+                        <div className="mt-auto pt-3 pb-2 shrink-0">
                             {oneClickEnabled ? (
                                 <div className="grid grid-cols-2 gap-4 animate-in fade-in zoom-in duration-300">
                                     <button
