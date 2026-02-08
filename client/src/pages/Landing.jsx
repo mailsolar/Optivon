@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import CrystalMarket from '../components/Landing/CrystalMarket';
 import LandingChart from '../components/LandingChart';
+import ChallengeSelector from '../components/Landing/ChallengeSelector';
+import DummyTerminal from '../components/Landing/DummyTerminal';
 
 // --- ANIMATION VARIANTS ---
 const fadeInUp = {
@@ -68,6 +70,12 @@ export default function Landing({ onAuthRequest }) {
                         >
                             Start Evaluation
                         </button>
+                        <button
+                            onClick={() => window.location.href = '/rules'}
+                            className="w-fit px-8 py-4 ml-4 text-gray-400 hover:text-white transition-colors duration-300 font-bold uppercase tracking-widest text-sm flex items-center gap-2 group"
+                        >
+                            Read Protocol <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
                     </div>
                 </div>
 
@@ -91,6 +99,12 @@ export default function Landing({ onAuthRequest }) {
                             <p className="text-2xl font-medium leading-relaxed max-w-2xl mb-12">
                                 Our requirements are simple. We fund talent, not gamblers. Prove your edge within our risk parameters and access up to ₹50L in buying power.
                             </p>
+                            <button
+                                onClick={() => window.location.href = '/rules'}
+                                className="mb-12 text-sm font-bold uppercase tracking-widest border-b-2 border-brand-dark hover:border-white transition-colors pb-1"
+                            >
+                                View Detailed Rulebook
+                            </button>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="border-t border-brand-dark/20 pt-6">
@@ -149,6 +163,31 @@ export default function Landing({ onAuthRequest }) {
                 </div>
             </section>
 
+            {/* SECTION 1.5: CHALLENGE SELECTOR */}
+            <section className="bg-brand-dark py-32 px-6 md:px-12 border-t border-white/10 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-lime/30 to-transparent" />
+
+                <div className="max-w-[1600px] mx-auto">
+                    <div className="text-center mb-16">
+                        <span className="block font-mono font-bold text-xs text-brand-lime uppercase tracking-widest mb-4">/ Select Protocol</span>
+                        <h2 className="text-[5vw] md:text-5xl leading-[0.9] font-black tracking-tighter font-display text-white mb-6">
+                            Choose Your Engine
+                        </h2>
+                        <p className="text-gray-400 max-w-xl mx-auto">
+                            Tailor your capital access. Select the model that fits your risk profile and trading style.
+                        </p>
+                    </div>
+
+                    <ChallengeSelector />
+
+                    <div className="text-center mt-12">
+                        <a href="/rules" className="text-xs font-mono text-gray-500 hover:text-brand-lime uppercase tracking-widest border-b border-transparent hover:border-brand-lime pb-1 transition-all">
+                            View Full Trading Rules & Logic
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             {/* SECTION 2: EXECUTION/DEVELOPMENT (Dark Block) */}
             <section className="bg-brand-dark py-32 px-6 md:px-12 border-t border-white/10">
                 <div className="max-w-[1600px] mx-auto">
@@ -174,15 +213,8 @@ export default function Landing({ onAuthRequest }) {
                     {/* Bento Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Live Chart Block */}
-                        <div className="md:col-span-2 bg-[#121220] rounded-[32px] p-8 border border-white/5 relative overflow-hidden h-[500px]">
-                            <div className="absolute inset-0 opacity-50">
-                                <LandingChart forcedTheme="dark" />
-                            </div>
-                            <div className="absolute bottom-8 left-8 z-10">
-                                <h3 className="text-3xl font-bold bg-white/10 backdrop-blur-md px-6 py-2 rounded-full inline-block border border-white/10">
-                                    NIFTY 50 Loop
-                                </h3>
-                            </div>
+                        <div className="md:col-span-2 bg-[#121220] rounded-[32px] border border-white/5 relative overflow-hidden h-[500px]">
+                            <DummyTerminal />
                         </div>
 
                         {/* Feature Blocks */}

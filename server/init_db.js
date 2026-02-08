@@ -10,6 +10,9 @@ const initUtils = {
         password_hash TEXT,
         is_admin INTEGER DEFAULT 0,
         two_fa_secret TEXT,
+        two_fa_pin TEXT, -- 6-digit PIN hash
+        two_fa_enabled INTEGER DEFAULT 0,
+        email_verified INTEGER DEFAULT 0,
         ip_address TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
@@ -45,6 +48,15 @@ const initUtils = {
         type TEXT, -- 'daily_dd', 'max_dd', 'rules'
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(account_id) REFERENCES accounts(id)
+      )`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS otps (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT,
+        otp TEXT,
+        type TEXT, -- 'registration', 'recovery'
+        expires_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
 
             console.log('Tables created');

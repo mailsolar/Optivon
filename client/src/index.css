@@ -69,11 +69,12 @@
 }
 
 /* Base Styles */
+/* Base Styles */
 html,
 body {
-  height: 100vh;
+  height: 100%;
   margin: 0;
-  overflow: hidden;
+  /* overflow: hidden;  <-- REMOVED to allow scrolling on Landing Page */
   font-family: 'Inter', sans-serif;
   background-color: rgb(var(--bg-background));
   color: rgb(var(--text-primary));
@@ -82,7 +83,9 @@ body {
 
 #root {
   height: 100%;
-  overflow: hidden;
+  /* overflow: hidden; <-- REMOVED */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Custom Scrollbar (Lime Accent) */

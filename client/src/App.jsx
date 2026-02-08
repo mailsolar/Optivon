@@ -20,6 +20,15 @@ import HelpCenter from './pages/OptivonDashboard/HelpCenter'
 import Affiliates from './pages/OptivonDashboard/Affiliates'
 import Competitions from './pages/OptivonDashboard/Competitions'
 import Settings from './pages/OptivonDashboard/Settings'
+import ResetPassword from './pages/ResetPassword'
+import Rules from './pages/Rules'
+import Checkout from './pages/Checkout'
+import AdminLayout from './layouts/AdminLayout'
+import AdminRoute from './components/AdminRoute'
+import AdminDashboard from './pages/Admin/AdminDashboard'
+import Users from './pages/Admin/Users'
+import RiskMonitor from './pages/Admin/RiskMonitor'
+import AdminSettings from './pages/Admin/Settings'
 
 function AppRoutes() {
     const { user, login } = useAuth();
@@ -68,6 +77,22 @@ function AppRoutes() {
                 } />
 
                 <Route path="/stock/:symbol" element={<StockDetail />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/rules" element={<Rules />} />
+                <Route path="/checkout" element={<Checkout />} />
+
+                {/* ADMIN ROUTES */}
+                <Route path="/admin" element={
+                    <AdminRoute>
+                        <AdminLayout />
+                    </AdminRoute>
+                }>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="risk" element={<RiskMonitor />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                </Route>
+
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 

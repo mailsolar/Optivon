@@ -283,4 +283,9 @@ class OrderManager {
 
 const manager = new OrderManager();
 manager.startMatchingEngine(); // Start the loop on require
+
+// Start Risk Manager
+const riskManager = require('./riskManager');
+riskManager.start();
+
 module.exports = manager;

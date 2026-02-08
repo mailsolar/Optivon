@@ -2,64 +2,98 @@ const db = require('../database');
 const market = require('./market');
 
 class RiskManager {
-    start() {
-        console.log("Risk Manager Started");
-        setInterval(() => this.monitorRisk(), 1000); // Check every 1s
+    constructor() {
+        this.isRunning = false;
+        this.checkInterval = 1000; // 1 second
     }
 
-    monitorRisk() {
-        // Enforce Daily Drawdown & Overall Drawdown
-        db.all("SELECT * FROM accounts WHERE status = 'active'", [], (err, accounts) => {
-            if (err) return;
+    start() {
+        if (this.isRunning) return;
+        this.isRunning = true;
+        console.log("Risk Manager Started");
+        this.monitorRisk();
+    }
 
-            accounts.forEach(async acc => {
-                // Calculate PnL from open positions
-                const positions = await this.getOpenPositions(acc.id);
-                let openPnL = 0;
+    stop() {
+        this.isRunning = false;
+    }
 
-                positions.forEach(pos => {
-                    const quote = market.getQuote(pos.symbol);
-                    if (quote) {
-                        const curr = pos.side === 'buy' ? quote.bid : quote.ask;
-                        const diff = pos.side === 'buy' ? curr - pos.entry_price : pos.entry_price - curr;
-                        const size = pos.symbol === 'NIFTY' ? 50 : 15;
-                        openPnL += diff * pos.lots * size;
-                    }
-                });
+    async monitorRisk() {
+        if (!this.isRunning) return;
 
-                const currentEquity = acc.balance + openPnL;
+        try {
+            // Get all active accounts
+            const accounts = await this.getActiveAccounts();
 
-                // 1. Max Drawdown (4% of Size)
-                const maxLoss = acc.size * 0.04;
-                const minEquityAllowed = acc.size - maxLoss;
+            for (const acc of accounts) {
+                await this.checkAccountHealth(acc);
+            }
 
-                if (currentEquity < minEquityAllowed) {
-                    this.failAccount(acc.id, 'Max Drawdown Violation (4%)');
-                    return;
-                }
+        } catch (err) {
+            console.error("Risk Monitor Error:", err);
+        }
 
-                // 2. Daily Drawdown (2% of Daily Start Balance)
-                const dailyLossLimit = acc.daily_start_balance * 0.02;
-                const minDailyEquity = acc.daily_start_balance - dailyLossLimit;
+        // Schedule next check
+        if (this.isRunning) {
+            setTimeout(() => this.monitorRisk(), this.checkInterval);
+        }
+    }
 
-                if (currentEquity < minDailyEquity) {
-                    this.failAccount(acc.id, 'Daily Drawdown Violation (2%)');
-                    return;
-                }
-
-                // 3. Profit Target Logic (Optional auto-pass)
-                // 1-Step: 10%, 2-Step: P1 8%, P2 5%
-                let target = 0.10;
-                if (acc.type === '2-Step') {
-                    target = acc.phase === 1 ? 0.08 : 0.05;
-                }
-
-                if (currentEquity >= acc.size * (1 + target)) {
-                    // Pass! (Usually requires closed trades, but simulated logic can pass on equity)
-                    // this.passAccount(acc.id);
-                }
+    getActiveAccounts() {
+        return new Promise((resolve) => {
+            db.all("SELECT * FROM accounts WHERE status = 'active'", [], (err, rows) => {
+                if (err) resolve([]);
+                else resolve(rows || []);
             });
         });
+    }
+
+    async checkAccountHealth(account) {
+        // 1. Calculate Current Equity (Balance + Floating PnL)
+        const positions = await this.getOpenPositions(account.id);
+        let floatingPnL = 0;
+
+        positions.forEach(pos => {
+            const quote = market.getQuote(pos.symbol);
+            if (quote) {
+                const currentPrice = pos.side === 'buy' ? quote.bid : quote.ask;
+                const diff = pos.side === 'buy' ? currentPrice - pos.entry_price : pos.entry_price - currentPrice;
+                const contractSize = pos.symbol === 'NIFTY' ? 50 : 15;
+                floatingPnL += diff * pos.lots * contractSize;
+            }
+        });
+
+        const currentEquity = account.balance + floatingPnL;
+
+        // 2. Max Drawdown Check (10% of Initial Size)
+        // Static Max Drawdown: Equity must not fall below Initial - 10%
+        // E.g. $100k -> Max Loss allowed is $10k -> Breach if Equity < $90k
+        const maxDrawdownLimit = account.size * 0.10;
+        const breachLevelMax = account.size - maxDrawdownLimit;
+
+        if (currentEquity <= breachLevelMax) {
+            await this.failAccount(account, 'MAX_DRAWDOWN', `Equity ${currentEquity.toFixed(2)} below limit ${breachLevelMax}`);
+            return;
+        }
+
+        // 3. Daily Drawdown Check (5% of Day Start Equity)
+        // Daily Start Balance is reset at 00:00 UTC (or handled by a separate cron)
+        // For now, we assume 'daily_start_balance' in DB is accurate for the current day.
+        // E.g. Start Day $100k -> Max Daily Loss $5k -> Breach if Equity < $95k
+        // If account grew to $104k yesterday, Start Day $104k -> Limit $5.2k -> Breach < $98.8k
+
+        // Use daily_start_balance if set, else fallback to balance (e.g. for new accounts)
+        const dailyStart = account.daily_start_balance || account.balance;
+        const dailyLossLimit = dailyStart * 0.05;
+        const breachLevelDaily = dailyStart - dailyLossLimit;
+
+        if (currentEquity <= breachLevelDaily) {
+            await this.failAccount(account, 'DAILY_DRAWDOWN', `Equity ${currentEquity.toFixed(2)} below daily limit ${breachLevelDaily.toFixed(2)}`);
+            return;
+        }
+
+        // Update Equity in DB for Frontend (optional optimisation: only if changed significantly)
+        this.updateEquity(account.id, currentEquity);
     }
 
     getOpenPositions(accountId) {
@@ -70,13 +104,32 @@ class RiskManager {
         });
     }
 
-    failAccount(accountId, reason) {
-        console.log(`Failing Account ${accountId}: ${reason}`);
-        db.run("UPDATE accounts SET status = 'failed' WHERE id = ?", [accountId]);
-        db.run("INSERT INTO violations (account_id, type, details) VALUES (?, ?, ?)", [accountId, 'RISK_FAIL', reason]);
+    updateEquity(accountId, equity) {
+        db.run("UPDATE accounts SET equity = ? WHERE id = ?", [equity, accountId]);
+    }
 
-        // Close all positions logic would go here
-        db.run("UPDATE trades SET status = 'closed', close_time = CURRENT_TIMESTAMP WHERE account_id = ? AND status='open'", [accountId]);
+    async failAccount(account, type, reason) {
+        console.log(`[RISK] Failing Account ${account.id}: ${type} - ${reason}`);
+
+        // 1. Close all Open Positions
+        await new Promise(resolve => {
+            const closeTime = new Date().toISOString();
+            // We should ideally calculate final PnL for record keeping, but primarily we just close them.
+            // A simple batch update:
+            db.run(`UPDATE trades 
+                    SET status = 'closed', 
+                        close_time = ?, 
+                        notes = 'RISK_LIQUIDATION' 
+                    WHERE account_id = ? AND status = 'open'`,
+                [closeTime, account.id], (err) => resolve());
+        });
+
+        // 2. Mark Account as Failed
+        db.run("UPDATE accounts SET status = 'failed' WHERE id = ?", [account.id]);
+
+        // 3. Log Violation
+        db.run("INSERT INTO violations (account_id, type, details, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
+            [account.id, type, reason]);
     }
 }
 

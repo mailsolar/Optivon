@@ -2,126 +2,193 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const speakeasy = require('speakeasy');
-const QRCode = require('qrcode');
-const db = require('../database'); // Adjust path
-const { SECRET_KEY, authenticateToken } = require('../middleware/auth');
+const db = require('../database');
+const { sendOTP, sendPasswordReset } = require('../utils/email');
+const { authenticateToken } = require('../middleware/auth');
 
-// Get Me
-router.get('/me', authenticateToken, (req, res) => {
-    db.get('SELECT id, email, is_admin, two_fa_secret FROM users WHERE id = ?', [req.user.id], (err, row) => {
-        if (err || !row) return res.status(404).send({ error: 'User not found' });
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
-        // Derive name from email (e.g., john.doe@... -> John Doe)
-        const namePart = row.email.split('@')[0];
-        const name = namePart.split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+// Helper: Generate 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-        res.send({ user: { id: row.id, email: row.email, name, isAdmin: row.is_admin, has2FA: !!row.two_fa_secret } });
-    });
-});
+// 1. Send OTP for Registration
+router.post('/send-otp-register', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).send({ error: 'Email required' });
 
-// Register
-router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
-    const ip = req.ip || req.connection.remoteAddress;
-
-    // Anti-Duplication: Check IP limit (Relaxed for dev)
-    db.get('SELECT COUNT(*) as count FROM users WHERE ip_address = ?', [ip], async (err, row) => {
+    // Check if user already exists
+    db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
         if (err) return res.status(500).send({ error: 'Database error' });
+        if (row) return res.status(400).send({ error: 'Email already registered' });
 
-        if (row && row.count >= 10) {
-            return res.status(403).send({ error: 'Anti-Cheat: Maximum accounts reached for this IP address.' });
-        }
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 10 * 60000); // 10 mins
 
-        try {
-            const hash = await bcrypt.hash(password, 10);
-            db.run('INSERT INTO users (email, password_hash, ip_address) VALUES (?, ?, ?)', [email, hash, ip], function (err) {
-                if (err) {
-                    if (err.message.includes('UNIQUE constraint failed')) {
-                        return res.status(400).send({ error: 'Email already registered' });
-                    }
-                    return res.status(500).send({ error: 'Registration failed' });
-                }
-                res.status(201).send({ message: 'User registered successfully', userId: this.lastID });
-            });
-        } catch (e) {
-            res.status(500).send({ error: 'Server error' });
-        }
+        // Store OTP
+        db.run('INSERT INTO otps (email, otp, type, expires_at) VALUES (?, ?, ?, ?)',
+            [email, otp, 'registration', expiresAt.toISOString()],
+            (err) => {
+                if (err) return res.status(500).send({ error: 'Failed to generate OTP' });
+
+                // Send Email
+                sendOTP(email, otp)
+                    .then(() => res.send({ message: 'OTP sent to email', devOTP: otp })) // Dev Mode: Return OTP
+                    .catch(() => res.status(500).send({ error: 'Failed to send email' }));
+            }
+        );
     });
 });
 
-// Login
+// 2. Register (Verify OTP + Create User)
+router.post('/register', async (req, res) => {
+    const { email, password, otp } = req.body;
+
+    // Verify OTP
+    db.get('SELECT * FROM otps WHERE email = ? AND type = ? ORDER BY created_at DESC LIMIT 1',
+        [email, 'registration'],
+        async (err, row) => {
+            if (err) return res.status(500).send({ error: 'Database error' });
+            if (!row || row.otp !== otp) return res.status(400).send({ error: 'Invalid or expired OTP' });
+
+            if (new Date(row.expires_at) < new Date()) {
+                return res.status(400).send({ error: 'OTP Expired' });
+            }
+
+            try {
+                const hash = await bcrypt.hash(password, 10);
+                db.run('INSERT INTO users (email, password_hash, email_verified) VALUES (?, ?, 1)',
+                    [email, hash],
+                    function (err) {
+                        if (err) return res.status(500).send({ error: 'Error creating user' });
+                        // Clean up OTPs
+                        db.run('DELETE FROM otps WHERE email = ?', [email]);
+                        res.status(201).send({ message: 'Registered Successfully' });
+                    }
+                );
+            } catch {
+                res.status(500).send({ error: 'Server Error' });
+            }
+        }
+    );
+});
+
+// 3. Login (Step 1)
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
     db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
         if (err) return res.status(500).send({ error: 'Database error' });
-        if (!user) return res.status(401).send({ error: 'Invalid credentials' });
+        if (!user) return res.status(400).send({ error: 'Invalid credentials' });
 
         const match = await bcrypt.compare(password, user.password_hash);
-        if (!match) return res.status(401).send({ error: 'Invalid credentials' });
+        if (!match) return res.status(400).send({ error: 'Invalid credentials' });
 
-        // Generate JWT
+        // Check 2FA
+        if (user.two_fa_enabled) {
+            return res.send({ require2FA: true, userId: user.id });
+        }
+
+        // Issue Token
         const token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
-
-        // Derive name
-        const namePart = user.email.split('@')[0];
-        const name = namePart.split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
-
-        res.send({ token, user: { id: user.id, email: user.email, name, isAdmin: user.is_admin, has2FA: !!user.two_fa_secret } });
+        res.send({ message: 'Login Successful', token, user: { id: user.id, email: user.email, is_admin: user.is_admin } });
     });
 });
 
-// 2FA Setup (Protected)
-router.post('/2fa/setup', authenticateToken, (req, res) => {
-    const secret = speakeasy.generateSecret({ name: `Optivon (${req.user.email})` });
-
-    // Store temp secret? Ideally we store it only after verification, but for simplicity we can update DB now or send code to verify.
-    // We'll return the secret and QR code, client must verify to save it permanently.
-    // Actually, let's just save it.
-
-    db.run('UPDATE users SET two_fa_secret = ? WHERE id = ?', [secret.base32, req.user.id], (err) => {
-        if (err) return res.status(500).send({ error: 'Database error' });
-
-        QRCode.toDataURL(secret.otpauth_url, (err, data_url) => {
-            res.send({ secret: secret.base32, qrCode: data_url });
-        });
-    });
-});
-
-// 2FA Verify (Can be used for setup confirmation or login challenge)
-router.post('/2fa/verify', async (req, res) => {
-    const { token, userId } = req.body;
-
-    if (!userId) return res.status(400).send({ error: 'User ID required' });
+// 4. Verify 2FA (Login Step 2)
+router.post('/verify-2fa-login', (req, res) => {
+    const { userId, pin } = req.body;
 
     db.get('SELECT * FROM users WHERE id = ?', [userId], async (err, user) => {
-        if (err || !user) return res.status(404).send({ error: 'User not found' });
+        if (err || !user) return res.status(400).send({ error: 'User not found' });
 
-        if (!user.two_fa_secret) return res.status(400).send({ error: '2FA not setup for this user' });
+        const match = await bcrypt.compare(pin, user.two_fa_pin);
+        if (!match) return res.status(400).send({ error: 'Invalid PIN' });
 
-        const verified = speakeasy.totp.verify({
-            secret: user.two_fa_secret,
-            encoding: 'base32',
-            token: token
-        });
+        const token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
+        res.send({ message: 'Login Successful', token, user: { id: user.id, email: user.email, is_admin: user.is_admin } });
+    });
+});
 
-        if (verified) {
-            // Generate JWT
-            const authToken = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
+// 5. Setup 2FA (Authenticated)
+router.post('/setup-2fa', authenticateToken, async (req, res) => {
+    const { pin } = req.body;
+    if (!pin || pin.length !== 6) return res.status(400).send({ error: 'PIN must be 6 digits' });
 
-            // Derive name
-            const namePart = user.email.split('@')[0];
-            const name = namePart.split('.').map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
+    try {
+        const pinHash = await bcrypt.hash(pin, 10);
+        db.run('UPDATE users SET two_fa_pin = ?, two_fa_enabled = 1 WHERE id = ?',
+            [pinHash, req.user.id],
+            (err) => {
+                if (err) return res.status(500).send({ error: 'Database error' });
+                res.send({ message: '2FA Enabled Successfully' });
+            }
+        );
+    } catch {
+        res.status(500).send({ error: 'Server Error' });
+    }
+});
 
-            res.send({
-                verified: true,
-                token: authToken,
-                user: { id: user.id, email: user.email, name, isAdmin: user.is_admin, has2FA: true }
-            });
-        } else {
-            res.send({ verified: false });
+// 6. Forgot Password - Request
+router.post('/forgot-password', (req, res) => {
+    const { email } = req.body;
+    db.get('SELECT id FROM users WHERE email = ?', [email], (err, user) => {
+        if (!user) return res.status(404).send({ error: 'Email not found' });
+
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 15 * 60000); // 15 mins
+
+        db.run('INSERT INTO otps (email, otp, type, expires_at) VALUES (?, ?, ?, ?)',
+            [email, otp, 'recovery', expiresAt.toISOString()],
+            (err) => {
+                if (err) return res.status(500).send({ error: 'Database error' });
+
+                // Construct Link (User will be redirected to this frontend route)
+                const link = `http://localhost:5173/reset-password?email=${email}&code=${otp}`;
+                sendPasswordReset(email, link)
+                    .then(() => res.send({ message: 'Recovery link sent to email', devLink: link })) // Dev Mode: Return Link
+                    .catch(() => res.status(500).send({ error: 'Failed to send email' }));
+            }
+        );
+    });
+});
+
+// 7. Reset Password
+router.post('/reset-password', async (req, res) => {
+    const { email, code, newPassword } = req.body;
+
+    db.get('SELECT * FROM otps WHERE email = ? AND type = ? ORDER BY created_at DESC LIMIT 1',
+        [email, 'recovery'],
+        async (err, row) => {
+            if (err) return res.status(500).send({ error: 'Database check failed' });
+            if (!row || row.otp !== code) return res.status(400).send({ error: 'Invalid or expired link' });
+
+            if (new Date(row.expires_at) < new Date()) {
+                return res.status(400).send({ error: 'Link Expired' });
+            }
+
+            try {
+                const hash = await bcrypt.hash(newPassword, 10);
+                db.run('UPDATE users SET password_hash = ? WHERE email = ?',
+                    [hash, email],
+                    (err) => {
+                        if (err) return res.status(500).send({ error: 'Database update failed' });
+                        db.run('DELETE FROM otps WHERE email = ?', [email]);
+                        res.send({ message: 'Password reset successfully' });
+                    }
+                );
+            } catch {
+                res.status(500).send({ error: 'Server Error' });
+            }
         }
+    );
+});
+
+
+// Me Route
+router.get('/me', authenticateToken, (req, res) => {
+    db.get('SELECT id, email, is_admin, two_fa_enabled FROM users WHERE id = ?', [req.user.id], (err, user) => {
+        if (err || !user) return res.status(404).send({ error: 'User not found' });
+        res.send({ user });
     });
 });
 
