@@ -11,42 +11,73 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
+import { useAuth } from '../../context/AuthContext';
+
 export default function AccountMetrics() {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    // Mock Data for Chart
-    const chartData = [
-        { date: '23-01-2026', equity: 4926, balance: 4926 },
-        { date: '24-01-2026', equity: 4923, balance: 4923 },
-        { date: '25-01-2026', equity: 4923, balance: 4923 },
-        { date: '26-01-2026', equity: 5000, balance: 5000 },
-        { date: '27-01-2026', equity: 4809, balance: 4809 },
-        { date: '28-01-2026', equity: 4966, balance: 4966 },
-        { date: '29-01-2026', equity: 5127, balance: 5127 },
-        { date: '30-01-2026', equity: 4926, balance: 4926 },
-    ];
+    const { token } = useAuth();
+    const [data, setData] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
 
-    const dailySummary = [
-        { date: '30-01-2026', balance: 4926.53, equity: 4926.53, result: -201.01 },
-        { date: '29-01-2026', balance: 5127.54, equity: 5127.54, result: 161.51 },
-        { date: '28-01-2026', balance: 4966.03, equity: 4966.03, result: 156.74 },
-        { date: '27-01-2026', balance: 4809.29, equity: 4809.29, result: -191.30 },
-    ];
+    React.useEffect(() => {
+        fetchMetrics();
+    }, [id]);
+
+    const fetchMetrics = async () => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/trade/account/${id}/metrics`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const result = await res.json();
+                setData(result);
+            }
+        } catch (err) {
+            console.error("Failed to fetch metrics", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center text-secondary">Loading Metrics...</div>;
+    if (!data) return <div className="p-10 text-center text-secondary">Account Not Found</div>;
+
+    const { account, chartData, dailySummary } = data;
+
+    // Objectives Calculation
+    const profitTarget = account.size * 0.10;
+    const currentProfit = (account.equity - account.size);
+    const profitProgress = Math.min(Math.max((currentProfit / profitTarget) * 100, 0), 100);
+
+    const dailyStart = account.daily_start_balance || account.balance;
+    const dailyLossLimit = dailyStart * 0.05;
+    const currentDailyLoss = dailyStart - account.equity;
+    const dailyResult = currentDailyLoss > 0 ? -currentDailyLoss : 0; // Display as negative if loss
+    const dailyProgress = Math.min(Math.max((currentDailyLoss / dailyLossLimit) * 100, 0), 100);
+
+    const maxLossLimit = account.size * 0.10;
+    const currentMaxLoss = account.size - account.equity;
+    const maxLossProgress = Math.min(Math.max((currentMaxLoss / maxLossLimit) * 100, 0), 100);
 
     return (
         <div className="flex flex-col gap-6 h-full">
             {/* HEADER WITH BACK BUTTON */}
             <div className="flex items-center gap-4 mb-2">
-                <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition">
-                    <ArrowLeft size={20} className="text-gray-500" />
+                <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-full transition">
+                    <ArrowLeft size={20} className="text-secondary" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-optivon-primary">Account #{id || '5005622'} <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded ml-2 uppercase font-bold">Breached</span></h1>
+                    <h1 className="text-2xl font-bold text-primary flex items-center gap-3">
+                        Account #{account.id}
+                        {account.status === 'failed' && <span className="text-xs bg-red-500/10 text-red-500 px-2 py-1 rounded border border-red-500/20 uppercase font-bold">Breached</span>}
+                        {account.status === 'active' && <span className="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded border border-emerald-500/20 uppercase font-bold">Active</span>}
+                    </h1>
                 </div>
                 <div className="ml-auto flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-optivon-primary text-white rounded-lg hover:bg-optivon-primary-hover transition"><Share2 size={16} /> Share</button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-optivon-primary text-white rounded-lg hover:bg-optivon-primary-hover transition"><Key size={16} /> Credentials</button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition"><Share2 size={16} /> Share</button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition"><Key size={16} /> Credentials</button>
                 </div>
             </div>
 
@@ -56,52 +87,54 @@ export default function AccountMetrics() {
                 <div className="flex-1 flex flex-col gap-6 min-w-0">
 
                     {/* EQUITY CHART */}
-                    <div className="bg-white dark:bg-optivon-surface p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 h-80">
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
-                            <span className="text-optivon-primary">📈</span> Account Equity
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border h-80">
+                        <h3 className="font-semibold text-primary mb-4 flex items-center gap-2">
+                            <span className="text-accent">📈</span> Account Equity
                         </h3>
                         <ResponsiveContainer width="100%" height="90%">
                             <AreaChart data={chartData}>
                                 <defs>
                                     <linearGradient id="colorEquity" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#cdfe05" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#cdfe05" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} domain={['auto', 'auto']} />
-                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                                <Area type="monotone" dataKey="equity" stroke="#8884d8" fillOpacity={1} fill="url(#colorEquity)" strokeWidth={2} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2a2a35" />
+                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} domain={['auto', 'auto']} />
+                                <Tooltip contentStyle={{ backgroundColor: '#18181b', borderRadius: '8px', border: '1px solid #2a2a35', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.5)', color: '#fff' }} />
+                                <Area type="monotone" dataKey="equity" stroke="#cdfe05" fillOpacity={1} fill="url(#colorEquity)" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
 
                     {/* DAILY SUMMARY TABLE */}
-                    <div className="bg-white dark:bg-optivon-surface p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex-1">
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
-                            <span className="text-optivon-primary">📅</span> Daily Summary
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border flex-1">
+                        <h3 className="font-semibold text-primary mb-4 flex items-center gap-2">
+                            <span className="text-accent">📅</span> Daily Summary
                         </h3>
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="border-b border-gray-100 dark:border-gray-800 text-xs text-gray-500 uppercase">
+                                <tr className="border-b border-border text-xs text-secondary uppercase">
                                     <th className="py-3 font-medium">Date</th>
-                                    <th className="py-3 font-medium">Balance</th>
-                                    <th className="py-3 font-medium">Equity</th>
+                                    <th className="py-3 font-medium">Trades</th>
                                     <th className="py-3 font-medium">Result</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                {dailySummary.map((Row, i) => (
-                                    <tr key={i} className="text-sm">
-                                        <td className="py-3 text-gray-600 dark:text-gray-300 font-medium">{Row.date}</td>
-                                        <td className="py-3 text-gray-900 dark:text-white">${Row.balance.toFixed(2)}</td>
-                                        <td className="py-3 text-gray-900 dark:text-white">${Row.equity.toFixed(2)}</td>
-                                        <td className={`py-3 font-bold ${Row.result >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                            ${Row.result.toFixed(2)}
-                                        </td>
-                                    </tr>
-                                ))}
+                            <tbody className="divide-y divide-border">
+                                {dailySummary.length === 0 ? (
+                                    <tr><td colSpan="3" className="py-4 text-center text-secondary text-sm">No trades yet.</td></tr>
+                                ) : (
+                                    dailySummary.map((Row, i) => (
+                                        <tr key={i} className="text-sm">
+                                            <td className="py-3 text-secondary font-medium font-mono">{Row.date}</td>
+                                            <td className="py-3 text-primary font-mono">{Row.trades}</td>
+                                            <td className={`py-3 font-bold font-mono ${Row.result >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                ${Row.result.toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -112,27 +145,27 @@ export default function AccountMetrics() {
                 <div className="w-96 flex flex-col gap-6">
 
                     {/* ACCOUNT INFO */}
-                    <div className="bg-white dark:bg-optivon-surface p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-4">
-                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-800">
-                            <span className="text-sm text-gray-500">Program</span>
-                            <span className="text-sm font-medium bg-blue-50 text-blue-600 px-2 py-1 rounded">MT5 - 1 Step - Phase 1 - 5k</span>
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-white/5">
+                            <span className="text-sm text-secondary">Program</span>
+                            <span className="text-xs font-bold bg-blue-500/10 text-blue-500 px-2 py-1 rounded border border-blue-500/20">{account.type} - {account.phase === 1 ? 'Phase 1' : 'Funded'}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-800">
-                            <span className="text-sm text-gray-500">Account Size</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-white">$4,926.53</span>
+                        <div className="flex justify-between items-center py-2 border-b border-white/5">
+                            <span className="text-sm text-secondary">Account Size</span>
+                            <span className="text-sm font-bold text-primary font-mono">${account.size.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-800">
-                            <span className="text-sm text-gray-500">Platform</span>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">MetaTrader5</span>
+                        <div className="flex justify-between items-center py-2 border-b border-white/5">
+                            <span className="text-sm text-secondary">Equity</span>
+                            <span className="text-sm font-bold text-primary font-mono">${account.equity.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center py-2">
-                            <span className="text-sm text-gray-500">Start Date</span>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">23/01/2026</span>
+                            <span className="text-sm text-secondary">Start Date</span>
+                            <span className="text-sm font-medium text-primary font-mono">{new Date(account.created_at).toLocaleDateString()}</span>
                         </div>
                     </div>
 
                     {/* PROGRAM OBJECTIVES (Purple Card) */}
-                    <div className="bg-optivon-primary text-white p-6 rounded-xl shadow-lg shadow-purple-500/20 space-y-6">
+                    <div className="bg-accent text-black p-6 rounded-xl shadow-lg shadow-accent/20 space-y-6">
                         <h3 className="font-bold flex items-center gap-2 text-lg">
                             🎯 Program Objectives
                         </h3>
@@ -140,48 +173,56 @@ export default function AccountMetrics() {
                         {/* Profit Target */}
                         <div>
                             <div className="flex justify-between text-sm mb-1">
-                                <span className="opacity-90">Profit Target</span>
+                                <span className="opacity-90 font-medium">Profit Target</span>
                                 <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold">Ongoing</span>
                             </div>
                             <div className="flex justify-between items-end mb-2">
-                                <span className="text-xl font-bold">$500</span>
-                                <span className="text-xs opacity-75">$0 (0.00%)</span>
+                                <span className="text-xl font-black">${profitTarget.toLocaleString()}</span>
+                                <span className="text-xs font-bold opacity-75">${currentProfit.toFixed(2)} ({Math.min((currentProfit / profitTarget) * 100, 100).toFixed(1)}%)</span>
                             </div>
-                            <div className="h-2 bg-black/20 rounded-full overflow-hidden">
-                                <div className="h-full bg-optivon-accent w-0" />
+                            <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                                <div className="h-full bg-black/80" style={{ width: `${profitProgress}%` }} />
                             </div>
                         </div>
 
                         {/* Daily Loss */}
                         <div>
                             <div className="flex justify-between text-sm mb-1">
-                                <span className="opacity-90">Daily Loss</span>
-                                <span className="bg-red-500 text-white px-2 py-0.5 rounded text-xs font-bold shadow-sm">Breached</span>
+                                <span className="opacity-90 font-medium">Daily Loss</span>
+                                {currentDailyLoss > dailyLossLimit ? (
+                                    <span className="bg-red-500 text-white px-2 py-0.5 rounded text-xs font-bold shadow-sm">Breached</span>
+                                ) : (
+                                    <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold">Active</span>
+                                )}
                             </div>
                             <div className="flex justify-between items-end mb-2">
-                                <span className="text-xl font-bold">$200</span>
-                                <span className="text-xs opacity-75">-$201.01 (100.5%)</span>
+                                <span className="text-xl font-black">${dailyLossLimit.toLocaleString()}</span>
+                                <span className="text-xs font-bold opacity-75">-${currentDailyLoss.toFixed(2)}</span>
                             </div>
-                            <div className="h-2 bg-black/20 rounded-full overflow-hidden">
-                                <div className="h-full bg-red-400 w-full" />
+                            <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                                <div className={`h-full ${currentDailyLoss > dailyLossLimit ? 'bg-red-500' : 'bg-red-400'}`} style={{ width: `${dailyProgress}%` }} />
                             </div>
-                            <p className="text-xs mt-1 opacity-70">Daily Loss Limit: $4,927.54</p>
+                            <p className="text-xs mt-1 opacity-70 font-mono">Limit: ${(dailyStart - dailyLossLimit).toLocaleString()}</p>
                         </div>
 
                         {/* Max Loss */}
                         <div>
                             <div className="flex justify-between text-sm mb-1">
-                                <span className="opacity-90">Max Loss</span>
-                                <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold">Ongoing</span>
+                                <span className="opacity-90 font-medium">Max Loss</span>
+                                {currentMaxLoss > maxLossLimit ? (
+                                    <span className="bg-red-500 text-white px-2 py-0.5 rounded text-xs font-bold shadow-sm">Breached</span>
+                                ) : (
+                                    <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold">Ongoing</span>
+                                )}
                             </div>
                             <div className="flex justify-between items-end mb-2">
-                                <span className="text-xl font-bold">$300</span>
-                                <span className="text-xs opacity-75">$73.47 (24.5%)</span>
+                                <span className="text-xl font-black">${maxLossLimit.toLocaleString()}</span>
+                                <span className="text-xs font-bold opacity-75">-${currentMaxLoss.toFixed(2)}</span>
                             </div>
-                            <div className="h-2 bg-black/20 rounded-full overflow-hidden">
-                                <div className="h-full bg-orange-400 w-1/4" />
+                            <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                                <div className={`h-full ${currentMaxLoss > maxLossLimit ? 'bg-red-500' : 'bg-orange-400'}`} style={{ width: `${maxLossProgress}%` }} />
                             </div>
-                            <p className="text-xs mt-1 opacity-70">Max Loss Limit: $4,700</p>
+                            <p className="text-xs mt-1 opacity-70 font-mono">Limit: ${(account.size - maxLossLimit).toLocaleString()}</p>
                         </div>
                     </div>
 

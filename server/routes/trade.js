@@ -133,6 +133,73 @@ router.get('/account/:id', authenticateToken, (req, res) => {
     });
 });
 
+// Get Comprehensive Account Metrics
+router.get('/account/:id/metrics', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    db.get('SELECT * FROM accounts WHERE id = ? AND user_id = ?', [id, userId], (err, account) => {
+        if (err || !account) return res.status(404).send({ error: 'Account not found' });
+
+        // Get Trade History
+        db.all('SELECT * FROM trades WHERE account_id = ? ORDER BY close_time DESC, open_time DESC', [id], (err, trades) => {
+            if (err) return res.status(500).send({ error: 'Failed to fetch trades' });
+
+            // Calculate Daily Summary
+            const dailyStats = {};
+            let runningBalance = account.size; // Start from initial size? Or work backwards from current balance?
+            // Working backwards is harder if we don't have all transactions (deposits/withdrawals).
+            // Let's rely on trade history sum.
+
+            // Build Daily Summary from Trades
+            trades.forEach(trade => {
+                if (trade.status === 'closed' && trade.close_time) {
+                    const date = new Date(trade.close_time).toLocaleDateString();
+                    if (!dailyStats[date]) {
+                        dailyStats[date] = { date, result: 0, trades: 0 };
+                    }
+                    dailyStats[date].result += trade.pnl;
+                    dailyStats[date].trades += 1;
+                }
+            });
+
+            // Convert to Array and Sort
+            const dailySummary = Object.values(dailyStats).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Chart Data (Equity Curve)
+            // Simplified: Start with current balance and subtract PnL backwards?
+            // Or start with Size and add PnL forwards?
+            // Let's do Forwards from Account Start Date
+            let currentEquity = account.size;
+            const chartData = [{ date: new Date(account.created_at).toLocaleDateString(), equity: account.size }];
+
+            // We need to replay trades chronologically for the chart
+            const chronologyTrades = [...trades].sort((a, b) => new Date(a.close_time || a.open_time) - new Date(b.close_time || b.open_time));
+
+            chronologyTrades.forEach(t => {
+                if (t.status === 'closed') {
+                    currentEquity += t.pnl;
+                    const date = new Date(t.close_time).toLocaleDateString();
+                    // Update or Add entry for this date
+                    const existing = chartData.find(d => d.date === date);
+                    if (existing) {
+                        existing.equity = currentEquity;
+                    } else {
+                        chartData.push({ date, equity: currentEquity });
+                    }
+                }
+            });
+
+            res.send({
+                account,
+                trades,
+                dailySummary,
+                chartData
+            });
+        });
+    });
+});
+
 // Get All Positions (User level)
 router.get('/positions', authenticateToken, (req, res) => {
     // Join trades with accounts to verify user ownership

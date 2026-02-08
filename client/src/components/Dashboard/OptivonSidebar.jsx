@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { NavLink } from 'react-router-dom';
 import {
     CreditCard,
@@ -17,6 +18,8 @@ import {
 } from 'lucide-react';
 
 export default function OptivonSidebar() {
+    const { user } = useAuth();
+
     const navGroups = [
         {
             label: null, // Main group has no label
@@ -43,6 +46,16 @@ export default function OptivonSidebar() {
             ]
         }
     ];
+
+    // Inject Admin Link if Authorized
+    if (user?.email === 'deepaknairm10@gmail.com' || user?.isAdmin) {
+        navGroups.push({
+            label: 'ADMINISTRATION',
+            items: [
+                { name: 'Admin Panel', path: '/admin', icon: Monitor }
+            ]
+        });
+    }
 
     return (
         <div className="w-64 h-full bg-brand-dark flex flex-col text-white flex-shrink-0 border-r border-white/5">

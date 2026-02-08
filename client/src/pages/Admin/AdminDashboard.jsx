@@ -1,32 +1,73 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Users, DollarSign, Activity, AlertTriangle } from 'lucide-react';
 
 export default function AdminDashboard() {
+    const [stats, setStats] = React.useState({
+        totalUsers: 0,
+        activeChallenges: 0,
+        failedAccounts: 0,
+        revenue: 0,
+        recentUsers: []
+    });
+    const [loading, setLoading] = React.useState(true);
+    const { token } = useAuth();
+
+    React.useEffect(() => {
+        fetchStats();
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/admin/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch admin stats", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center text-gray-500">Loading Dashboard...</div>;
+
     return (
         <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-black text-white mb-8">System Overview</h1>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                <StatCard label="Total Users" value="1,245" change="+12%" icon={Users} color="blue" />
-                <StatCard label="Active Challenges" value="342" change="+5%" icon={Activity} color="lime" />
-                <StatCard label="Revenue (MTD)" value="₹45.2L" change="+18%" icon={DollarSign} color="green" />
-                <StatCard label="Flagged Accounts" value="12" change="-2%" icon={AlertTriangle} color="red" />
+                <StatCard label="Total Users" value={stats.totalUsers} change="+2 Today" icon={Users} color="blue" />
+                <StatCard label="Active Challenges" value={stats.activeChallenges} change="Live" icon={Activity} color="lime" />
+                <StatCard label="Total Revenue" value={`$${stats.revenue.toLocaleString()}`} change="Gross" icon={DollarSign} color="green" />
+                <StatCard label="Failed Accounts" value={stats.failedAccounts} change="Total" icon={AlertTriangle} color="red" />
             </div>
 
-            {/* Recent Activity Placeholder */}
+            {/* Recent Activity */}
             <div className="bg-[#12121a] rounded-2xl border border-white/5 p-6">
-                <h2 className="text-xl font-bold mb-4">Recent System Activity</h2>
+                <h2 className="text-xl font-bold mb-4">Recent User Registrations</h2>
                 <div className="space-y-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                            <div className="flex items-center gap-4">
-                                <div className="w-2 h-2 bg-brand-lime rounded-full" />
-                                <span className="text-sm text-gray-300">New user registration: <span className="text-white font-mono">user_{1000 + i}@optivon.com</span></span>
+                    {stats.recentUsers && stats.recentUsers.length > 0 ? (
+                        stats.recentUsers.map((user, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-2 h-2 bg-brand-lime rounded-full" />
+                                    <span className="text-sm text-gray-300">
+                                        New user: <span className="text-white font-mono">{user.email}</span>
+                                    </span>
+                                </div>
+                                <span className="text-xs text-gray-500 font-mono">
+                                    {new Date(user.created_at).toLocaleString()}
+                                </span>
                             </div>
-                            <span className="text-xs text-gray-500 font-mono">2 mins ago</span>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <div className="text-gray-500 text-sm">No recent activity.</div>
+                    )}
                 </div>
             </div>
         </div>
