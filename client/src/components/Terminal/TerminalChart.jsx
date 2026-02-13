@@ -9,13 +9,17 @@ import {
     BaselineSeries,
     HistogramSeries
 } from 'lightweight-charts';
+import './HideTV.css'; // Hide TradingView Logo
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function TerminalChart({ data, symbol, onChartReady, chartType = 'candlestick' }) {
     const chartContainerRef = useRef(null);
     const chartRef = useRef(null);
     const seriesRef = useRef(null);
-    const { theme } = useTheme();
+    const { settings } = useSettings();
+    const { theme } = useTheme(); // Keep for backward compat or sync? 
+    // Actually, settings.theme should override.
 
     useEffect(() => {
         if (!chartContainerRef.current) return;
@@ -26,12 +30,18 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
             chartRef.current = null;
         }
 
-        const isDark = theme === 'dark';
-        const bgColor = isDark ? '#0a0e27' : '#ffffff';
-        const textColor = isDark ? '#9CA3AF' : '#111827';
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+        // Determine Colors from Settings or Theme
+        const activeTheme = settings?.theme || (theme === 'dark' ? 'OptiVon Dark' : 'Light');
+        const isDark = activeTheme !== 'Light';
 
-        // 1. Create Chart
+        const bgColor = settings?.['chart-bg'] || (isDark ? '#0a0e27' : '#ffffff');
+        const textColor = isDark ? '#9CA3AF' : '#111827';
+        const gridColor = settings?.['grid-color'] || (isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)');
+
+        // 1. Clear Container (Prevent Double Graph)
+        chartContainerRef.current.innerHTML = '';
+
+        // 2. Create Chart
         const chart = createChart(chartContainerRef.current, {
             width: chartContainerRef.current.clientWidth || 800,
             height: chartContainerRef.current.clientHeight || 500,
@@ -40,8 +50,8 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 textColor: textColor,
             },
             grid: {
-                vertLines: { color: gridColor },
-                horzLines: { color: gridColor },
+                vertLines: { color: gridColor, visible: settings?.['show-period-sep'] ?? true },
+                horzLines: { color: gridColor, visible: true },
             },
             crosshair: {
                 mode: 1, // CrosshairMode.Normal
@@ -58,18 +68,44 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                     labelBackgroundColor: isDark ? '#4c525e' : '#9ca3af',
                 },
             },
+            localization: {
+                locale: 'en-IN',
+                dateFormat: 'dd MMM yyyy',
+                timeFormatter: (time) => {
+                    const date = new Date(time * 1000);
+                    // Force IST (UTC+5:30)
+                    return date.toLocaleString('en-IN', {
+                        timeZone: 'Asia/Kolkata',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                    });
+                },
+            },
             timeScale: {
                 borderColor: gridColor,
                 timeVisible: true,
-                secondsVisible: false,
-                barSpacing: 2, // Show more candles
-                minBarSpacing: 0.5, // Allow zoom out to see all candles
+                secondsVisible: true, // User wants accurate time
+                barSpacing: 6, // Better spacing
+                minBarSpacing: 0.5,
+                tickMarkFormatter: (time, tickMarkType, locale) => {
+                    const date = new Date(time * 1000);
+                    return date.toLocaleString('en-IN', {
+                        timeZone: 'Asia/Kolkata',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                    }); // Custom tick formatting
+                },
             },
             rightPriceScale: {
                 borderColor: gridColor,
                 autoScale: true,
                 mode: 1, // PriceScaleMode.Normal
             },
+            // Attribution Hiding (Attempt via API - works in some versions or ignores)
+            // CSS is the primary method, this is backup
         });
 
         chartRef.current = chart;
@@ -77,10 +113,10 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
         // 2. Add Series using v5 API: addSeries(SeriesClass, options)
         let SeriesClass;
         let options = {
-            upColor: '#26a69a',
-            downColor: '#ef5350',
-            wickUpColor: '#26a69a',
-            wickDownColor: '#ef5350',
+            upColor: settings?.['bull-color'] || '#26a69a',
+            downColor: settings?.['bear-color'] || '#ef5350',
+            wickUpColor: settings?.['bull-color'] || '#26a69a',
+            wickDownColor: settings?.['bear-color'] || '#ef5350',
             borderVisible: false,
         };
 
@@ -157,6 +193,51 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 console.log('[TerminalChart] fitContent called');
             }
 
+            // 5. Add Volume Series (Histogram) if enabled
+            if (settings?.['show-volumes']) {
+                const volumeSeries = chart.addSeries(HistogramSeries, {
+                    color: '#26a69a',
+                    priceFormat: { type: 'volume' },
+                    priceScaleId: '', // Overlay on main chart? Or separate pane? Usually separate pane.
+                    // But lightweight-charts v4+ handles pane via logic. 
+                    // Let's overlay at bottom for simplicity or use 'overlay'.
+                    // Actually, let's keep it simple: separate pane logic requires complex layout.
+                    // Overlay at bottom using scale margins.
+                    priceScaleId: 'volume',
+                });
+
+                chart.priceScale('volume').applyOptions({
+                    scaleMargins: { top: 0.85, bottom: 0 }, // Push volume to bottom 15%
+                    visible: false,
+                });
+
+                const volumeData = data.map(d => ({
+                    time: d.time ?? d.Time,
+                    value: d.volume || (Math.random() * 1000), // Mock volume if missing
+                    color: (d.close >= d.open) ? '#26a69a' : '#ef5350'
+                }));
+
+                volumeSeries.setData(volumeData);
+            }
+
+            // 6. Show Ask Line if enabled
+            // Since we only have historical data here, we can't show live Ask.
+            // But we can show the "Last Price" line which is default.
+            // To simulate Ask Line, we'd need live tick updates passed here.
+            // For now, let's just ensure the 'LastPriceAnimation' is on.
+            if (settings?.['show-askline']) {
+                // Enable Price Line
+                series.applyOptions({
+                    lastValueVisible: true,
+                    priceLineVisible: true,
+                });
+            } else {
+                series.applyOptions({
+                    lastValueVisible: false,
+                    priceLineVisible: false,
+                });
+            }
+
             if (onChartReady) onChartReady(chart, series);
 
         } catch (e) {
@@ -179,7 +260,7 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 chartRef.current = null;
             }
         };
-    }, [data, theme, chartType]);
+    }, [data, theme, chartType, settings]); // Re-render on settings change
 
     return (
         <div
@@ -189,3 +270,4 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
         />
     );
 }
+

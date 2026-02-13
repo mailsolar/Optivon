@@ -12,6 +12,7 @@ import { useToast } from '../../context/ToastContext';
 import { useAlerts } from '../../context/AlertContext';
 import { RiskManagementProvider, useRiskManagement, RiskStatusBanner } from '../../context/RiskManagementContext';
 import { AlgoProvider } from '../../context/AlgoContext';
+import { io } from 'socket.io-client';
 
 function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccount, onTrade }) {
     const { addToast } = useToast();
@@ -38,80 +39,96 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     const chartAPI = useRef(null);
     const seriesAPI = useRef(null);
 
-    // 1. WebSocket / EventSource for Price Updates
-    // 1. WebSocket / EventSource for Price Updates
+    // 1. WebSocket / Socket.IO for Price Updates
     // We use a Ref to track the "Live" candle so we don't depend on stale closures
     const activeBarRef = useRef(null);
+    const socketRef = useRef(null);
 
     // Sync Ref with History when chartData loads initially
     useEffect(() => {
         if (chartData && chartData.length > 0) {
             activeBarRef.current = chartData[chartData.length - 1];
+        } else {
+            activeBarRef.current = null;
         }
     }, [chartData]);
 
     useEffect(() => {
-        const eventSource = new EventSource('http://localhost:5000/api/market/stream');
+        // Connect Socket.IO
+        // Use a persistent connection or recreate on symbol change? Recreate is safer to avoid leaks if not managed well.
+        // Actually best practice is one socket connection, join rooms. But for simplicity here:
 
-        eventSource.onmessage = (event) => {
-            try {
-                const tick = JSON.parse(event.data);
-                if (tick && tick.symbol) {
-                    setQuotes(prev => ({ ...prev, [tick.symbol]: tick }));
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+        }
 
-                    // Only process chart updates if this is the selected symbol AND chart is ready
-                    if (tick.symbol === selectedSymbol && seriesAPI.current) {
-                        const tickTime = Math.floor(new Date(tick.timestamp).getTime() / 1000); // Current Tick Unix
-                        const price = tick.ltp;
+        const newSocket = io(window.location.origin.replace('5173', '5000'), {
+            path: '/socket.io'
+        });
+        socketRef.current = newSocket;
 
-                        // Initialize if missing (rare, but possible if history empty)
-                        if (!activeBarRef.current) {
-                            activeBarRef.current = {
-                                time: tickTime,
-                                open: price, high: price, low: price, close: price
-                            };
-                            seriesAPI.current.update(activeBarRef.current);
-                            return;
-                        }
+        newSocket.on('connect', () => {
+            console.log('[Terminal] Socket Connected');
+            newSocket.emit('subscribe', selectedSymbol);
+        });
 
-                        const currentBar = activeBarRef.current;
-                        const barTime = currentBar.time; // This is the start of the current bar (e.g. 12:00:00)
+        newSocket.on('stock_update', (tick) => {
+            if (tick && tick.symbol) {
+                // Update Quotes (for Header/Panel)
+                setQuotes(prev => ({ ...prev, [tick.symbol]: tick }));
 
-                        // Timeframe logic (Assuming 1 Minute for now)
-                        // If tickTime is in the NEXT minute, we close current and start new
-                        // Note: TerminalChart expects seconds if we are using TimeScale
-                        const isNewBar = tickTime >= barTime + 60;
+                // Process Chart Update
+                if (tick.symbol === selectedSymbol && seriesAPI.current) {
+                    const tickTime = Math.floor(tick.time || (Date.now() / 1000));
+                    const price = tick.ltp;
 
-                        if (isNewBar) {
-                            // CREATE NEW CANDLE
-                            const newBar = {
-                                time: Math.floor(tickTime / 60) * 60, // Snap to minute grid
-                                open: currentBar.close, // Open at previous close (gapless)
-                                high: price,
-                                low: price,
-                                close: price
-                            };
-                            activeBarRef.current = newBar;
-                            seriesAPI.current.update(newBar);
-                        } else {
-                            // UPDATE EXISTING CANDLE
-                            const updatedBar = {
-                                ...currentBar,
-                                high: Math.max(currentBar.high, price),
-                                low: Math.min(currentBar.low, price),
-                                close: price
-                            };
-                            activeBarRef.current = updatedBar;
-                            seriesAPI.current.update(updatedBar);
-                        }
+                    // Initialize if missing (rare, but possible if history empty)
+                    if (!activeBarRef.current) {
+                        activeBarRef.current = {
+                            time: tickTime,
+                            open: price, high: price, low: price, close: price
+                        };
+                        seriesAPI.current.update(activeBarRef.current);
+                        return;
+                    }
+
+                    const currentBar = activeBarRef.current;
+                    const barTime = currentBar.time; // This is the start of the current bar (e.g. 12:00:00)
+
+                    // Timeframe logic (Assuming 1 Minute for now)
+                    // If tickTime is in the NEXT minute, we close current and start new
+                    const isNewBar = tickTime >= barTime + 60;
+
+                    if (isNewBar) {
+                        // CREATE NEW CANDLE
+                        const newBar = {
+                            time: Math.floor(tickTime / 60) * 60, // Snap to minute grid
+                            open: currentBar.close, // Open at previous close (gapless)
+                            high: price,
+                            low: price,
+                            close: price
+                        };
+                        activeBarRef.current = newBar;
+                        seriesAPI.current.update(newBar);
+                    } else {
+                        // UPDATE EXISTING CANDLE
+                        const updatedBar = {
+                            ...currentBar,
+                            high: Math.max(currentBar.high, price),
+                            low: Math.min(currentBar.low, price),
+                            close: price
+                        };
+                        activeBarRef.current = updatedBar;
+                        seriesAPI.current.update(updatedBar);
                     }
                 }
-            } catch (e) {
-                console.warn("Tick Error:", e);
             }
+        });
+
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
         };
-        return () => eventSource.close();
-    }, [selectedSymbol]); // Remove chartData dependency so we don't reconnect constantly
+    }, [selectedSymbol]);
 
     // 2. Fetch Historical Data & Account State
     const fetchData = useCallback(async () => {
@@ -119,9 +136,10 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             const token = localStorage.getItem('token');
             const accId = account?.id;
 
-            // Always fetch chart data, even without account
-            console.log('[Layout] Fetching history for', selectedSymbol);
-            const dataRes = await fetch(`http://localhost:5000/api/market/history/${selectedSymbol}?timeframe=${timeframe}`);
+            // Fetch Upstox History
+            console.log('[Layout] Fetching Upstox history for', selectedSymbol);
+            // Use new Upstox API
+            const dataRes = await fetch(`/api/upstox/intraday?symbol=${selectedSymbol}`);
 
             if (dataRes.ok) {
                 const history = await dataRes.json();
@@ -129,16 +147,19 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                 if (history && history.length > 0) {
                     setChartData(history);
                 } else {
-                    throw new Error("Empty Data");
+                    // Start empty or handle gracefully
+                    setChartData([]);
                 }
+            } else {
+                throw new Error("Failed to fetch Upstox data");
             }
 
             // Fetch positions and account only if logged in
             if (!accId) return;
 
             const [posRes, accRes] = await Promise.all([
-                fetch('http://localhost:5000/api/trade/positions', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`http://localhost:5000/api/trade/account/${accId}`, { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch('/api/trade/positions', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`/api/trade/account/${accId}`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             if (posRes.ok) {
@@ -152,38 +173,18 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             }
         } catch (e) {
             console.error("Fetch Data Error:", e);
-            // Fallback: Generate mock data if API fails to prevent blank screen
-            // Fallback: Generate mock data if API fails to prevent blank screen
-            const now = Math.floor(Date.now() / 1000);
-            const fallbackData = [];
-            let price = selectedSymbol === 'NIFTY' ? 22000 : 46000;
-            const BAR_INTERVAL = 3; // Match the Live "Hyper Speed" interval
-
-            for (let i = 300; i >= 0; i--) {
-                const time = now - (i * BAR_INTERVAL);
-                // Dynamic volatility for history seeds
-                const change = (Math.random() - 0.5) * (price * 0.0005);
-                const close = price + change;
-                const high = Math.max(price, close) + Math.random() * 2;
-                const low = Math.min(price, close) - Math.random() * 2;
-
-                fallbackData.push({
-                    time,
-                    open: price,
-                    high,
-                    low,
-                    close
-                });
-                price = close;
-            }
-            setChartData(fallbackData);
+            // Fallback mock data only if CRITICAL failure to prevent blank screen?
+            // User likely wants to know if Upstox fails.
+            // Let's NOT use fallback data yet so user sees "No Data" if API fails,
+            // which confirms we aren't faking it anymore.
+            setChartData([]);
         }
     }, [selectedSymbol, timeframe, account?.id]);
 
     useEffect(() => {
         // Initial fetch only
         fetchData();
-        // Polling removed to rely on SSE streaming for smoother charts
+        // Polling removed to rely on Socket.IO
     }, [fetchData]);
 
     // 3. Trade Handlers
@@ -204,7 +205,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             const endpoint = isClose ? '/api/trade/close' : '/api/trade/place';
             const body = isClose ? { tradeId: symbol.id } : { accountId: account.id, symbol, side, lots, type, price: limitPrice, sl, tp };
 
-            const res = await fetch(`http://localhost:5000${endpoint}`, {
+            const res = await fetch(`${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -216,7 +217,8 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             const result = await res.json();
             if (res.ok) {
                 addToast(isClose ? 'Position Closed' : 'Order Executed', 'success');
-                fetchData();
+                // Remove fetchData() to prevent chart reset. Live updates handle price.
+                // Account update happens via parent props or SSE eventually.
                 if (onTrade) onTrade();
             } else {
                 addToast(result.error || 'Execution Error', 'error');
@@ -388,7 +390,7 @@ function TerminalLayoutStateWrapper(props) {
                     const token = localStorage.getItem('token');
                     if (!token) return;
 
-                    const res = await fetch('http://localhost:5000/api/trade/accounts', {
+                    const res = await fetch('/api/trade/accounts', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
 
@@ -430,3 +432,4 @@ function TerminalLayoutStateWrapper(props) {
         </RiskManagementProvider>
     );
 }
+

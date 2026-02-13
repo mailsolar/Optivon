@@ -188,3 +188,4 @@ function SpecItem({ label, value, subValue, highlight }) {
         </motion.div>
     );
 }
+

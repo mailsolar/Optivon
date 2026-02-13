@@ -4,24 +4,46 @@ const nodemailer = require('nodemailer');
 // In production, this would be replaced by actual SMTP credentials
 let transporter;
 
-const initEmailService = async () => {
-    try {
-        const testAccount = await nodemailer.createTestAccount();
-
-        transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false, // true for 465, false for other ports
+// Create transport based on service or host
+const createTransporter = () => {
+    // 1. Check if using Gmail Service explicitly (simplifies config)
+    if (process.env.EMAIL_HOST && process.env.EMAIL_HOST.includes('gmail')) {
+        return nodemailer.createTransport({
+            service: 'gmail',
             auth: {
-                user: testAccount.user, // generated ethereal user
-                pass: testAccount.pass, // generated ethereal password
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : '', // Remove spaces
             },
         });
+    }
 
-        console.log("Email Service Initialized (Mock/Ethereal mode)");
-        console.log("Mock Account User:", testAccount.user);
+    // 2. Generic SMTP
+    return nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || "smtp.gmail.com",
+        port: Number(process.env.EMAIL_PORT) || 587,
+        secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for others
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : '', // Remove spaces
+        },
+    });
+};
+
+const initEmailService = async () => {
+    try {
+        // Use environment variables if available
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            transporter = createTransporter();
+
+            // Verify connection configuration
+            await transporter.verify();
+            console.log("Email Service Initialized (Production Mode) - Connection Verified");
+        } else {
+            console.log("Email Service Initialized (Dev/Mock Mode - Check Server Logs for OTP)");
+        }
     } catch (err) {
-        console.error("Failed to default email service", err);
+        console.error("Failed to initialize email service:", err.message);
+        console.error("Check your EMAIL_USER and EMAIL_PASS in .env");
     }
 };
 
@@ -37,16 +59,13 @@ const sendEmail = async (to, subject, html) => {
 
     try {
         const info = await transporter.sendMail({
-            from: '"Optivon Security" <security@optivon.com>',
+            from: `"Optivon Security" <${process.env.EMAIL_USER}>`, // Use authenticated email
             to,
             subject,
             html,
         });
 
         console.log("Message sent: %s", info.messageId);
-        // Preview only available when sending through an Ethereal account
-        const previewUrl = nodemailer.getTestMessageUrl(info);
-        console.log("Preview URL: %s", previewUrl);
         return info;
     } catch (error) {
         console.error("Error sending email:", error);

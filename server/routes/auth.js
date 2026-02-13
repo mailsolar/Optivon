@@ -143,7 +143,8 @@ router.post('/forgot-password', (req, res) => {
                 if (err) return res.status(500).send({ error: 'Database error' });
 
                 // Construct Link (User will be redirected to this frontend route)
-                const link = `http://localhost:5173/reset-password?email=${email}&code=${otp}`;
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                const link = `${frontendUrl}/reset-password?email=${email}&code=${otp}`;
                 sendPasswordReset(email, link)
                     .then(() => res.send({ message: 'Recovery link sent to email', devLink: link })) // Dev Mode: Return Link
                     .catch(() => res.status(500).send({ error: 'Failed to send email' }));
@@ -186,10 +187,22 @@ router.post('/reset-password', async (req, res) => {
 
 // Me Route
 router.get('/me', authenticateToken, (req, res) => {
-    db.get('SELECT id, email, is_admin, two_fa_enabled FROM users WHERE id = ?', [req.user.id], (err, user) => {
-        if (err || !user) return res.status(404).send({ error: 'User not found' });
-        res.send({ user });
-    });
+    try {
+        db.get('SELECT id, email, is_admin, two_fa_enabled FROM users WHERE id = ?', [req.user.id], (err, user) => {
+            if (err) {
+                console.error('[Auth] /me DB Error:', err);
+                return res.status(500).send({ error: 'Database error' });
+            }
+            if (!user) {
+                console.warn('[Auth] /me User not found for ID:', req.user.id);
+                return res.status(404).send({ error: 'User not found' });
+            }
+            res.send({ user });
+        });
+    } catch (e) {
+        console.error('[Auth] /me Unexpected Error:', e);
+        res.status(500).send({ error: 'Server Error' });
+    }
 });
 
 module.exports = router;

@@ -7,6 +7,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('Could not connect to database', err);
     } else {
         console.log('Connected to SQLite database');
+        db.configure('busyTimeout', 3000); // Wait 3s before throwing SQLITE_BUSY
         initializeTables();
     }
 });
@@ -37,8 +38,22 @@ function initializeTables() {
             status TEXT DEFAULT 'pending', -- pending, active, expired, failed, passed
             session_start DATETIME, -- timestamp when launched
             session_expires DATETIME, -- timestamp when session ends
+            last_payout_date DATETIME, -- Added for Funded Payout Tracking
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(user_id) REFERENCES users(id)
+        )`);
+
+        // Payouts (Funded Account Rules)
+        db.run(`CREATE TABLE IF NOT EXISTS payouts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id INTEGER,
+            amount REAL, -- Total Profit Withdrawn
+            trader_share REAL, -- 80%
+            firm_share REAL, -- 20%
+            status TEXT, -- pending, processed
+            request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            processed_date DATETIME,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
         )`);
 
         // Trades

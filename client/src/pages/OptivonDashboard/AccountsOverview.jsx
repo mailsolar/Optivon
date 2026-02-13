@@ -4,6 +4,7 @@ import { ChevronRight, Key, Share2, ArrowRight, X, AlertCircle } from 'lucide-re
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { API_BASE_URL } from '../../config';
 
 // Simple Modal for Purchasing Challenge
 const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
@@ -88,7 +89,7 @@ export default function AccountsOverview() {
     const fetchAccounts = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/trade/accounts', {
+            const res = await fetch(`${API_BASE_URL}/api/trade/accounts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -108,7 +109,7 @@ export default function AccountsOverview() {
 
     const handlePurchase = async (pkg) => {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/trade/purchase', {
+        const res = await fetch(`${API_BASE_URL}/api/trade/purchase`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -132,7 +133,7 @@ export default function AccountsOverview() {
         if (acc.status === 'pending') {
             // Launch Logic
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/trade/launch', {
+            const res = await fetch(`${API_BASE_URL}/api/trade/launch`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -285,3 +286,4 @@ export default function AccountsOverview() {
         </div>
     );
 }
+

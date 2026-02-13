@@ -175,3 +175,4 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
         </div>
     );
 }
+

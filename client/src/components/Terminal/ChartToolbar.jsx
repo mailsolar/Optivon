@@ -79,3 +79,4 @@ export default function ChartToolbar({ activeTool, setActiveTool, onOpenAlerts }
         </div>
     );
 }
+

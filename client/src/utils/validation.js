@@ -60,3 +60,4 @@ export const calculateSLTP = (orderType, entryPrice, slPercent, tpPercent) => {
         takeProfit: takeProfit ? parseFloat(takeProfit.toFixed(2)) : null
     };
 };
+

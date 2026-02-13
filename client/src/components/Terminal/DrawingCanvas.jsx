@@ -139,3 +139,4 @@ export default function DrawingCanvas({ chart, series, activeTool, width, height
         </svg>
     );
 }
+

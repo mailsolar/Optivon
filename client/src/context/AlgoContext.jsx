@@ -37,7 +37,7 @@ export function AlgoProvider({ children }) {
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
-            const res = await fetch('http://localhost:5000/api/algo/bots', {
+            const res = await fetch('/api/algo/bots', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -77,7 +77,7 @@ export function AlgoProvider({ children }) {
             }
 
             const strategy = availableStrategies.find(s => s.id === strategyId);
-            const res = await fetch('http://localhost:5000/api/algo/start', {
+            const res = await fetch('/api/algo/start', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export function AlgoProvider({ children }) {
     const stopBot = async (botId) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/algo/stop', {
+            const res = await fetch('/api/algo/stop', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -132,3 +132,4 @@ export function AlgoProvider({ children }) {
 }
 
 export const useAlgo = () => useContext(AlgoContext);
+

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Lock, ArrowRight, CheckCircle } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { API_BASE_URL } from '../config';
 
 export default function ResetPassword() {
     const [searchParams] = useSearchParams();
@@ -28,7 +29,7 @@ export default function ResetPassword() {
 
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/auth/reset-password', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, code, newPassword })
@@ -131,3 +132,4 @@ export default function ResetPassword() {
         </div>
     );
 }
+

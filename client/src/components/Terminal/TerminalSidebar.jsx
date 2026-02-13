@@ -50,3 +50,4 @@ export default function TerminalSidebar({ quotes, positions, account, onClosePos
         </div>
     );
 }
+

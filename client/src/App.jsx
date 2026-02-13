@@ -29,6 +29,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard'
 import Users from './pages/Admin/Users'
 import RiskMonitor from './pages/Admin/RiskMonitor'
 import AdminSettings from './pages/Admin/Settings'
+import UpstoxChart from './components/UpstoxChart'
 
 function AppRoutes() {
     const { user, login } = useAuth();
@@ -80,6 +81,7 @@ function AppRoutes() {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/rules" element={<Rules />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/live-test" element={<UpstoxChart />} />
 
                 {/* ADMIN ROUTES */}
                 <Route path="/admin" element={
@@ -119,3 +121,4 @@ export default function App() {
         </ErrorBoundary>
     )
 }
+

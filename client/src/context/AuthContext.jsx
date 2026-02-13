@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config';
 
 const AuthContext = createContext(null);
 
@@ -10,7 +11,7 @@ export const AuthProvider = ({ children }) => {
         // Check for existing session
         const token = localStorage.getItem('token');
         if (token) {
-            fetch('http://localhost:5000/api/auth/me', {
+            fetch(`${API_BASE_URL}/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -57,3 +58,4 @@ export const useAuth = () => {
     }
     return context;
 };
+

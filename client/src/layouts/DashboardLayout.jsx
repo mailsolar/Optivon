@@ -15,3 +15,4 @@ export default function DashboardLayout({ user, onLogout, children }) {
         </div>
     );
 }
+

@@ -93,3 +93,4 @@ export default function Positions({ positions, quotes, onClosePosition }) {
         </div>
     );
 }
+

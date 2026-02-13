@@ -22,8 +22,10 @@
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.11",
     "qrcode": "^1.5.4",
+    "socket.io": "^4.8.3",
     "speakeasy": "^2.0.0",
     "sqlite3": "^5.1.7",
+    "upstox-js-sdk": "^2.21.0",
     "uuid": "^13.0.0"
   }
 }

@@ -18,9 +18,9 @@ export default function AdminPanel({ user, onLogout }) {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             const [uRes, vRes, aRes] = await Promise.all([
-                fetch('http://localhost:5000/api/admin/users', { headers }),
-                fetch('http://localhost:5000/api/admin/violations', { headers }),
-                fetch('http://localhost:5000/api/admin/accounts', { headers })
+                fetch('/api/admin/users', { headers }),
+                fetch('/api/admin/violations', { headers }),
+                fetch('/api/admin/accounts', { headers })
             ]);
 
             if (uRes.ok) setUsers(await uRes.json());
@@ -82,3 +82,4 @@ export default function AdminPanel({ user, onLogout }) {
         </div>
     );
 }
+

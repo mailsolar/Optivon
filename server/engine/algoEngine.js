@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
-const market = require('./market');
+// const market = require('./market'); // Removed
+const upstoxService = require('../services/upstox');
 const orderManager = require('./orderManager');
 const db = require('../database');
 
@@ -13,9 +14,11 @@ class AlgoEngine {
 
     init() {
         console.log("Algo Engine Initialized");
-        market.on('tick', async (tick) => {
-            await this.onTick(tick);
-        });
+        // market.on('tick', async (tick) => {
+        //     await this.onTick(tick);
+        // });
+
+        // TODO: Wire up to UpstoxService polling if we want Algos to run on Real Data
     }
 
     async onTick(tick) {
@@ -58,9 +61,8 @@ class AlgoEngine {
                 await this.runRSIStrategy(bot, history, tick.ltp, currentTrade);
             } else if (bot.strategy === 'STRAT_EMA_CROSS') {
                 await this.runEMAStrategy(bot, history, tick.ltp, currentTrade);
-            } else if (bot.strategy === 'STRAT_FLUX_GRID') {
-                await this.runGridStrategy(bot, history, tick.ltp, currentTrade);
             }
+            // GRID STRATEGY REMOVED (Prohibited Rule)
 
         } catch (err) {
             console.error(`Bot ${bot.id} Error:`, err);
@@ -121,29 +123,7 @@ class AlgoEngine {
         // We use prev tick calculation here (simple slicing)
     }
 
-    async runGridStrategy(bot, history, currentPrice, currentTrade) {
-        // Flux Grid: Simple mean reversion
-        // If price moves X% away from start, fade it.
-        if (!bot.startPrice) bot.startPrice = currentPrice;
 
-        const diffPct = (currentPrice - bot.startPrice) / bot.startPrice;
-        const gridStep = 0.001; // 0.1%
-
-        if (!bot.currentTradeId) {
-            if (diffPct < -gridStep) await this.executeBotTrade(bot, 'buy', 1); // Drop -> Buy
-            if (diffPct > gridStep) await this.executeBotTrade(bot, 'sell', 1); // Rise -> Sell
-        } else if (currentTrade) {
-            // Take profit quickly (0.05%)
-            const profitPct = currentTrade.side === 'buy'
-                ? (currentPrice - currentTrade.entry_price) / currentTrade.entry_price
-                : (currentTrade.entry_price - currentPrice) / currentTrade.entry_price;
-
-            if (profitPct > 0.0005) {
-                await this.closeBotTrade(bot, currentTrade, currentPrice, 'GRID_PROFIT');
-                bot.startPrice = currentPrice; // Reset grid center
-            }
-        }
-    }
 
     // --- EXEUCTION ---
 
@@ -152,10 +132,19 @@ class AlgoEngine {
             // Default params based on risk level
             // Aggressive: 1 lot, Conservative: 0.5 (Assume lots passed are correct)
             // Add tight SL/TP by default
-            const quote = market.getQuote(bot.symbol);
-            if (!quote) return;
+            // const quote = market.getQuote(bot.symbol);
+            // if (!quote) return;
+            // const price = side === 'buy' ? quote.ask : quote.bid;
 
-            const price = side === 'buy' ? quote.ask : quote.bid;
+            // Temporary: Fetch price or skip
+            // Since we disabled the tick loop, this executeBotTrade won't be called automatically.
+            // But if called manually:
+            let price = 0;
+            try {
+                price = await orderManager.fetchPrice(bot.symbol);
+            } catch (e) { }
+
+            if (!price) return;
 
             // Auto SL/TP
             const slDist = price * 0.005; // 0.5% SL

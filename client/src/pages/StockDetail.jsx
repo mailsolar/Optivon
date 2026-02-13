@@ -154,3 +154,4 @@ const StockDetail = () => {
 };
 
 export default StockDetail;
+

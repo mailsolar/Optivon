@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ShieldCheck, Sparkles, CreditCard, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { SIZES, DATA, MODELS } from '../components/Landing/ChallengeSelector';
-
+import { API_BASE_URL } from '../config';
 
 export default function Checkout() {
     const location = useLocation();
@@ -39,7 +39,7 @@ export default function Checkout() {
         if (!email || !password) return alert("Please fill in email and password");
         setIsLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/auth/send-otp-register', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/send-otp-register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -61,7 +61,7 @@ export default function Checkout() {
     const handleVerifyAndRegister = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/auth/register', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, otp })
@@ -75,7 +75,7 @@ export default function Checkout() {
                 // Or better, let's trigger a real background login to set the context
 
                 // Triggering Login (re-using login logic or hitting login endpoint)
-                const loginRes = await fetch('http://localhost:5000/api/auth/login', {
+                const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -319,3 +319,4 @@ function DetailItem({ label, value, sub }) {
         </div>
     );
 }
+

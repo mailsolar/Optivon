@@ -8,17 +8,19 @@ import { validateOrder, calculateSLTP } from '../../utils/validation';
 
 import OneClickOrderToggle from './OneClickOrder';
 
+import { useSettings } from '../../context/SettingsContext';
+
 export default function UnifiedRightPanel({
-    user,
+    isOpen,
     quotes,
     account,
     positions,
     selectedSymbol,
     onSelectSymbol,
+    user,
     searchTerm,
     onClosePosition,
     onOrder,
-    isOpen,
     onOpenSettings
 }) {
     const [activeTab, setActiveTab] = useState('trade');
@@ -39,14 +41,24 @@ export default function UnifiedRightPanel({
     const [limitPrice, setLimitPrice] = useState(0);
 
     // One Click State
-    const [oneClickEnabled, setOneClickEnabled] = useState(() => localStorage.getItem('oneClickOrder') === 'true');
+    const [oneClickEnabled, setOneClickEnabled] = useState(false);
     const [orderExecuting, setOrderExecuting] = useState(false);
 
-    useEffect(() => {
-        localStorage.setItem('oneClickOrder', oneClickEnabled);
-    }, [oneClickEnabled]);
+    // FIX: Removed localStorage persistence for One Click Order to ensure it is always OFF on login
 
     // SL/TP logic
+    const [showStopInfo, setShowStopInfo] = useState(false);
+    const { settings } = useSettings();
+
+    // Reset Side on Type Change logic moved here from previous fix?
+    // It's inside the JSX block in previous edit.
+
+    // One-Click Trading Logic
+    // If settings['one-click-trading'] is true, we should probably auto-submit on button click?
+    // Currently the UI has "Execute" buttons.
+    // "One Click" usually implies clicking the Chart or a Quick-Trade panel.
+    // Here, clicking "EXECUTE" is the one click.
+    // If 'confirm-order' is true, show confirm modal (not implemented yet, but we can respect the flag).
     const [slEnabled, setSlEnabled] = useState(false);
     const [slPrice, setSlPrice] = useState('');
     const [tpEnabled, setTpEnabled] = useState(false);
@@ -60,16 +72,19 @@ export default function UnifiedRightPanel({
 
     const quote = quotes[selectedSymbol] || { ltp: 0, bid: 0, ask: 0, dayChange: 0 };
     const currentPrice = quote.ltp || 0;
-    const lotSize = selectedSymbol.includes('NIFTY') ? (selectedSymbol === 'BANKNIFTY' ? 15 : 50) : 1;
+    const lotSize = selectedSymbol.includes('NIFTY') ? (selectedSymbol === 'BANKNIFTY' ? 15 : 65) : 1; // Fixed NIFTY to 65
     const totalQty = lots * lotSize;
 
-    // Real-time P&L calculation for SL/TP
     const calculatePnL = (targetPrice, isSl) => {
         const price = parseFloat(targetPrice);
         if (!price || isNaN(price) || price <= 0) return 0;
 
         const entry = currentPrice;
         let diff;
+
+        // FIX: Correct PnL Direction
+        // If Buying (Long): Profit if Exit (TP) > Entry. Loss if Exit (SL) < Entry.
+        // If Selling (Short): Profit if Exit (TP) < Entry. Loss if Exit (SL) > Entry.
 
         if (side === 'buy') {
             diff = price - entry;
@@ -158,7 +173,7 @@ export default function UnifiedRightPanel({
                     <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-3 space-y-3">
 
                         {/* Market Overview Header */}
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start shrink-0">
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">Active Symbol</span>
                                 <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none">{selectedSymbol}</h2>
@@ -177,7 +192,7 @@ export default function UnifiedRightPanel({
                         </div>
 
                         {/* Account Health Matrix */}
-                        <div className="flex flex-col gap-3 p-4 bg-background border border-border rounded-2xl relative overflow-hidden group">
+                        <div className="flex flex-col gap-3 p-4 bg-background border border-border rounded-2xl relative overflow-hidden group shrink-0">
                             <div className="flex justify-between items-center relative z-10">
                                 <div className="flex flex-col">
                                     <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-1">Portfolio Balance</span>
@@ -238,8 +253,8 @@ export default function UnifiedRightPanel({
                                 <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
                                     {/* Order Side and Type Selection */}
                                     <div className="grid grid-cols-2 gap-2 bg-background p-1.5 rounded-2xl border border-border">
-                                        <button onClick={() => setOrderType('market')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>MARKET</button>
-                                        <button onClick={() => setOrderType('limit')} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'limit' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>LIMIT</button>
+                                        <button onClick={() => { setOrderType('market'); setSide('buy'); }} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>MARKET</button>
+                                        <button onClick={() => { setOrderType('limit'); setSide('buy'); setLimitPrice(currentPrice); }} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'limit' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>LIMIT</button>
                                     </div>
 
                                     {/* Side Selector (Visual Only since button determines action) */}
@@ -367,23 +382,23 @@ export default function UnifiedRightPanel({
                             {oneClickEnabled ? (
                                 <div className="grid grid-cols-2 gap-4 animate-in fade-in zoom-in duration-300">
                                     <button
-                                        disabled={orderExecuting}
+                                        disabled={orderExecuting || account?.status === 'failed'}
                                         onClick={() => handlePlaceOrder('sell')}
-                                        className="relative group bg-red-500 hover:bg-red-500/90 disabled:opacity-50 text-white py-6 rounded-2xl flex flex-col items-center shadow-lg shadow-red-900/20 transition-all active:scale-95 overflow-hidden"
+                                        className="relative group bg-red-500 hover:bg-red-500/90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-6 rounded-2xl flex flex-col items-center shadow-lg shadow-red-900/20 transition-all active:scale-95 overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingDown className="w-12 h-12" /></div>
-                                        <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">DIRECT SELL</span>
+                                        <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">{account?.status === 'failed' ? 'LOCKED' : 'DIRECT SELL'}</span>
                                         <span className="text-sm font-mono font-black">{quote.bid?.toFixed(2) || currentPrice.toFixed(2)}</span>
                                         <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '50U' : '15U'}</span>
                                         {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
                                     </button>
                                     <button
-                                        disabled={orderExecuting}
+                                        disabled={orderExecuting || account?.status === 'failed'}
                                         onClick={() => handlePlaceOrder('buy')}
-                                        className="relative group bg-green-500 hover:bg-green-500/90 disabled:opacity-50 text-white py-6 rounded-2xl flex flex-col items-center shadow-lg shadow-green-900/20 transition-all active:scale-95 overflow-hidden"
+                                        className="relative group bg-green-500 hover:bg-green-500/90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-6 rounded-2xl flex flex-col items-center shadow-lg shadow-green-900/20 transition-all active:scale-95 overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingUp className="w-12 h-12" /></div>
-                                        <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">DIRECT BUY</span>
+                                        <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">{account?.status === 'failed' ? 'LOCKED' : 'DIRECT BUY'}</span>
                                         <span className="text-sm font-mono font-black">{quote.ask?.toFixed(2) || currentPrice.toFixed(2)}</span>
                                         <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '50U' : '15U'}</span>
                                         {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
@@ -391,10 +406,10 @@ export default function UnifiedRightPanel({
                                 </div>
                             ) : (
                                 <button
-                                    disabled={orderExecuting}
+                                    disabled={orderExecuting || account?.status === 'failed'}
                                     onClick={() => handlePlaceOrder()}
                                     className={`w-full py-6 rounded-[24px] font-black text-sm uppercase tracking-[5px] shadow-lg transition-all active:scale-90 relative overflow-hidden group ${side === 'buy' ? 'bg-green-500 hover:bg-green-500/90 text-white' : 'bg-red-500 hover:bg-red-500/90 text-white'
-                                        } ${orderExecuting ? 'opacity-50' : ''}`}
+                                        } ${(orderExecuting || account?.status === 'failed') ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {orderExecuting ? (
                                         <div className="flex items-center justify-center gap-3">
@@ -403,8 +418,8 @@ export default function UnifiedRightPanel({
                                         </div>
                                     ) : (
                                         <>
-                                            Execute {side === 'buy' ? 'Long' : 'Short'}
-                                            <div className="absolute top-0 right-10 bottom-0 w-20 bg-white/10 -skew-x-[30deg] -translate-x-full group-hover:translate-x-[400px] transition-transform duration-1000 ease-in-out pointer-events-none"></div>
+                                            {account?.status === 'failed' ? 'ACCOUNT LOCKED' : `Execute ${side === 'buy' ? 'Long' : 'Short'}`}
+                                            {!account?.status === 'failed' && <div className="absolute top-0 right-10 bottom-0 w-20 bg-white/10 -skew-x-[30deg] -translate-x-full group-hover:translate-x-[400px] transition-transform duration-1000 ease-in-out pointer-events-none"></div>}
                                         </>
                                     )}
                                 </button>

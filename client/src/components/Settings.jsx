@@ -8,7 +8,7 @@ export default function Settings({ user }) {
 
     const enable2FA = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/auth/2fa/setup', {
+            const res = await fetch('/api/auth/2fa/setup', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -26,7 +26,7 @@ export default function Settings({ user }) {
 
     const verifyAndActivate = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/auth/2fa/verify', {
+            const res = await fetch('/api/auth/2fa/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,3 +98,4 @@ export default function Settings({ user }) {
         </div>
     );
 }
+

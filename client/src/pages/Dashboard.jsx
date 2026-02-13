@@ -60,7 +60,7 @@ function DashboardContent({ user, onLogout }) {
     const fetchAccounts = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/trade/accounts', {
+            const res = await fetch('/api/trade/accounts', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -85,7 +85,7 @@ function DashboardContent({ user, onLogout }) {
 
     // SSE Stream
     useEffect(() => {
-        const eventSource = new EventSource('http://localhost:5000/api/market/stream');
+        const eventSource = new EventSource('/api/market/stream');
         eventSource.onmessage = (event) => {
             try {
                 const tick = JSON.parse(event.data);
@@ -99,7 +99,7 @@ function DashboardContent({ user, onLogout }) {
 
     const handlePurchase = async (type, size) => {
         try {
-            const res = await fetch('http://localhost:5000/api/trade/purchase', {
+            const res = await fetch('/api/trade/purchase', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ function DashboardContent({ user, onLogout }) {
 
     const handleLaunch = async (accId) => {
         try {
-            const res = await fetch('http://localhost:5000/api/trade/launch', {
+            const res = await fetch('/api/trade/launch', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -382,3 +382,4 @@ const StatBox = ({ label, value, color, isActive }) => (
         </div>
     </div>
 );
+

@@ -104,3 +104,4 @@ export default function Watchlist({ quotes = {}, onSelectSymbol, selectedSymbol,
         </div>
     );
 }
+

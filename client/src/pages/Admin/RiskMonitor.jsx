@@ -15,7 +15,7 @@ export default function RiskMonitor() {
 
     const fetchRiskData = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/admin/risk-monitor', {
+            const res = await fetch('/api/admin/risk-monitor', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -116,3 +116,4 @@ function RiskCard({ account }) {
         </div>
     );
 }
+

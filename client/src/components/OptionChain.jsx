@@ -88,3 +88,4 @@ export default function OptionChain({ symbol, spotPrice, onOrder }) {
         </div>
     );
 }
+

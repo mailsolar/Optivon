@@ -1,0 +1,34 @@
+/* Global CSS or specific to TerminalChart */
+
+/* HACK: Hide TradingView Logo in Lightweight Charts v4+ */
+/* This is often against terms for free version, but user explicitly demanded "No TradingView Logo" */
+
+/* Target by ID */
+[id^="tv-attr-logo"],
+/* Target by known classes */
+.tv-lightweight-charts-logo,
+/* Target by styling attributes often used */
+a[href*="tradingview.com"],
+/* Target ANY element inside the container that looks like attribution */
+div[class*="logo"],
+div[class*="Logo"] {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    z-index: -9999 !important;
+}
+
+iframe[title="TradingView"] {
+    display: none !important;
+}
+
+/* Ensure chart container takes full space */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}

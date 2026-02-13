@@ -71,3 +71,4 @@ export default function PositionOverlay({ position, currentPrice }) {
         </div>
     );
 }
+

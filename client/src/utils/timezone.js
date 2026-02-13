@@ -29,3 +29,4 @@ export const formatChartTime = (timestamp) => {
     const zonedDate = toZonedTime(date, TIMEZONE);
     return format(zonedDate, 'dd MMM HH:mm', { timeZone: TIMEZONE });
 };
+

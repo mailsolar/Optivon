@@ -31,3 +31,4 @@ export default function TabSwitcher({ tabs, activeTab, onTabChange }) {
         </div>
     );
 }
+

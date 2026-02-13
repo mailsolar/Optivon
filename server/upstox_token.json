@@ -1,0 +1,28 @@
+{
+  "email": "welcomeuser66@gmail.com",
+  "exchanges": [
+    "BSE",
+    "NSE"
+  ],
+  "products": [
+    "OCO",
+    "D",
+    "CO",
+    "I"
+  ],
+  "broker": "UPSTOX",
+  "user_id": "24CANA",
+  "user_name": "DHANISH G NAIR",
+  "order_types": [
+    "MARKET",
+    "LIMIT",
+    "SL",
+    "SL-M"
+  ],
+  "user_type": "individual",
+  "poa": false,
+  "ddpi": false,
+  "is_active": true,
+  "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNENBTkEiLCJqdGkiOiI2OThlYjhhMmUyNGM4NDExZmY2NTZjMzYiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc3MDk2MTA1OCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzcxMDIwMDAwfQ.Fj11nfsoKxeuk7_GPpDoOLMJDJ0ZBcLKQ1bOJjwLz20",
+  "extended_token": null
+}

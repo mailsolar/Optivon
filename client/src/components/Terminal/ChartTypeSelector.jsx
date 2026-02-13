@@ -92,3 +92,4 @@ export default function ChartTypeSelector({ currentType, onChange }) {
         </div>
     );
 }
+

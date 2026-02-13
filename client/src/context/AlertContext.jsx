@@ -92,3 +92,4 @@ export const AlertProvider = ({ children, quotes }) => {
         </AlertContext.Provider>
     );
 };
+

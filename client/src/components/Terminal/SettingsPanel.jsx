@@ -3,7 +3,7 @@ import { Settings, X, Shield, Activity, Bell, Layout, Monitor, Zap, TrendingUp, 
 
 const SETTINGS_CATEGORIES = {
     GENERAL: [
-        { id: 'show-volumes', label: 'Show Trade Volumes', type: 'checkbox', default: true, icon: Activity },
+        { id: 'show-volumes', label: 'Show Trade Volumes', type: 'checkbox', default: false, icon: Activity },
         { id: 'show-askline', label: 'Show Ask Line', type: 'checkbox', default: true, icon: Activity },
         { id: 'show-ohlc', label: 'Show OHLC', type: 'checkbox', default: false, icon: Layout },
         { id: 'show-period-sep', label: 'Show Period Separators', type: 'checkbox', default: true, icon: Grid },
@@ -21,8 +21,8 @@ const SETTINGS_CATEGORIES = {
         { id: 'email-alerts', label: 'Email Alerts', type: 'checkbox', default: false, icon: Mail },
     ],
     RISK_MANAGEMENT: [
-        { id: 'max-drawdown', label: 'Maximum Drawdown (%)', type: 'number', default: 4, min: 1, max: 10, step: 0.5, icon: Shield },
-        { id: 'daily-loss-limit', label: 'Daily Loss Limit (%)', type: 'number', default: 2, min: 0.5, max: 5, step: 0.5, icon: Shield },
+        { id: 'max-drawdown', label: 'Maximum Drawdown (%)', type: 'number', default: 10, min: 1, max: 20, step: 0.5, icon: Shield },
+        { id: 'daily-loss-limit', label: 'Daily Loss Limit (%)', type: 'number', default: 5, min: 0.5, max: 10, step: 0.5, icon: Shield },
         { id: 'max-position-size', label: 'Max Position Size (Lots)', type: 'number', default: 10, min: 1, max: 100, step: 1, icon: Shield },
         { id: 'stop-loss-required', label: 'Require Stop Loss', type: 'checkbox', default: true, icon: Shield },
     ],
@@ -35,17 +35,34 @@ const SETTINGS_CATEGORIES = {
     ],
 };
 
+import { useSettings } from '../../context/SettingsContext';
+
 export default function SettingsPanel({ isOpen, onClose }) {
     const [activeTab, setActiveTab] = useState('GENERAL');
-    const [settings, setSettings] = useState(() => {
-        const saved = localStorage.getItem('optivon_settings');
-        return saved ? JSON.parse(saved) : {};
-    });
+    const { settings, updateSetting, resetSettings } = useSettings();
 
     const handleChange = (id, value) => {
-        const newSettings = { ...settings, [id]: value };
-        setSettings(newSettings);
-        localStorage.setItem('optivon_settings', JSON.stringify(newSettings));
+        updateSetting(id, value);
+
+        // Auto-update Colors based on Theme Selection
+        if (id === 'theme') {
+            if (value === 'Light') {
+                updateSetting('chart-bg', '#ffffff');
+                updateSetting('grid-color', '#e5e7eb');
+                updateSetting('bull-color', '#26a69a');
+                updateSetting('bear-color', '#ef5350');
+            } else if (value === 'Cyberpunk') {
+                updateSetting('chart-bg', '#090014');
+                updateSetting('grid-color', '#2a0a4a');
+                updateSetting('bull-color', '#00ffd5');
+                updateSetting('bear-color', '#ff0055');
+            } else { // Default Dark
+                updateSetting('chart-bg', '#0a0e27');
+                updateSetting('grid-color', '#1a1e2e');
+                updateSetting('bull-color', '#26a69a');
+                updateSetting('bear-color', '#ef5350');
+            }
+        }
     };
 
     if (!isOpen) return null;
@@ -83,9 +100,10 @@ export default function SettingsPanel({ isOpen, onClose }) {
                         <button
                             onClick={() => {
                                 if (window.confirm("Reset all settings to default?")) {
-                                    localStorage.removeItem('optivon_settings');
-                                    setSettings({});
-                                    window.location.reload();
+                                    if (window.confirm("Reset all settings to default?")) {
+                                        resetSettings();
+                                        window.location.reload();
+                                    }
                                 }
                             }}
                             className="w-full bg-red-500/5 hover:bg-red-500/10 text-red-500 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border border-red-500/10 hover:border-red-500/30"
@@ -200,3 +218,4 @@ export default function SettingsPanel({ isOpen, onClose }) {
         </div>
     );
 }
+

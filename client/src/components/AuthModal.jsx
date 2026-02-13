@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Mail, ArrowRight, ShieldCheck, KeyRound, CheckCircle } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { API_BASE_URL } from '../config';
 
 export default function AuthModal({ onClose, onLoginSuccess }) {
     const { addToast } = useToast();
@@ -39,7 +40,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:5000/api/auth/send-otp-register', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/send-otp-register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -66,7 +67,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:5000/api/auth/register', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, otp })
@@ -75,7 +76,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
             if (!res.ok) throw new Error(data.error);
 
             // Auto-login to generate token for 2FA setup
-            const loginRes = await fetch('http://localhost:5000/api/auth/login', {
+            const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -105,7 +106,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/auth/setup-2fa', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/setup-2fa`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +132,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:5000/api/auth/login', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -159,7 +160,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:5000/api/auth/verify-2fa-login', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/verify-2fa-login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, pin })
@@ -182,7 +183,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -374,3 +375,4 @@ function SubmitButton({ children, loading }) {
         </button>
     );
 }
+

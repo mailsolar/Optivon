@@ -97,3 +97,4 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
         </div>
     );
 }
+

@@ -141,6 +141,16 @@ export default function TerminalHeader({
                     <span className="text-[11px] font-mono font-bold text-secondary">{currentTime}</span>
                 </div>
 
+                {/* Upstox Login Button */}
+                <button
+                    onClick={() => window.location.href = 'http://localhost:5000/api/upstox/login'}
+                    className="px-3 py-1.5 bg-brand-lime/10 text-brand-lime border border-brand-lime/20 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-brand-lime/20 transition-all flex items-center gap-2"
+                    title="Connect Upstox for Live Data"
+                >
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    Connect Upstox
+                </button>
+
                 {/* Symbol Toggle Tabs (NIFTY / BANKNIFTY) */}
                 <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border">
                     <button
@@ -204,3 +214,4 @@ export default function TerminalHeader({
         </div>
     );
 }
+

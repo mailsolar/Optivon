@@ -8,30 +8,45 @@ export class RiskManager {
     }
 
     checkDrawdown(currentBalance) {
-        // Calculate Losses
-        const dailyLoss = this.dailyStartBalance - currentBalance;
-        const totalLoss = this.highWaterMark - currentBalance;
+        // Calculate Drawdown based on Initial Balance (Fixed Type)
+        // If current balance is > initial, drawdown is 0.
+        // If current balance < initial, drawdown is the difference.
 
-        // Calculate Percentages
-        const dailyLossPercent = (dailyLoss / this.dailyStartBalance) * 100;
-        const maxDrawdownPercent = (totalLoss / this.highWaterMark) * 100;
+        const initialBalance = this.initialBalance;
+        let diff = currentBalance - initialBalance;
+
+        // If profit, no drawdown
+        let drawdownPercent = 0;
+
+        if (diff < 0) {
+            // Loss
+            drawdownPercent = (Math.abs(diff) / initialBalance) * 100;
+        }
+
+        // Daily Drawdown logic - simplified to overall for now to match user expectation
+        // If current balance < dailyStart
+        const dailyDiff = currentBalance - this.dailyStartBalance;
+        let dailyDrawdownPercent = 0;
+        if (dailyDiff < 0) {
+            dailyDrawdownPercent = (Math.abs(dailyDiff) / this.dailyStartBalance) * 100;
+        }
 
         // Daily Drawdown Check
-        if (dailyLossPercent >= 2) {
+        if (dailyDrawdownPercent >= 2) {
             return {
                 violated: true,
                 type: 'DAILY_DRAWDOWN',
-                message: `Daily Limit Exceeded: -${dailyLossPercent.toFixed(2)}%`,
+                message: `Daily Limit Exceeded: -${dailyDrawdownPercent.toFixed(2)}%`,
                 lockAccount: true
             };
         }
 
         // Maximum Drawdown Check
-        if (maxDrawdownPercent >= 4) {
+        if (drawdownPercent >= 4) {
             return {
                 violated: true,
                 type: 'MAX_DRAWDOWN',
-                message: `Max Drawdown Exceeded: -${maxDrawdownPercent.toFixed(2)}%`,
+                message: `Max Drawdown Exceeded: -${drawdownPercent.toFixed(2)}%`,
                 lockAccount: true
             };
         }
@@ -43,9 +58,9 @@ export class RiskManager {
 
         return {
             violated: false,
-            dailyLossPercent: dailyLossPercent.toFixed(2),
-            maxLossPercent: maxDrawdownPercent.toFixed(2),
-            limitWarning: dailyLossPercent >= 1.5 || maxDrawdownPercent >= 3.5
+            dailyLossPercent: dailyDrawdownPercent.toFixed(2),
+            maxLossPercent: drawdownPercent.toFixed(2),
+            limitWarning: dailyDrawdownPercent >= 1.5 || drawdownPercent >= 3.5
         };
     }
 
@@ -55,3 +70,4 @@ export class RiskManager {
         this.dailyStartBalance = this.highWaterMark;
     }
 }
+
