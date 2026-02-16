@@ -3,7 +3,14 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 
 const ToastContext = createContext();
 
-export const useToast = () => useContext(ToastContext);
+export const useToast = () => {
+    const context = useContext(ToastContext);
+    if (!context) {
+        console.warn('[useToast] Context not available, returning fallback');
+        return { addToast: () => { } };
+    }
+    return context;
+};
 
 export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);

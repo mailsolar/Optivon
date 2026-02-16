@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, X, Shield, Activity, Bell, Layout, Monitor, Zap, TrendingUp, TrendingDown, Mail, Smartphone, Volume2, Grid, MousePointer, Info } from 'lucide-react';
+import { Settings, X, Shield, Activity, Bell, Layout, Monitor, Zap, TrendingUp, TrendingDown, Mail, Smartphone, Volume2, Grid, MousePointer, Info, Target, Clock } from 'lucide-react';
 
 const SETTINGS_CATEGORIES = {
     GENERAL: [
@@ -21,10 +21,18 @@ const SETTINGS_CATEGORIES = {
         { id: 'email-alerts', label: 'Email Alerts', type: 'checkbox', default: false, icon: Mail },
     ],
     RISK_MANAGEMENT: [
-        { id: 'max-drawdown', label: 'Maximum Drawdown (%)', type: 'number', default: 10, min: 1, max: 20, step: 0.5, icon: Shield },
-        { id: 'daily-loss-limit', label: 'Daily Loss Limit (%)', type: 'number', default: 5, min: 0.5, max: 10, step: 0.5, icon: Shield },
+        { id: 'section-title', label: 'PERSONAL RISK CONTROLS (Soft Limits)', type: 'title', icon: Shield },
+        { id: 'max-drawdown', label: 'Personal Max Drawdown (%)', type: 'number', default: 10, min: 0.1, max: 100, step: 0.1, icon: Shield },
+        { id: 'daily-loss-limit', label: 'Personal Daily Loss Limit (%)', type: 'number', default: 5, min: 0.1, max: 100, step: 0.1, icon: Shield },
         { id: 'max-position-size', label: 'Max Position Size (Lots)', type: 'number', default: 10, min: 1, max: 100, step: 1, icon: Shield },
-        { id: 'stop-loss-required', label: 'Require Stop Loss', type: 'checkbox', default: true, icon: Shield },
+
+        { id: 'section-separator', type: 'separator' },
+
+        { id: 'firm-rules-title', label: 'FIRM ACCOUNT RULES (Hard Limits)', type: 'title', icon: Shield },
+        { id: 'firm-max-dd', label: 'Max Account Drawdown', type: 'info', value: '5.0%', icon: Shield },
+        { id: 'firm-daily-dd', label: 'Max Daily Drawdown', type: 'info', value: '3.0%', icon: Shield },
+        { id: 'firm-profit-target', label: 'Profit Target', type: 'info', value: '8.0%', icon: Target },
+        { id: 'firm-min-days', label: 'Min Trading Days', type: 'info', value: '5 Days', icon: Clock },
     ],
     APPEARANCE: [
         { id: 'theme', label: 'Color Theme', type: 'select', options: ['OptiVon Dark', 'Light', 'Cyberpunk'], default: 'OptiVon Dark', icon: Monitor },
@@ -131,73 +139,97 @@ export default function SettingsPanel({ isOpen, onClose }) {
 
                     {/* Settings List */}
                     <div className="flex-1 overflow-y-auto p-8 space-y-6">
-                        {SETTINGS_CATEGORIES[activeTab]?.map((setting) => (
-                            <div key={setting.id} className="flex items-center justify-between p-6 bg-[#1a1e2e]/30 border border-white/5 rounded-2xl hover:border-white/10 transition-colors group">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings[setting.id] !== undefined ? 'bg-blue-500/10 text-blue-400' : 'bg-gray-800/50 text-gray-600'} transition-colors`}>
-                                        {setting.icon && <setting.icon className="w-5 h-5" />}
+                        {SETTINGS_CATEGORIES[activeTab]?.map((setting) => {
+                            if (setting.type === 'title') {
+                                return (
+                                    <div key={setting.id} className="mt-8 mb-4 flex items-center gap-4">
+                                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                            {setting.icon && <setting.icon className="w-4 h-4" />}
+                                        </div>
+                                        <span className="text-xs font-black uppercase tracking-widest text-blue-400">{setting.label}</span>
+                                        <div className="h-px bg-blue-500/20 flex-1"></div>
                                     </div>
-                                    <div>
-                                        <div className="text-sm font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{setting.label}</div>
-                                        <div className="text-[10px] text-gray-600 font-mono uppercase tracking-wide">ID: {setting.id}</div>
+                                );
+                            }
+
+                            if (setting.type === 'separator') {
+                                return <div key={setting.id} className="w-full h-px bg-white/5 my-2"></div>;
+                            }
+
+                            return (
+                                <div key={setting.id} className="flex items-center justify-between p-6 bg-[#1a1e2e]/30 border border-white/5 rounded-2xl hover:border-white/10 transition-colors group">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings[setting.id] !== undefined ? 'bg-blue-500/10 text-blue-400' : 'bg-gray-800/50 text-gray-600'} transition-colors`}>
+                                            {setting.icon && <setting.icon className="w-5 h-5" />}
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{setting.label}</div>
+                                            <div className="text-[10px] text-gray-600 font-mono uppercase tracking-wide">ID: {setting.id}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="w-48">
+                                        {setting.type === 'info' && (
+                                            <div className="text-right font-mono font-black text-white text-sm bg-white/5 px-3 py-1 rounded-lg border border-white/5">
+                                                {setting.value}
+                                            </div>
+                                        )}
+
+                                        {setting.type === 'checkbox' && (
+                                            <label className="relative inline-flex items-center cursor-pointer float-right">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings[setting.id] ?? setting.default}
+                                                    onChange={(e) => handleChange(setting.id, e.target.checked)}
+                                                    className="sr-only peer"
+                                                />
+                                                <div className="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        )}
+
+                                        {setting.type === 'number' && (
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    value={settings[setting.id] ?? setting.default}
+                                                    onChange={(e) => handleChange(setting.id, parseFloat(e.target.value))}
+                                                    min={setting.min}
+                                                    max={setting.max}
+                                                    step={setting.step || 1}
+                                                    className="w-full bg-[#0a0e27] border border-white/10 rounded-xl px-4 py-2.5 text-right font-mono font-bold text-white focus:border-blue-500 outline-none transition-all"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {setting.type === 'select' && (
+                                            <div className="relative">
+                                                <select
+                                                    value={settings[setting.id] ?? setting.default}
+                                                    onChange={(e) => handleChange(setting.id, e.target.value)}
+                                                    className="w-full bg-[#0a0e27] border border-white/10 rounded-xl px-4 py-2.5 text-white font-bold text-xs focus:border-blue-500 outline-none appearance-none transition-all"
+                                                >
+                                                    {setting.options.map(opt => (
+                                                        <option key={opt} value={opt}>{opt}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {setting.type === 'color' && (
+                                            <div className="relative flex justify-end">
+                                                <input
+                                                    type="color"
+                                                    value={settings[setting.id] ?? setting.default}
+                                                    onChange={(e) => handleChange(setting.id, e.target.value)}
+                                                    className="w-full h-10 bg-transparent cursor-pointer rounded-xl"
+                                                    style={{ border: 'none' }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-
-                                <div className="w-48">
-                                    {setting.type === 'checkbox' && (
-                                        <label className="relative inline-flex items-center cursor-pointer float-right">
-                                            <input
-                                                type="checkbox"
-                                                checked={settings[setting.id] ?? setting.default}
-                                                onChange={(e) => handleChange(setting.id, e.target.checked)}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                        </label>
-                                    )}
-
-                                    {setting.type === 'number' && (
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                value={settings[setting.id] ?? setting.default}
-                                                onChange={(e) => handleChange(setting.id, parseFloat(e.target.value))}
-                                                min={setting.min}
-                                                max={setting.max}
-                                                step={setting.step || 1}
-                                                className="w-full bg-[#0a0e27] border border-white/10 rounded-xl px-4 py-2.5 text-right font-mono font-bold text-white focus:border-blue-500 outline-none transition-all"
-                                            />
-                                        </div>
-                                    )}
-
-                                    {setting.type === 'select' && (
-                                        <div className="relative">
-                                            <select
-                                                value={settings[setting.id] ?? setting.default}
-                                                onChange={(e) => handleChange(setting.id, e.target.value)}
-                                                className="w-full bg-[#0a0e27] border border-white/10 rounded-xl px-4 py-2.5 text-white font-bold text-xs focus:border-blue-500 outline-none appearance-none transition-all"
-                                            >
-                                                {setting.options.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    {setting.type === 'color' && (
-                                        <div className="relative flex justify-end">
-                                            <input
-                                                type="color"
-                                                value={settings[setting.id] ?? setting.default}
-                                                onChange={(e) => handleChange(setting.id, e.target.value)}
-                                                className="w-full h-10 bg-transparent cursor-pointer rounded-xl"
-                                                style={{ border: 'none' }}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     {/* Footer */}

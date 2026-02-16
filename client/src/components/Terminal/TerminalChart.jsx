@@ -17,10 +17,14 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
     const chartContainerRef = useRef(null);
     const chartRef = useRef(null);
     const seriesRef = useRef(null);
+    const volumeSeriesRef = useRef(null); // Added
     const { settings } = useSettings();
     const { theme } = useTheme(); // Keep for backward compat or sync? 
     // Actually, settings.theme should override.
 
+    const prevSymbolRef = useRef(null);
+
+    // 1. Chart Initialization & Settings (Runs only when visual settings change)
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
@@ -38,10 +42,7 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
         const textColor = isDark ? '#9CA3AF' : '#111827';
         const gridColor = settings?.['grid-color'] || (isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)');
 
-        // 1. Clear Container (Prevent Double Graph)
-        chartContainerRef.current.innerHTML = '';
-
-        // 2. Create Chart
+        // Create Chart
         const chart = createChart(chartContainerRef.current, {
             width: chartContainerRef.current.clientWidth || 800,
             height: chartContainerRef.current.clientHeight || 500,
@@ -54,11 +55,11 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 horzLines: { color: gridColor, visible: true },
             },
             crosshair: {
-                mode: 1, // CrosshairMode.Normal
+                mode: 1,
                 vertLine: {
                     width: 1,
                     color: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
-                    style: 3, // LineStyle.Dashed
+                    style: 3,
                     labelBackgroundColor: isDark ? '#4c525e' : '#9ca3af',
                 },
                 horzLine: {
@@ -73,7 +74,6 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 dateFormat: 'dd MMM yyyy',
                 timeFormatter: (time) => {
                     const date = new Date(time * 1000);
-                    // Force IST (UTC+5:30)
                     return date.toLocaleString('en-IN', {
                         timeZone: 'Asia/Kolkata',
                         hour: '2-digit',
@@ -86,31 +86,29 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
             timeScale: {
                 borderColor: gridColor,
                 timeVisible: true,
-                secondsVisible: true, // User wants accurate time
-                barSpacing: 6, // Better spacing
+                secondsVisible: true,
+                barSpacing: 6,
                 minBarSpacing: 0.5,
-                tickMarkFormatter: (time, tickMarkType, locale) => {
+                tickMarkFormatter: (time) => {
                     const date = new Date(time * 1000);
                     return date.toLocaleString('en-IN', {
                         timeZone: 'Asia/Kolkata',
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: false,
-                    }); // Custom tick formatting
+                    });
                 },
             },
             rightPriceScale: {
                 borderColor: gridColor,
                 autoScale: true,
-                mode: 1, // PriceScaleMode.Normal
+                mode: 1,
             },
-            // Attribution Hiding (Attempt via API - works in some versions or ignores)
-            // CSS is the primary method, this is backup
         });
 
         chartRef.current = chart;
 
-        // 2. Add Series using v5 API: addSeries(SeriesClass, options)
+        // Add Series
         let SeriesClass;
         let options = {
             upColor: settings?.['bull-color'] || '#26a69a',
@@ -120,11 +118,8 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
             borderVisible: false,
         };
 
-        // Select Series Type
         switch (chartType) {
-            case 'candlestick':
-                SeriesClass = CandlestickSeries;
-                break;
+            case 'candlestick': SeriesClass = CandlestickSeries; break;
             case 'area':
                 SeriesClass = AreaSeries;
                 options = {
@@ -135,12 +130,12 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 };
                 break;
             case 'line':
-            case 'line-markers': // Fallback to Line
+            case 'line-markers':
                 SeriesClass = LineSeries;
                 options = { color: '#2962FF', lineWidth: 2 };
                 break;
             case 'bars':
-            case 'hlc': // Fallback to Bar
+            case 'hlc':
                 SeriesClass = BarSeries;
                 options = { upColor: '#26a69a', downColor: '#ef5350', thinBars: false };
                 break;
@@ -149,107 +144,67 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
                 options = {
                     topLineColor: '#26a69a',
                     bottomLineColor: '#ef5350',
-                    baseValue: { type: 'price', price: data?.[0]?.close || 0 }
+                    baseValue: { type: 'price', price: 0 } // Updated dynamically via data if needed
                 };
                 break;
-            default:
-                SeriesClass = CandlestickSeries;
+            default: SeriesClass = CandlestickSeries;
         }
 
-        try {
-            const series = chart.addSeries(SeriesClass, options);
-            seriesRef.current = series;
+        const series = chart.addSeries(SeriesClass, options);
+        seriesRef.current = series;
 
-            // 3. Set Data
-            if (data && data.length > 0) {
-                const validData = data
-                    .map(d => {
-                        // Normalize data based on type
-                        const item = {
-                            time: d.time ?? d.Time,
-                        };
-
-                        // Value-based series (Line, Area, Baseline) vs OHLC
-                        if ([AreaSeries, LineSeries, BaselineSeries, HistogramSeries].includes(SeriesClass)) {
-                            item.value = parseFloat(d.close ?? d.Close ?? d.value ?? 0);
-                        } else {
-                            item.open = parseFloat(d.open ?? d.Open ?? 0);
-                            item.high = parseFloat(d.high ?? d.High ?? 0);
-                            item.low = parseFloat(d.low ?? d.Low ?? 0);
-                            item.close = parseFloat(d.close ?? d.Close ?? 0);
-                        }
-                        return item;
-                    })
-                    .filter(d => {
-                        // STRICT VALIDATION: Filter out 0 or negative prices to prevent scale collapse
-                        if (d.value !== undefined) return d.value > 100;
-                        return d.open > 100 && d.close > 100;
-                    })
-                    .sort((a, b) => a.time - b.time);
-
-                console.log('[TerminalChart] Setting', validData.length, 'candles');
-                series.setData(validData);
-                chart.timeScale().fitContent();
-                console.log('[TerminalChart] fitContent called');
-            }
-
-            // 5. Add Volume Series (Histogram) if enabled
-            if (settings?.['show-volumes']) {
-                const volumeSeries = chart.addSeries(HistogramSeries, {
-                    color: '#26a69a',
-                    priceFormat: { type: 'volume' },
-                    priceScaleId: '', // Overlay on main chart? Or separate pane? Usually separate pane.
-                    // But lightweight-charts v4+ handles pane via logic. 
-                    // Let's overlay at bottom for simplicity or use 'overlay'.
-                    // Actually, let's keep it simple: separate pane logic requires complex layout.
-                    // Overlay at bottom using scale margins.
-                    priceScaleId: 'volume',
-                });
-
-                chart.priceScale('volume').applyOptions({
-                    scaleMargins: { top: 0.85, bottom: 0 }, // Push volume to bottom 15%
-                    visible: false,
-                });
-
-                const volumeData = data.map(d => ({
-                    time: d.time ?? d.Time,
-                    value: d.volume || (Math.random() * 1000), // Mock volume if missing
-                    color: (d.close >= d.open) ? '#26a69a' : '#ef5350'
-                }));
-
-                volumeSeries.setData(volumeData);
-            }
-
-            // 6. Show Ask Line if enabled
-            // Since we only have historical data here, we can't show live Ask.
-            // But we can show the "Last Price" line which is default.
-            // To simulate Ask Line, we'd need live tick updates passed here.
-            // For now, let's just ensure the 'LastPriceAnimation' is on.
-            if (settings?.['show-askline']) {
-                // Enable Price Line
-                series.applyOptions({
-                    lastValueVisible: true,
-                    priceLineVisible: true,
-                });
-            } else {
-                series.applyOptions({
-                    lastValueVisible: false,
-                    priceLineVisible: false,
-                });
-            }
-
-            if (onChartReady) onChartReady(chart, series);
-
-        } catch (e) {
-            console.error("TerminalChart v5 Error:", e);
+        // Volume Series Logic
+        if (settings?.['show-volumes']) {
+            const volumeSeries = chart.addSeries(HistogramSeries, {
+                color: '#26a69a',
+                priceFormat: {
+                    type: 'volume',
+                },
+                priceScaleId: '', // Overlay on same scale? Or separate? 
+                // Creating a simplified look: separate scale or overlay at bottom.
+                // scaleMargins: { top: 0.8, bottom: 0 }
+            });
+            volumeSeries.priceScale().applyOptions({
+                scaleMargins: {
+                    top: 0.8, // Highest volume bar will be 20% height from bottom
+                    bottom: 0,
+                },
+            });
+            volumeSeriesRef.current = volumeSeries;
+        } else {
+            volumeSeriesRef.current = null;
         }
 
-        // 4. Resize Observer
-        const handleResize = (entries) => {
-            if (!chart || entries.length === 0) return;
-            const { width, height } = entries[0].contentRect;
-            chart.applyOptions({ width, height });
+        // Volume Series Logic
+
+
+
+
+        // Ask Line Logic
+        if (settings?.['show-askline']) {
+            series.applyOptions({ lastValueVisible: true, priceLineVisible: true });
+        } else {
+            series.applyOptions({ lastValueVisible: false, priceLineVisible: false });
+        }
+
+        if (onChartReady) onChartReady(chart, series);
+
+        // Resize Hook with Debounce/RAF
+        const handleResize = () => {
+            if (!chart || !chartContainerRef.current) return;
+
+            requestAnimationFrame(() => {
+                if (!chartContainerRef.current) return;
+                const { clientWidth, clientHeight } = chartContainerRef.current;
+
+                // Only resize if dimensions are valid and changed (Lightweight charts handles changes internally, 
+                // but we check to avoid unnecessary calls if 0)
+                if (clientWidth > 0 && clientHeight > 0) {
+                    chart.applyOptions({ width: clientWidth, height: clientHeight });
+                }
+            });
         };
+
         const resizeObserver = new ResizeObserver(handleResize);
         resizeObserver.observe(chartContainerRef.current);
 
@@ -258,16 +213,78 @@ export default function TerminalChart({ data, symbol, onChartReady, chartType = 
             if (chartRef.current) {
                 chartRef.current.remove();
                 chartRef.current = null;
+                seriesRef.current = null;
+                volumeSeriesRef.current = null;
             }
         };
-    }, [data, theme, chartType, settings]); // Re-render on settings change
+    }, [theme, chartType, settings?.['chart-bg'], settings?.['grid-color'], settings?.['bull-color'], settings?.['bear-color'], settings?.['show-askline'], settings?.['show-period-sep'], settings?.['show-volumes']]);
+
+
+    // 2. Data Update Logic (Runs when data or symbol changes)
+    useEffect(() => {
+        if (!seriesRef.current) return;
+
+        // Handle empty data (clear chart)
+        if (!data || data.length === 0) {
+            seriesRef.current.setData([]);
+            return;
+        }
+
+        try {
+            const validData = data
+                .map(d => {
+                    const item = { time: d.time ?? d.Time };
+                    // Value-based vs OHLC items
+                    if (chartType === 'area' || chartType === 'line' || chartType === 'baseline') {
+                        item.value = parseFloat(d.close ?? d.Close ?? d.value ?? 0);
+                    } else {
+                        item.open = parseFloat(d.open ?? d.Open ?? 0);
+                        item.high = parseFloat(d.high ?? d.High ?? 0);
+                        item.low = parseFloat(d.low ?? d.Low ?? 0);
+                        item.close = parseFloat(d.close ?? d.Close ?? 0);
+                    }
+                    return item;
+                })
+                .filter(d => (d.value !== undefined ? d.value > 0 : d.open > 0));
+
+            // DEDUPLICATION: Latest timestamp wins
+            const uniqueDataMap = new Map();
+            validData.forEach(item => uniqueDataMap.set(item.time, item));
+
+            const sortedData = Array.from(uniqueDataMap.values())
+                .sort((a, b) => a.time - b.time);
+
+            seriesRef.current.setData(sortedData);
+
+            // Handle Volume if enabled
+            if (settings?.['show-volumes'] && volumeSeriesRef.current) {
+                const volumeData = validData.map(d => ({
+                    time: d.time,
+                    value: d.volume || (d.close - d.open) * 100, // Mock volume if missing, or use real
+                    color: (d.close >= d.open) ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)'
+                }));
+                volumeSeriesRef.current.setData(volumeData);
+            }
+
+            // AUTO SCROLL LOGIC
+            // If auto-scroll is enabled, and we added a new candle (last item is new), scroll to it.
+            // However, lightweight-charts handles this by default unless user scrolled back.
+            // If settings['auto-scroll'] is TRUE, we force it.
+            if (settings?.['auto-scroll']) {
+                // We can force reset TimeScale
+                // But better to just check if we should scroll
+                if (chartRef.current) {
+                    chartRef.current.timeScale().scrollToRealTime();
+                }
+            }
+
+        } catch (e) {
+            console.error("TerminalChart Data Error:", e);
+        }
+    }, [data, symbol, chartType, settings]);
 
     return (
-        <div
-            ref={chartContainerRef}
-            className="w-full h-full relative"
-            style={{ minHeight: '400px' }}
-        />
+        <div className="absolute inset-0" ref={chartContainerRef} />
     );
 }
 

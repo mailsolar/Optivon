@@ -53,6 +53,13 @@ export default function UnifiedRightPanel({
     // Reset Side on Type Change logic moved here from previous fix?
     // It's inside the JSX block in previous edit.
 
+    // Sync One-Click Setting
+    useEffect(() => {
+        if (settings?.['one-click-trading'] !== undefined) {
+            setOneClickEnabled(settings['one-click-trading']);
+        }
+    }, [settings]);
+
     // One-Click Trading Logic
     // If settings['one-click-trading'] is true, we should probably auto-submit on button click?
     // Currently the UI has "Execute" buttons.
@@ -65,14 +72,14 @@ export default function UnifiedRightPanel({
     const [tpPrice, setTpPrice] = useState('');
 
     useEffect(() => {
-        if (quotes[selectedSymbol]) {
+        if (quotes && selectedSymbol && quotes[selectedSymbol]) {
             setLimitPrice(quotes[selectedSymbol].ltp || 0);
         }
     }, [selectedSymbol, quotes]);
 
-    const quote = quotes[selectedSymbol] || { ltp: 0, bid: 0, ask: 0, dayChange: 0 };
+    const quote = (quotes && selectedSymbol && quotes[selectedSymbol]) || { ltp: 0, bid: 0, ask: 0, dayChange: 0 };
     const currentPrice = quote.ltp || 0;
-    const lotSize = selectedSymbol.includes('NIFTY') ? (selectedSymbol === 'BANKNIFTY' ? 15 : 65) : 1; // Fixed NIFTY to 65
+    const lotSize = (selectedSymbol && selectedSymbol.includes('NIFTY')) ? (selectedSymbol === 'BANKNIFTY' ? 15 : 65) : 1; // Fixed NIFTY to 65
     const totalQty = lots * lotSize;
 
     const calculatePnL = (targetPrice, isSl) => {
@@ -83,9 +90,6 @@ export default function UnifiedRightPanel({
         let diff;
 
         // FIX: Correct PnL Direction
-        // If Buying (Long): Profit if Exit (TP) > Entry. Loss if Exit (SL) < Entry.
-        // If Selling (Short): Profit if Exit (TP) < Entry. Loss if Exit (SL) > Entry.
-
         if (side === 'buy') {
             diff = price - entry;
         } else {
@@ -122,16 +126,18 @@ export default function UnifiedRightPanel({
 
         // VALIDATION STEP
         if (orderType === 'market' || orderType === 'limit') {
-            // For limit orders, validation might differ slightly (limit price vs current price)
-            // But for now, validate against execution price
             const executionPrice = orderType === 'limit' ? limitPrice : currentPrice;
-
             const validation = validateOrder(finalSide, executionPrice, finalSl, finalTp);
 
             if (!validation.isValid) {
                 validation.errors.forEach(err => addToast(err, 'error'));
                 return; // STOP EXECUTION
             }
+        }
+
+        // CONFIRMATION Dialog Logic
+        if (!oneClickEnabled && settings?.['confirm-order'] && !window.confirm(`Confirm ${finalSide.toUpperCase()} Order?\n\nSymbol: ${selectedSymbol}\nLots: ${lots}\nType: ${orderType.toUpperCase()}`)) {
+            return;
         }
 
         setOrderExecuting(true);
@@ -151,7 +157,7 @@ export default function UnifiedRightPanel({
     if (!isOpen) return null;
 
     return (
-        <div className="flex flex-col h-full bg-surface border-l border-border relative overflow-hidden select-none transition-colors duration-300">
+        <div className="w-[320px] flex flex-col h-full bg-surface border-l border-border relative overflow-hidden select-none transition-colors duration-300">
 
             {/* TAB HEADER */}
             <div className="flex bg-background border-b border-border h-12 shrink-0">
@@ -197,13 +203,13 @@ export default function UnifiedRightPanel({
                                 <div className="flex flex-col">
                                     <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-1">Portfolio Balance</span>
                                     <span className="text-sm font-mono font-black text-primary">
-                                        ${(parseFloat(account?.balance) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₹{(parseFloat(account?.balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </div>
                                 <div className="flex flex-col items-end border-l border-border pl-4">
                                     <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-1">Liquid Equity</span>
                                     <span className={`text-sm font-mono font-black ${account?.equity >= account?.balance ? 'text-green-500' : 'text-red-500'}`}>
-                                        ${(parseFloat(account?.equity) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₹{(parseFloat(account?.equity) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </div>
                             </div>
@@ -296,7 +302,7 @@ export default function UnifiedRightPanel({
                                                 </div>
                                                 {slEnabled && slPrice && (
                                                     <span className="text-[9px] font-mono font-bold text-red-500">
-                                                        Est: ${calculatePnL(slPrice, true).toFixed(2)}
+                                                        Est: -₹{Math.abs(calculatePnL(slPrice, true)).toFixed(2)}
                                                     </span>
                                                 )}
                                             </div>
@@ -344,7 +350,7 @@ export default function UnifiedRightPanel({
                                                 </div>
                                                 {tpEnabled && tpPrice && (
                                                     <span className="text-[9px] font-mono font-bold text-green-500">
-                                                        Est: +${calculatePnL(tpPrice, false).toFixed(2)}
+                                                        Est: +₹{Math.abs(calculatePnL(tpPrice, false)).toFixed(2)}
                                                     </span>
                                                 )}
                                             </div>
@@ -389,7 +395,8 @@ export default function UnifiedRightPanel({
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingDown className="w-12 h-12" /></div>
                                         <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">{account?.status === 'failed' ? 'LOCKED' : 'DIRECT SELL'}</span>
                                         <span className="text-sm font-mono font-black">{quote.bid?.toFixed(2) || currentPrice.toFixed(2)}</span>
-                                        <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '50U' : '15U'}</span>
+
+                                        <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '65U' : '15U'}</span>
                                         {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
                                     </button>
                                     <button
@@ -400,7 +407,7 @@ export default function UnifiedRightPanel({
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingUp className="w-12 h-12" /></div>
                                         <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">{account?.status === 'failed' ? 'LOCKED' : 'DIRECT BUY'}</span>
                                         <span className="text-sm font-mono font-black">{quote.ask?.toFixed(2) || currentPrice.toFixed(2)}</span>
-                                        <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '50U' : '15U'}</span>
+                                        <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '65U' : '15U'}</span>
                                         {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
                                     </button>
                                 </div>

@@ -131,5 +131,17 @@ export function AlgoProvider({ children }) {
     );
 }
 
-export const useAlgo = () => useContext(AlgoContext);
+export const useAlgo = () => {
+    const context = useContext(AlgoContext);
+    if (!context) {
+        // Fallback when context is not available
+        return {
+            activeBots: [],
+            startBot: () => { },
+            stopBot: () => { },
+            availableStrategies: []
+        };
+    }
+    return context;
+};
 

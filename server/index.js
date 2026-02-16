@@ -7,13 +7,6 @@ dotenv.config();
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server, {
-    cors: {
-        origin: "*", // Allow all origins for development
-        methods: ["GET", "POST"]
-    }
-});
 
 const PORT = process.env.PORT || 5000;
 
@@ -25,8 +18,6 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Make io accessible to routes
-app.set('socketio', io);
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
@@ -44,18 +35,26 @@ app.use('/api/admin', adminRoutes);
 const algoRoutes = require('./routes/algo');
 app.use('/api/algo', algoRoutes);
 
-const upstoxRoutes = require('./routes/upstox');
-app.use('/api/upstox', upstoxRoutes);
+// Upstox integration disabled - using Optivon Market Data API instead
+// const upstoxRoutes = require('./routes/upstox');
+// app.use('/api/upstox', upstoxRoutes);
 
 // Initialize Upstox Service with IO
-const upstoxService = require('./services/upstox');
-upstoxService.init(io);
+// const upstoxService = require('./services/upstox');
+// upstoxService.init(io);
 
 // const market = require('./engine/market');
 // market.start(); // Disable default simulation to avoid conflict with Upstox
 
 const riskManager = require('./engine/riskManager');
 riskManager.start();
+
+// Initialize Market WebSocket Server for historical data replay
+const MarketWebSocketServer = require('./engine/marketWebSocket');
+const marketWS = new MarketWebSocketServer(server);
+console.log('✅ Market Data WebSocket Server initialized');
+
+
 
 app.get('/api/health', (req, res) => {
     res.send({ message: 'Optivon API Running', status: 'Active' });
@@ -75,10 +74,3 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-// Handle socket connections
-io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
-    socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id);
-    });
-});

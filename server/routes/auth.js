@@ -77,20 +77,28 @@ router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
     db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
-        if (err) return res.status(500).send({ error: 'Database error' });
+        if (err) {
+            console.error('[Login] Database error:', err);
+            return res.status(500).send({ error: 'Database error' });
+        }
         if (!user) return res.status(400).send({ error: 'Invalid credentials' });
 
-        const match = await bcrypt.compare(password, user.password_hash);
-        if (!match) return res.status(400).send({ error: 'Invalid credentials' });
+        try {
+            const match = await bcrypt.compare(password, user.password_hash);
+            if (!match) return res.status(400).send({ error: 'Invalid credentials' });
 
-        // Check 2FA
-        if (user.two_fa_enabled) {
-            return res.send({ require2FA: true, userId: user.id });
+            // Check 2FA
+            if (user.two_fa_enabled) {
+                return res.send({ require2FA: true, userId: user.id });
+            }
+
+            // Issue Token
+            const token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
+            res.send({ message: 'Login Successful', token, user: { id: user.id, email: user.email, is_admin: user.is_admin } });
+        } catch (error) {
+            console.error('[Login] Error:', error);
+            res.status(500).send({ error: 'Login failed: ' + error.message });
         }
-
-        // Issue Token
-        const token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
-        res.send({ message: 'Login Successful', token, user: { id: user.id, email: user.email, is_admin: user.is_admin } });
     });
 });
 

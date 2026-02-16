@@ -2,7 +2,17 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
 
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme = () => {
+    const context = useContext(ThemeContext);
+    if (!context) {
+        console.warn('[useTheme] Context not available, returning fallback');
+        return {
+            theme: 'dark',
+            toggleTheme: () => { }
+        };
+    }
+    return context;
+};
 
 export const ThemeProvider = ({ children }) => {
     // Default to 'dark' if no preference, or check system preference

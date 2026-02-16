@@ -318,52 +318,63 @@ function DashboardContent({ user, onLogout }) {
                                 <h2 className="text-4xl font-black text-primary font-display mb-4">INITIATE PROTOCOL</h2>
                                 <p className="text-secondary font-medium text-sm max-w-lg mx-auto leading-relaxed">Select the challenge that matches your skill level. Pass the evaluation to earn performance-based rewards.</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl w-full px-4 mb-20 mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-full px-4 mb-20">
                                 <PricingCard
-                                    title="Starter"
-                                    price="₹2,999"
-                                    subtitle="Perfect for beginners testing their skills"
-                                    features={[
-                                        "₹1,00,000 simulated capital",
-                                        "₹8,000 profit target",
-                                        "5% max drawdown",
-                                        "30 days duration",
-                                        "Basic analytics",
-                                        "Email support"
-                                    ]}
-                                    onSelect={() => handlePurchase('Starter', 100000)}
-                                />
-                                <PricingCard
-                                    title="Intermediate"
-                                    price="₹5,999"
-                                    subtitle="For traders ready to scale up"
-                                    isPopular={true}
-                                    features={[
-                                        "₹3,00,000 simulated capital",
-                                        "₹24,000 profit target",
-                                        "6% max drawdown",
-                                        "45 days duration",
-                                        "Advanced analytics",
-                                        "Priority support",
-                                        "Risk management tools"
-                                    ]}
-                                    onSelect={() => handlePurchase('Intermediate', 300000)}
-                                />
-                                <PricingCard
-                                    title="Advanced"
-                                    price="₹9,999"
-                                    subtitle="Maximum capital for experienced traders"
+                                    title="5L Account"
+                                    price="₹3,000"
+                                    subtitle="Starter Tier"
                                     features={[
                                         "₹5,00,000 simulated capital",
+                                        "3 Max Lots",
                                         "₹40,000 profit target",
-                                        "7% max drawdown",
-                                        "60 days duration",
-                                        "Premium analytics",
-                                        "24/7 support",
-                                        "Advanced risk tools",
-                                        "API access"
+                                        "3% max drawdown",
+                                        "No Time Limit",
+                                        "Basic Support"
                                     ]}
-                                    onSelect={() => handlePurchase('Advanced', 500000)}
+                                    onSelect={() => handlePurchase('5L', 500000)}
+                                />
+                                <PricingCard
+                                    title="10L Account"
+                                    price="₹5,000"
+                                    subtitle="Standard Tier"
+                                    isPopular={true}
+                                    features={[
+                                        "₹10,00,000 simulated capital",
+                                        "5 Max Lots",
+                                        "₹80,000 profit target",
+                                        "3% max drawdown",
+                                        "No Time Limit",
+                                        "Priority Support"
+                                    ]}
+                                    onSelect={() => handlePurchase('10L', 1000000)}
+                                />
+                                <PricingCard
+                                    title="20L Account"
+                                    price="₹12,000"
+                                    subtitle="Pro Tier"
+                                    features={[
+                                        "₹20,00,000 simulated capital",
+                                        "8 Max Lots",
+                                        "₹1.6L profit target",
+                                        "3% max drawdown",
+                                        "No Time Limit",
+                                        "Dedicated Manager"
+                                    ]}
+                                    onSelect={() => handlePurchase('20L', 2000000)}
+                                />
+                                <PricingCard
+                                    title="50L Account"
+                                    price="₹22,000"
+                                    subtitle="Elite Tier"
+                                    features={[
+                                        "₹50,00,000 simulated capital",
+                                        "12 Max Lots",
+                                        "₹4L profit target",
+                                        "3% max drawdown",
+                                        "No Time Limit",
+                                        "Direct API Access"
+                                    ]}
+                                    onSelect={() => handlePurchase('50L', 5000000)}
                                 />
                             </div>
                         </div>
@@ -378,7 +389,7 @@ const StatBox = ({ label, value, color, isActive }) => (
     <div className={`p-4 border rounded-xl backdrop-blur-sm transition-all ${isActive ? 'border-accent bg-accent/5 shadow-sm' : 'border-border bg-surface'}`}>
         <div className="text-[10px] text-secondary mb-1 uppercase tracking-widest font-black">{label}</div>
         <div className={`text-xl font-black font-mono tracking-tight ${color || 'text-primary'}`}>
-            ${value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
     </div>
 );

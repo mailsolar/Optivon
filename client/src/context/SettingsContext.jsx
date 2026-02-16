@@ -28,12 +28,6 @@ const DEFAULT_SETTINGS = {
     'max-position-size': 10,
     'stop-loss-required': true,
 
-    // Trading
-    'one-click-trading': false,
-    'confirm-order': true,
-    'show-trade-levels': true,
-    'expert-advisors': false,
-
     // Appearance
     'theme': 'OptiVon Dark',
     'chart-bg': '#0a0e27',
@@ -43,7 +37,18 @@ const DEFAULT_SETTINGS = {
     'version': 2 // Increment to force reset
 };
 
-export const useSettings = () => useContext(SettingsContext);
+export const useSettings = () => {
+    const context = useContext(SettingsContext);
+    if (!context) {
+        console.warn('[useSettings] Context not available, returning fallback');
+        return {
+            settings: DEFAULT_SETTINGS,
+            updateSetting: () => { },
+            resetSettings: () => { }
+        };
+    }
+    return context;
+};
 
 export const SettingsProvider = ({ children }) => {
     const [settings, setSettings] = useState(() => {

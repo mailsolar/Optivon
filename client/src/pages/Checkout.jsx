@@ -20,6 +20,7 @@ export default function Checkout() {
     const [otp, setOtp] = useState('');
     const [authStep, setAuthStep] = useState('input'); // 'input', 'verify', 'done' (or if user is already logged in)
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const activeModel = MODELS.find(m => m.id === selectedModelId);
     const activeSize = SIZES.find(s => s.id === selectedSizeId);
@@ -36,7 +37,8 @@ export default function Checkout() {
     };
 
     const handleSendOTP = async () => {
-        if (!email || !password) return alert("Please fill in email and password");
+        setError('');
+        if (!email || !password) return setError("Please fill in email and password");
         setIsLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/auth/send-otp-register`, {
@@ -47,18 +49,19 @@ export default function Checkout() {
             const data = await res.json();
             if (res.ok) {
                 setAuthStep('verify');
-                alert(`OTP Sent! (Dev: ${data.devOTP})`); // Remove dev hint in prod
+                // alert(`OTP Sent! (Dev: ${data.devOTP})`); // Remove dev hint in prod
             } else {
-                alert(data.error);
+                setError(data.error);
             }
         } catch (err) {
-            alert("Failed to send OTP");
+            setError("Failed to send OTP. Please check your connection.");
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleVerifyAndRegister = async () => {
+        setError('');
         setIsLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -69,12 +72,7 @@ export default function Checkout() {
             const data = await res.json();
 
             if (res.ok) {
-                // Auto-login after register (simplified for flow)
-                // In a real app, you might want to call the login endpoint to get a token
-                // For now, let's assume successful registration means they are ready to pay
-                // Or better, let's trigger a real background login to set the context
-
-                // Triggering Login (re-using login logic or hitting login endpoint)
+                // Triggering Login
                 const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -86,21 +84,50 @@ export default function Checkout() {
                     login(loginData.user, loginData.token);
                     setAuthStep('done');
                 } else {
-                    alert("Registration successful, but auto-login failed. Please login manually.");
+                    setError("Registration successful, but auto-login failed. Please login manually.");
                 }
             } else {
-                alert(data.error);
+                setError(data.error);
             }
         } catch (err) {
-            alert("Registration Failed");
+            setError("Registration Failed. Please try again.");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleCreateOrder = () => {
-        // Placeholder for Payment Gateway Integration
-        alert(`Creating order for ${user?.email || email}...\nPrice: ₹${activeSize.price}`);
+    const handleCreateOrder = async () => {
+        if (!user) return setError("User not authenticated.");
+        setIsLoading(true);
+        try {
+            // Simulate Payment Success & Create Account
+            // In a real app, this would be a redirect to PG, then webhook callback
+            // Here we assume payment is done and we call the purchase endpoint directly
+
+            // Using the same purchase endpoint as Dashboard
+            const res = await fetch(`${API_BASE_URL}/api/trade/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ type: activeModel.label, size: activeSize.value })
+            });
+
+            if (res.ok) {
+                // alert("Payment Successful! Redirecting to Dashboard...");
+                navigate('/dashboard');
+            } else {
+                const data = await res.json();
+                alert(data.error || "Purchase Failed");
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert("Payment Processing Failed");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -195,7 +222,7 @@ export default function Checkout() {
                             <DetailItem label="Daily Drawdown" value={activeData.dailyDrawdown} sub={calculateValue(activeData.dailyDrawdown)} />
                             <DetailItem label="Max Drawdown" value={activeData.maxDrawdown} sub={calculateValue(activeData.maxDrawdown)} />
                             <DetailItem label="Leverage" value={activeData.leverage} />
-                            <DetailItem label="Max Lots" value={activeData.maxLots} />
+                            <DetailItem label="Max Lots" value={`${activeSize.maxLots} Lots`} />
                             <DetailItem label="Profit Split" value={activeData.profitSplit} />
                         </div>
                     </div>
@@ -220,7 +247,7 @@ export default function Checkout() {
                                             placeholder="trader@optivon.com"
                                             className="w-full bg-[#0a0a0f] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-lime transition-colors"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => { setEmail(e.target.value); setError(''); }}
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -230,10 +257,11 @@ export default function Checkout() {
                                             placeholder="••••••••"
                                             className="w-full bg-[#0a0a0f] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-lime transition-colors"
                                             value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
+                                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
                                         />
                                     </div>
                                 </div>
+                                {error && <div className="text-red-500 text-xs text-center mb-4 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{error}</div>}
                                 <button
                                     onClick={handleSendOTP}
                                     disabled={isLoading}
@@ -249,13 +277,15 @@ export default function Checkout() {
                                 <h3 className="text-xl font-bold text-white mb-2">Verify Email</h3>
                                 <p className="text-gray-400 text-sm mb-6">Enter the code sent to <span className="text-white">{email}</span></p>
 
+                                {error && <div className="text-red-500 text-xs mb-4 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{error}</div>}
+
                                 <input
                                     type="text"
                                     placeholder="000000"
                                     maxLength={6}
                                     className="w-48 bg-[#0a0a0f] border border-white/10 rounded-xl px-4 py-4 text-center text-2xl tracking-[0.5em] font-mono text-brand-lime focus:outline-none focus:border-brand-lime transition-colors mb-6"
                                     value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
+                                    onChange={(e) => { setOtp(e.target.value); setError(''); }}
                                 />
 
                                 <div className="flex gap-4">

@@ -5,11 +5,11 @@ const AlertContext = createContext();
 
 export const useAlerts = () => {
     const context = useContext(AlertContext);
-    if (!context) return { alerts: [], addAlert: () => { }, removeAlert: () => { }, clearTriggered: () => { } };
+    if (!context) return { alerts: [], addAlert: () => { }, removeAlert: () => { }, clearTriggered: () => { }, checkAlerts: () => { } };
     return context;
 };
 
-export const AlertProvider = ({ children, quotes }) => {
+export const AlertProvider = ({ children }) => {
     const [alerts, setAlerts] = useState(() => {
         const saved = localStorage.getItem('price_alerts');
         return saved ? JSON.parse(saved) : [];
@@ -40,54 +40,48 @@ export const AlertProvider = ({ children, quotes }) => {
         setAlerts(prev => prev.filter(a => !a.triggered));
     }, []);
 
-    // Check alerts against price updates
-    useEffect(() => {
+    // Logic to check alerts against provided quotes
+    const checkAlerts = useCallback((quotes) => {
         if (!quotes) return;
 
-        let triggeredAny = false;
-        const updatedAlerts = alerts.map(alert => {
-            if (alert.triggered) return alert;
+        setAlerts(prevAlerts => {
+            let triggeredAny = false;
+            const updatedAlerts = prevAlerts.map(alert => {
+                if (alert.triggered) return alert;
 
-            const currentQuote = quotes[alert.symbol];
-            if (!currentQuote) return alert;
+                const currentQuote = quotes[alert.symbol];
+                if (!currentQuote) return alert;
 
-            const currentPrice = currentQuote.ltp;
+                const currentPrice = currentQuote.ltp;
+                let isTriggered = false;
 
-            // Check if price crossed the target
-            // If direction is 'buy' (expecting price to go UP to target)
-            // If direction is 'sell' (expecting price to go DOWN to target)
-            // Or more simply based on where current price was when set.
-            // Let's use a simple cross check:
-            let isTriggered = false;
-            if (alert.initialPrice < alert.targetPrice) {
-                // We are waiting for price to go UP
-                if (currentPrice >= alert.targetPrice) isTriggered = true;
-            } else {
-                // We are waiting for price to go DOWN
-                if (currentPrice <= alert.targetPrice) isTriggered = true;
-            }
+                if (alert.initialPrice < alert.targetPrice) {
+                    // Waiting for check UP
+                    if (currentPrice >= alert.targetPrice) isTriggered = true;
+                } else {
+                    // Waiting for check DOWN
+                    if (currentPrice <= alert.targetPrice) isTriggered = true;
+                }
 
-            if (isTriggered) {
-                triggeredAny = true;
-                addToast(`🔔 ALERT: ${alert.symbol} reached ${alert.targetPrice}!`, 'info');
-                // Play sound if possible
-                try {
-                    const audio = new Audio('/alert-sound.mp3'); // Assuming one exists or fallback
-                    audio.play().catch(() => { });
-                } catch (e) { }
+                if (isTriggered) {
+                    triggeredAny = true;
+                    addToast(`🔔 ALERT: ${alert.symbol} reached ${alert.targetPrice}!`, 'info');
+                    try {
+                        const audio = new Audio('/alert-sound.mp3');
+                        audio.play().catch(() => { });
+                    } catch (e) { }
 
-                return { ...alert, triggered: true };
-            }
-            return alert;
+                    return { ...alert, triggered: true };
+                }
+                return alert;
+            });
+
+            return triggeredAny ? updatedAlerts : prevAlerts;
         });
-
-        if (triggeredAny) {
-            setAlerts(updatedAlerts);
-        }
-    }, [quotes, alerts, addToast]);
+    }, [addToast]);
 
     return (
-        <AlertContext.Provider value={{ alerts, addAlert, removeAlert, clearTriggered }}>
+        <AlertContext.Provider value={{ alerts, addAlert, removeAlert, clearTriggered, checkAlerts }}>
             {children}
         </AlertContext.Provider>
     );

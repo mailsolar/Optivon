@@ -14,16 +14,17 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
     if (!isOpen) return null;
 
     const levels = [
-        { id: '5k', label: 'Starter', size: 5000, price: 3999, color: 'text-brand-lime' },
-        { id: '10k', label: 'Pro', size: 10000, price: 5999, color: 'text-brand-blue' },
-        { id: '25k', label: 'Elite', size: 25000, price: 8999, color: 'text-purple-400' },
+        { id: '5L', label: '5L', size: 500000, price: 3000, color: 'text-brand-lime' },
+        { id: '10L', label: '10L', size: 1000000, price: 5000, color: 'text-brand-blue' },
+        { id: '20L', label: '20L', size: 2000000, price: 12000, color: 'text-purple-400' },
+        { id: '50L', label: '50L', size: 5000000, price: 22000, color: 'text-orange-400' },
     ];
 
     const handleBuy = async () => {
         setLoading(true);
         try {
             const selected = levels.find(l => l.id === selectedLevel);
-            await onPurchase({ type: 'Regular', size: selected.size, price: selected.price });
+            await onPurchase({ type: selected.label, size: selected.size, price: selected.price });
             onClose();
         } catch (e) {
             // Error handled by parent
@@ -52,9 +53,9 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                                     }`}
                             >
                                 <div>
-                                    <h4 className={`font-bold ${level.color}`}>{level.label}</h4>
-                                    <p className="text-xs text-gray-400 uppercase tracking-widest font-mono">Size: ${level.size.toLocaleString()}</p>
-                                    <p className="text-sm font-bold text-white mt-1">₹{level.price.toLocaleString()}</p>
+                                    <h4 className={`font-bold ${level.color}`}>{level.label} Account</h4>
+                                    <p className="text-xs text-gray-400 uppercase tracking-widest font-mono">Size: ₹{level.size.toLocaleString('en-IN')}</p>
+                                    <p className="text-sm font-bold text-white mt-1">₹{level.price.toLocaleString('en-IN')}</p>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedLevel === level.id ? 'border-brand-lime' : 'border-gray-600'
                                     }`}>
@@ -224,12 +225,12 @@ export default function AccountsOverview() {
                                                 <div className="flex flex-col">
                                                     <span className="text-brand-lime font-mono text-xs mb-1">ID: #{acc.id.toString().padStart(4, '0')}</span>
                                                     <span className="font-bold">{acc.type}</span>
-                                                    <span className="text-xs text-gray-500">Size: ${acc.size.toLocaleString()}</span>
+                                                    <span className="text-xs text-gray-500">Size: ₹{acc.size.toLocaleString('en-IN')}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="font-mono text-lg font-bold text-white tracking-tight">
-                                                    ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                    ₹{acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-400 font-mono">

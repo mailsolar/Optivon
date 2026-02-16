@@ -1,6 +1,5 @@
 const db = require('../database');
 // const market = require('./market'); // Removed
-const upstoxService = require('../services/upstox');
 
 class RiskManager {
     constructor() {
@@ -112,11 +111,12 @@ class RiskManager {
 
 
         // 2. Max Drawdown Check
-        // Challenge (Active): 8%
-        // Funded: 10%
-        let maxDDPercent = 0.08;
+        // Rule: 3% Max Drawdown (Fixed based on user requirement)
+        let maxDDPercent = 0.03;
+
+        // Funded accounts might have different rules, but sticking to 3% hard limit as per request for now
         if (account.status === 'funded') {
-            maxDDPercent = 0.10;
+            maxDDPercent = 0.03; // Keep consistency unless specified
         }
 
         const maxDrawdownLimit = account.size * maxDDPercent;
@@ -127,14 +127,16 @@ class RiskManager {
             return;
         }
 
-        // 3. Daily Drawdown Check (4% of Day Start Equity)
-        // Daily Start Balance is reset at 00:00 UTC (or handled by a separate cron)
+        // 3. Daily Drawdown Check (2% of Day Start Equity)
+        // Daily Start Balance is reset at 00:00 IST
         const dailyStart = account.daily_start_balance || account.balance;
-        const dailyLossLimit = dailyStart * 0.04; // 4% Rule
+
+        // Rule: 2% Daily Drawdown
+        const dailyLossLimit = dailyStart * 0.02;
         const breachLevelDaily = dailyStart - dailyLossLimit;
 
         if (currentEquity <= breachLevelDaily) {
-            await this.failAccount(account, 'DAILY_DRAWDOWN', `Equity ${currentEquity.toFixed(2)} below daily limit ${breachLevelDaily.toFixed(2)} (4%)`);
+            await this.failAccount(account, 'DAILY_DRAWDOWN', `Equity ${currentEquity.toFixed(2)} below daily limit ${breachLevelDaily.toFixed(2)} (2% of ${dailyStart})`);
             return;
         }
 
@@ -173,8 +175,6 @@ class RiskManager {
         // 1. Close all Open Positions
         await new Promise(resolve => {
             const closeTime = new Date().toISOString();
-            // We should ideally calculate final PnL for record keeping, but primarily we just close them.
-            // A simple batch update:
             db.run(`UPDATE trades 
                     SET status = 'closed', 
                         close_time = ?, 
@@ -196,15 +196,8 @@ class RiskManager {
         const profit = currentEquity - account.size;
         const profitPct = profit / account.size;
 
-        // Determine Target
-        let target = 0.10; // Default 1-Step
-        if (account.type === '2-Step') {
-            if (account.phase === 1) target = 0.08;
-            else if (account.phase === 2) target = 0.05;
-        } else {
-            // 1-Step
-            target = 0.10;
-        }
+        // Determine Target: 8% (0.08)
+        let target = 0.08;
 
         if (profitPct >= target) {
             // New Rule: No Min Trading Days, but MIN 2 TRADES placed.
@@ -234,41 +227,67 @@ class RiskManager {
             newPhase = 2;
             details = 'Passed Phase 1. Upgraded to Phase 2.';
             // Reset Balance for Phase 2? 
-            // Usually balance resets to size, but we keep history. 
-            // For simplicity, we just update phase. User might need to "Reset" manually or we handle it here.
-            // Let's reset balance to size for fair Phase 2 start.
             db.run("UPDATE accounts SET phase = ?, balance = ?, equity = ?, daily_start_balance = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?",
                 [2, account.size, account.size, account.size, account.id]);
         } else {
             // 1-Step Passed OR 2-Step Phase 2 Passed -> FUNDED
             newStatus = 'funded';
-            newPhase = 'funded'; // Or keep numeric? Let's use status 'funded'
+            newPhase = 'funded';
             details = 'Account Funded!';
 
             db.run("UPDATE accounts SET status = 'funded' WHERE id = ?", [account.id]);
         }
 
-        // Log Event (using violations table for now or a new notifications table)
+        // Log Event
         db.run("INSERT INTO violations (account_id, type, details, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
             [account.id, 'OBJECTIVE_MET', details]);
     }
+
     async checkMarketHours() {
-        // ... (existing logic) ...
         const now = new Date();
         const istOffset = 5.5 * 60 * 60 * 1000;
         const istTime = new Date(now.getTime() + istOffset);
         const hours = istTime.getUTCHours();
         const minutes = istTime.getUTCMinutes();
 
-        // 15:25 = 3 PM 25 Min
+        // 1. Daily Reset at 00:00 IST
+        // Check if we already reset for today (simple in-memory check or check DB last_reset?)
+        // For simplicity in this loop, we can check if hours === 0 && minutes === 0
+        // But since loop runs every second, we need a flag or check.
+        // Better: Check if `daily_start_balance_date` < today? 
+        // Or simply: If it's 00:00, run reset. But ensure it runs only once.
+        if (hours === 0 && minutes === 0 && !this.dailyResetDone) {
+            console.log("[RISK] Daily Reset Triggered (00:00 IST)");
+            await this.resetDailyStats();
+            this.dailyResetDone = true;
+        }
+        if (hours === 0 && minutes === 1) {
+            this.dailyResetDone = false; // Reset flag
+        }
+
+        // 2. Market Close at 15:25 IST
         if (hours === 15 && minutes >= 25) {
             // Close All Open Positions
-            console.log("[RISK] Market Closed (15:25). Auto-Squareoff Triggered.");
-            // Only update open trades
-            await new Promise(resolve => {
-                db.run(`UPDATE trades SET status = 'closed', close_time = CURRENT_TIMESTAMP, notes = 'AUTO_SQUAREOFF' WHERE status = 'open'`, [], (err) => resolve());
+            // console.log("[RISK] Market Closed (15:25). Auto-Squareoff Triggered."); // Logs too much
+            // Only log if we actually close something
+            // Optimization: checking if any open trades exist before running update? 
+            // Running update is cheap if no rows match.
+            db.run(`UPDATE trades SET status = 'closed', close_time = CURRENT_TIMESTAMP, notes = 'AUTO_SQUAREOFF' WHERE status = 'open'`, [], (err) => {
+                if (this.changes > 0) console.log("[RISK] Market Close Squareoff Executed.");
             });
         }
+    }
+
+    async resetDailyStats() {
+        // Reset daily_start_balance to current Balance (equity might be floating, but daily DD is usually based on Balance or Equity at start of day)
+        // Standard rule: Balance at 00:00 (or Equity if higher? Usually Balance).
+        // Let's set daily_start_balance = current equity (mark to market).
+
+        console.log("[RISK] Resetting Daily Stats for all Active Accounts...");
+
+        // We need to iterate or do a bulk update.
+        // UPDATE accounts SET daily_start_balance = equity
+        db.run("UPDATE accounts SET daily_start_balance = equity WHERE status IN ('active', 'funded')");
     }
 
     async checkPayouts() {

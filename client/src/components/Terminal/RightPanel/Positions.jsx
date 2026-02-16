@@ -56,7 +56,7 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                                 </div>
                                 <div className="text-right">
                                     <div className={`text-sm font-mono font-black ${isProfit ? 'text-emerald-500' : 'text-red-500'}`}>
-                                        {isProfit ? '+' : ''}{pnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        {isProfit ? '+' : ''}₹{Math.abs(pnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
                                     <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Real-Time P&L</div>
                                 </div>
@@ -85,7 +85,7 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                 <div className="flex justify-between items-center mb-1">
                     <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Aggregate Exposure</span>
                     <span className={`text-xl font-mono font-black ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {totalPnL >= 0 ? '+' : ''}{totalPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {totalPnL >= 0 ? '+' : ''}₹{Math.abs(totalPnL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                 </div>
                 <div className="text-[8px] text-gray-600 font-bold uppercase tracking-[3px] text-right">Net Portfolio Value</div>

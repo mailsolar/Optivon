@@ -50,7 +50,7 @@ export default function Orders({ accountId }) {
             return (
                 <div className="flex flex-col items-center justify-center h-40 text-gray-500 text-xs">
                     <div className="mb-2 opacity-50 text-2xl">📝</div>
-                    <p>No {isHistory ? 'history' : 'pending orders'}</p>
+                    <p className="uppercase tracking-widest font-bold">No {isHistory ? 'History' : 'Active Orders'}</p>
                 </div>
             );
         }
@@ -67,17 +67,17 @@ export default function Orders({ accountId }) {
                         {item.status.toUpperCase()}
                     </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span className={item.side === 'buy' ? 'text-blue-400' : 'text-orange-400'}>
+                <div className="flex justify-between text-xs text-secondary mb-1 font-mono">
+                    <span className={`font-bold ${item.side === 'buy' ? 'text-green-400' : 'text-red-400'}`}>
                         {item.side.toUpperCase()} {item.lots} L
                     </span>
-                    <span>@ {item.entry_price ? item.entry_price.toFixed(2) : item.limit_price?.toFixed(2)}</span>
+                    <span>@ ₹{parseFloat(item.entry_price || item.limit_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 {item.status === 'closed' && (
-                    <div className="flex justify-between text-[10px] mt-1">
-                        <span className="text-gray-600">PnL:</span>
-                        <span className={`font-mono ${item.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {item.pnl >= 0 ? '+' : ''}{item.pnl?.toFixed(2)}
+                    <div className="flex justify-between text-[10px] mt-2 pt-2 border-t border-white/5">
+                        <span className="text-secondary/50 uppercase tracking-wider">Realized PnL</span>
+                        <span className={`font-mono font-bold ${item.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {item.pnl >= 0 ? '+' : ''}₹{Math.abs(item.pnl || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                     </div>
                 )}

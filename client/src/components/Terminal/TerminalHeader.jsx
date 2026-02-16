@@ -33,12 +33,13 @@ export default function TerminalHeader({
     setChartType,
     isPanelOpen,
     onOpenSettings,
-    onOpenAlerts
+    onOpenAlerts,
+    allAccounts = [],
+    onSelectAccount,
 }) {
     const navigate = useNavigate();
     const [showChartMenu, setShowChartMenu] = useState(false);
     const { alerts } = useAlerts();
-    const [timeLeft, setTimeLeft] = useState("");
     const [currentTime, setCurrentTime] = useState(getCurrentTimeIST());
 
     useEffect(() => {
@@ -50,23 +51,6 @@ export default function TerminalHeader({
 
     // Badge for active (untriggered) alerts
     const activeAlertsCount = alerts.filter(a => !a.triggered).length;
-
-    useEffect(() => {
-        if (!account?.session_expires) return;
-        const timer = setInterval(() => {
-            const diff = new Date(account.session_expires) - new Date();
-            if (diff <= 0) {
-                setTimeLeft("EXPIRED");
-                clearInterval(timer);
-            } else {
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diff % (1000 * 60)) / 1000);
-                setTimeLeft(`${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
-            }
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [account]);
 
     const chartTypes = [
         { id: 'candlestick', label: 'Candlesticks', icon: CandlestickChart },
@@ -100,35 +84,54 @@ export default function TerminalHeader({
                     </div>
                 </div>
 
-                {/* Account Metrics */}
+                {/* Account Selector & Metrics */}
                 {account ? (
                     <div className="flex items-center gap-8 border-l border-border pl-10 hidden sm:flex">
+                        {/* Account Selector */}
+                        <div className="relative group/acc">
+                            <button className="flex flex-col items-start gap-1 group-hover/acc:opacity-80 transition-opacity">
+                                <span className="text-[8px] font-black text-secondary uppercase tracking-widest flex items-center gap-1">
+                                    Account #{account.id} <ChevronDown className="w-3 h-3" />
+                                </span>
+                                <span className="text-xs font-mono font-black text-white bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                                    {account.type}
+                                </span>
+                            </button>
+
+                            {/* Dropdown */}
+                            <div className="absolute top-full left-0 mt-2 w-48 bg-[#1e1e24] border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover/acc:block z-50">
+                                <div className="py-1">
+                                    {(allAccounts || []).map(acc => (
+                                        <button
+                                            key={acc.id}
+                                            onClick={() => onSelectAccount && onSelectAccount(acc)}
+                                            className={`w-full text-left px-4 py-2 text-xs flex justify-between items-center hover:bg-white/5 transition-colors ${account.id === acc.id ? 'bg-brand-lime/10 text-brand-lime' : 'text-gray-400'}`}
+                                        >
+                                            <span className="font-mono">#{acc.id}</span>
+                                            <span className="font-bold">{acc.type}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="flex flex-col">
                             <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-0.5">Live Balance</span>
                             <span className="text-xs font-mono font-black text-white">
-                                ${parseFloat(account?.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ₹{parseFloat(account?.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-0.5">Floating Equity</span>
                             <span className={`text-xs font-mono font-black ${(account?.equity >= account?.balance) ? 'text-green-500' : 'text-red-500'}`}>
-                                ${parseFloat(account?.equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ₹{parseFloat(account?.equity || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
-                        </div>
-                        <div className="flex flex-col bg-background/50 px-3 py-1 rounded-lg border border-border">
-                            <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-0.5">Session Expiry</span>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-3 h-3 text-accent" />
-                                <span className={`text-[11px] font-mono font-black ${timeLeft === 'EXPIRED' ? 'text-red-500' : 'text-primary'}`}>
-                                    {timeLeft || "24:00:00"}
-                                </span>
-                            </div>
                         </div>
                     </div>
                 ) : (
                     <div className="flex items-center gap-3 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
                         <Shield className="w-3.5 h-3.5 text-red-500" />
-                        <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">Account Required for Stream</span>
+                        <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">No Active Account</span>
                     </div>
                 )}
             </div>
@@ -136,20 +139,13 @@ export default function TerminalHeader({
             {/* Right Section: Tooling */}
             <div className="flex items-center gap-3">
                 {/* Time Display (IST) */}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-background/50 border border-border rounded-lg hidden xl:flex">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-background/50 border border-border rounded-lg hidden xl:flex min-w-[100px] justify-center">
                     <Clock className="w-3.5 h-3.5 text-accent" />
                     <span className="text-[11px] font-mono font-bold text-secondary">{currentTime}</span>
                 </div>
 
                 {/* Upstox Login Button */}
-                <button
-                    onClick={() => window.location.href = 'http://localhost:5000/api/upstox/login'}
-                    className="px-3 py-1.5 bg-brand-lime/10 text-brand-lime border border-brand-lime/20 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-brand-lime/20 transition-all flex items-center gap-2"
-                    title="Connect Upstox for Live Data"
-                >
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    Connect Upstox
-                </button>
+
 
                 {/* Symbol Toggle Tabs (NIFTY / BANKNIFTY) */}
                 <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border">

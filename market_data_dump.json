@@ -1,0 +1,85 @@
+{
+  "tables": [
+    "users",
+    "sqlite_sequence",
+    "accounts",
+    "trades",
+    "limit_orders",
+    "violations",
+    "otps",
+    "payouts",
+    "market_data"
+  ],
+  "rowCount": 45000,
+  "latestRecords": [
+    {
+      "id": 11625,
+      "symbol": "BANKNIFTY",
+      "date": "2024-12-22",
+      "time": "15:29:00",
+      "timestamp": 1734861540,
+      "open": 45852.03,
+      "high": 45871.19,
+      "low": 45802.98,
+      "close": 45850.28,
+      "volume": 101808,
+      "created_at": "2026-02-13 07:44:39"
+    },
+    {
+      "id": 11624,
+      "symbol": "BANKNIFTY",
+      "date": "2024-12-22",
+      "time": "15:28:00",
+      "timestamp": 1734861480,
+      "open": 45865.65,
+      "high": 45873.15,
+      "low": 45781.63,
+      "close": 45784.35,
+      "volume": 114936,
+      "created_at": "2026-02-13 07:44:39"
+    },
+    {
+      "id": 11623,
+      "symbol": "BANKNIFTY",
+      "date": "2024-12-22",
+      "time": "15:27:00",
+      "timestamp": 1734861420,
+      "open": 45924.88,
+      "high": 46000.6,
+      "low": 45863.5,
+      "close": 45884.23,
+      "volume": 90061,
+      "created_at": "2026-02-13 07:44:39"
+    },
+    {
+      "id": 11622,
+      "symbol": "BANKNIFTY",
+      "date": "2024-12-22",
+      "time": "15:26:00",
+      "timestamp": 1734861360,
+      "open": 45885.52,
+      "high": 45905.36,
+      "low": 45874.07,
+      "close": 45875.74,
+      "volume": 161745,
+      "created_at": "2026-02-13 07:44:39"
+    },
+    {
+      "id": 11621,
+      "symbol": "BANKNIFTY",
+      "date": "2024-12-22",
+      "time": "15:25:00",
+      "timestamp": 1734861300,
+      "open": 46058.21,
+      "high": 46066.33,
+      "low": 45929.26,
+      "close": 45940.03,
+      "volume": 139728,
+      "created_at": "2026-02-13 07:44:39"
+    }
+  ],
+  "dataRange": {
+    "min_date": "2024-01-03",
+    "max_date": "2024-12-22"
+  }
+}

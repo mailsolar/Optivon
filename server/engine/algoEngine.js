@@ -1,6 +1,4 @@
 const { v4: uuidv4 } = require('uuid');
-// const market = require('./market'); // Removed
-const upstoxService = require('../services/upstox');
 const orderManager = require('./orderManager');
 const db = require('../database');
 
@@ -14,11 +12,8 @@ class AlgoEngine {
 
     init() {
         console.log("Algo Engine Initialized");
-        // market.on('tick', async (tick) => {
-        //     await this.onTick(tick);
-        // });
-
-        // TODO: Wire up to UpstoxService polling if we want Algos to run on Real Data
+        // Market tick integration disabled - algos currently run on historical replay data
+        // TODO: Wire up to Optivon Market Data WebSocket for real-time algo execution
     }
 
     async onTick(tick) {

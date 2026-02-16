@@ -15,7 +15,7 @@ router.post('/purchase', authenticateToken, (req, res) => {
             if (err) return res.status(500).send({ error: 'Database check failed' });
 
             if (row.count > 0) {
-                return res.status(400).send({ error: 'You already have an active or pending challenge of this level. Complete or expire it first.' });
+                return res.status(400).send({ error: 'You already have an active or pending challenge of this level. Please complete or reset it first.' });
             }
 
             // Create Account

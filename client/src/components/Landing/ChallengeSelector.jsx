@@ -8,10 +8,10 @@ export const MODELS = [
 ];
 
 export const SIZES = [
-    { id: '5L', label: '₹5L', value: 500000, price: 3000 },
-    { id: '10L', label: '₹10L', value: 1000000, price: 5000 },
-    { id: '20L', label: '₹20L', value: 2000000, price: 12000 },
-    { id: '50L', label: '₹50L', value: 5000000, price: 22000 },
+    { id: '5L', label: '₹5L', value: 500000, price: 3000, maxLots: 3 },
+    { id: '10L', label: '₹10L', value: 1000000, price: 5000, maxLots: 5 },
+    { id: '20L', label: '₹20L', value: 2000000, price: 12000, maxLots: 8 },
+    { id: '50L', label: '₹50L', value: 5000000, price: 22000, maxLots: 12 },
 ];
 
 // Data Configuration
@@ -22,7 +22,6 @@ export const DATA = {
         dailyDrawdown: '2%',
         maxDrawdown: '3%',
         leverage: '1:1', // As per lot size restriction
-        maxLots: '1 Lot', // User specified
         profitSplit: '80/20',
     }
 };
@@ -128,7 +127,7 @@ export default function ChallengeSelector() {
                             highlight
                         />
                         <SpecItem label="Profit Split" value={activeData.profitSplit} />
-                        <SpecItem label="Max Lot Size" value={activeData.maxLots} highlight />
+                        <SpecItem label="Max Lot Size" value={`${activeSize.maxLots} Lots`} highlight />
                         <SpecItem label="Min Trading Days" value={activeData.minDays} />
 
                         <div className="md:col-span-2 mt-4 pt-8 border-t border-white/5 flex gap-4 overflow-x-auto pb-2 scrollbar-none">

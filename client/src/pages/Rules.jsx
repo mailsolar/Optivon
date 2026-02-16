@@ -56,19 +56,16 @@ export default function Rules() {
                         {/* 1. Core Trading Rules */}
                         <Section id="core" title="Core Trading Rules" icon={Scale}>
                             <div className="grid md:grid-cols-2 gap-6 mb-8">
-                                <RuleCard title="Profit Targets" value="10% / 8% / 5%">
+                                <RuleCard title="Profit Target" value="8%">
                                     <ul className="space-y-2 text-sm text-gray-400 mt-2">
-                                        <li className="flex justify-between"><span>1-Phase Challenge:</span> <span className="text-white font-bold">10%</span></li>
-                                        <li className="flex justify-between"><span>2-Phase (Phase 1):</span> <span className="text-white font-bold">8%</span></li>
-                                        <li className="flex justify-between"><span>2-Phase (Phase 2):</span> <span className="text-white font-bold">5%</span></li>
+                                        <li className="flex justify-between"><span>Challenge Phase:</span> <span className="text-white font-bold">8%</span></li>
                                         <li className="flex justify-between"><span>Funded Stage:</span> <span className="text-brand-lime font-bold">No Target</span></li>
                                     </ul>
                                 </RuleCard>
-                                <RuleCard title="Drawdown Limits" value="4% Daily / 8-10% Max">
+                                <RuleCard title="Drawdown Limits" value="2% Daily / 3% Max">
                                     <ul className="space-y-2 text-sm text-gray-400 mt-2">
-                                        <li className="flex justify-between"><span>Daily Max Loss:</span> <span className="text-red-400 font-bold">4%</span></li>
-                                        <li className="flex justify-between"><span>Max Trailing (Chal):</span> <span className="text-red-400 font-bold">8%</span></li>
-                                        <li className="flex justify-between"><span>Max Trailing (Fund):</span> <span className="text-red-400 font-bold">10%</span></li>
+                                        <li className="flex justify-between"><span>Daily Max Loss:</span> <span className="text-red-400 font-bold">2%</span></li>
+                                        <li className="flex justify-between"><span>Max Trailing:</span> <span className="text-red-400 font-bold">3%</span></li>
                                     </ul>
                                 </RuleCard>
                             </div>
@@ -82,18 +79,17 @@ export default function Rules() {
                                     <div>
                                         <h4 className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">Instrument Leverage</h4>
                                         <ul className="space-y-3">
-                                            <BadgeRow label="Options Buying" value="10x" />
-                                            <BadgeRow label="Hedged Selling" value="5x" />
-                                            <BadgeRow label="Index Futures" value="2x - 3x" />
+                                            <BadgeRow label="Options Buying" value="1:1" />
+                                            <BadgeRow label="Intraday Equity" value="5x" />
                                         </ul>
                                     </div>
                                     <div>
                                         <h4 className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">Max Lots (Nifty / BankNifty)</h4>
                                         <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹50k Acc</span> <span className="font-mono text-white">2-3 / 1-2 Lots</span></div>
-                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹100k Acc</span> <span className="font-mono text-white">5-6 / 3-4 Lots</span></div>
-                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹200k Acc</span> <span className="font-mono text-white">10-12 / 6-8 Lots</span></div>
-                                            <div className="flex justify-between"><span>₹500k Acc</span> <span className="font-mono text-white">25-30 / 15-20 Lots</span></div>
+                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹5L Acc</span> <span className="font-mono text-white">3 Lots</span></div>
+                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹10L Acc</span> <span className="font-mono text-white">5 Lots</span></div>
+                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹20L Acc</span> <span className="font-mono text-white">8 Lots</span></div>
+                                            <div className="flex justify-between"><span>₹50L Acc</span> <span className="font-mono text-white">12 Lots</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -104,9 +100,9 @@ export default function Rules() {
                         <Section id="risk" title="Risk Parameters" icon={Shield}>
                             <div className="space-y-6">
                                 <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
-                                    <h3 className="text-lg font-bold text-red-400 mb-2">Rule 1: Max Risk Per Trade</h3>
-                                    <p className="text-gray-300">You cannot risk more than <span className="font-bold text-white">2% of account balance</span> on a single position.</p>
-                                    <p className="text-xs text-gray-500 mt-2">Violations result in trade block or account failure.</p>
+                                    <h3 className="text-lg font-bold text-red-400 mb-2">Rule 1: Max Daily Loss</h3>
+                                    <p className="text-gray-300">You cannot lose more than <span className="font-bold text-white">2% of account balance</span> in a single trading day.</p>
+                                    <p className="text-xs text-gray-500 mt-2">Violations result in account failure.</p>
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-6">

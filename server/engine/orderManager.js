@@ -1,6 +1,5 @@
 const db = require('../database');
 // const market = require('./market'); // Removed for real data
-const upstoxService = require('../services/upstox');
 
 class OrderManager {
     constructor() {
@@ -44,7 +43,7 @@ class OrderManager {
         // 1. Enforce Lot Limits
         const maxLots = this.getMaxLots(accountSize, symbol);
         if (lots > maxLots) {
-            throw new Error(`Lot limit exceeded. Max for ${symbol} on $${accountSize} is ${maxLots} lots.`);
+            throw new Error(`Lot limit exceeded. Max for ${symbol} on ₹${accountSize} is ${maxLots} lots.`);
         }
 
         // 2. Get Quote (Async/Real)
@@ -230,7 +229,7 @@ class OrderManager {
         // 1. Enforce Lot Limits
         const maxLots = this.getMaxLots(accountSize, symbol);
         if (lots > maxLots) {
-            throw new Error(`Lot limit exceeded. Max for ${symbol} on $${accountSize} is ${maxLots} lots.`);
+            throw new Error(`Lot limit exceeded. Max for ${symbol} on ₹${accountSize} is ${maxLots} lots.`);
         }
 
         return new Promise((resolve, reject) => {
@@ -445,10 +444,11 @@ class OrderManager {
     }
 
     getMaxLots(size, symbol) {
-        if (size <= 50000) return symbol === 'NIFTY' ? 3 : 2;
-        if (size <= 100000) return symbol === 'NIFTY' ? 6 : 4;
-        if (size <= 200000) return symbol === 'NIFTY' ? 12 : 8;
-        return symbol === 'NIFTY' ? 30 : 20; // 500k
+        // Tiers: 5L (3), 10L (5), 20L (8), 50L (12)
+        if (size <= 500000) return 3;
+        if (size <= 1000000) return 5;
+        if (size <= 2000000) return 8;
+        return 12; // 50L and above
     }
 
     getAccount(id) {

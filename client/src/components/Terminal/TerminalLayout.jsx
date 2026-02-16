@@ -9,19 +9,18 @@ import AlertModal from './AlertModal';
 import PositionOverlay from './PositionOverlay';
 import SettingsPanel from './SettingsPanel';
 import { useToast } from '../../context/ToastContext';
-import { useAlerts } from '../../context/AlertContext';
+
 import { RiskManagementProvider, useRiskManagement, RiskStatusBanner } from '../../context/RiskManagementContext';
 import { AlgoProvider } from '../../context/AlgoContext';
-import { io } from 'socket.io-client';
+import { AlertProvider, useAlerts } from '../../context/AlertContext';
 
 function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccount, onTrade }) {
     const { addToast } = useToast();
-    const { alerts } = useAlerts();
+    const { alerts, checkAlerts } = useAlerts();
     const { accountLocked, lockReason } = useRiskManagement();
 
     // Data State
     const [quotes, setQuotes] = useState(initialQuotes || {});
-    // Account state is managed by parent wrapper to sync with RiskProvider
     const [positions, setPositions] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [selectedSymbol, setSelectedSymbol] = useState('NIFTY');
@@ -39,157 +38,276 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     const chartAPI = useRef(null);
     const seriesAPI = useRef(null);
 
-    // 1. WebSocket / Socket.IO for Price Updates
-    // We use a Ref to track the "Live" candle so we don't depend on stale closures
-    const activeBarRef = useRef(null);
-    const socketRef = useRef(null);
+    // WebSocket for Optivon Market Data
+    const wsRef = useRef(null);
+    const sessionIdRef = useRef(null);
 
-    // Sync Ref with History when chartData loads initially
+    // Ref to accumulate data without re-rendering
+    const chartDataRef = useRef([]);
+
+    // specific effect to sync data when chart type changes (forcing a remount)
     useEffect(() => {
-        if (chartData && chartData.length > 0) {
-            activeBarRef.current = chartData[chartData.length - 1];
-        } else {
-            activeBarRef.current = null;
+        if (chartDataRef.current.length > 0) {
+            setChartData([...chartDataRef.current]);
         }
-    }, [chartData]);
+    }, [chartType, timeframe]);
+
+    // Track current symbol ref to avoid stale closures in WS callbacks
+    const selectedSymbolRef = useRef(selectedSymbol);
 
     useEffect(() => {
-        // Connect Socket.IO
-        // Use a persistent connection or recreate on symbol change? Recreate is safer to avoid leaks if not managed well.
-        // Actually best practice is one socket connection, join rooms. But for simplicity here:
-
-        if (socketRef.current) {
-            socketRef.current.disconnect();
-        }
-
-        const newSocket = io(window.location.origin.replace('5173', '5000'), {
-            path: '/socket.io'
-        });
-        socketRef.current = newSocket;
-
-        newSocket.on('connect', () => {
-            console.log('[Terminal] Socket Connected');
-            newSocket.emit('subscribe', selectedSymbol);
-        });
-
-        newSocket.on('stock_update', (tick) => {
-            if (tick && tick.symbol) {
-                // Update Quotes (for Header/Panel)
-                setQuotes(prev => ({ ...prev, [tick.symbol]: tick }));
-
-                // Process Chart Update
-                if (tick.symbol === selectedSymbol && seriesAPI.current) {
-                    const tickTime = Math.floor(tick.time || (Date.now() / 1000));
-                    const price = tick.ltp;
-
-                    // Initialize if missing (rare, but possible if history empty)
-                    if (!activeBarRef.current) {
-                        activeBarRef.current = {
-                            time: tickTime,
-                            open: price, high: price, low: price, close: price
-                        };
-                        seriesAPI.current.update(activeBarRef.current);
-                        return;
-                    }
-
-                    const currentBar = activeBarRef.current;
-                    const barTime = currentBar.time; // This is the start of the current bar (e.g. 12:00:00)
-
-                    // Timeframe logic (Assuming 1 Minute for now)
-                    // If tickTime is in the NEXT minute, we close current and start new
-                    const isNewBar = tickTime >= barTime + 60;
-
-                    if (isNewBar) {
-                        // CREATE NEW CANDLE
-                        const newBar = {
-                            time: Math.floor(tickTime / 60) * 60, // Snap to minute grid
-                            open: currentBar.close, // Open at previous close (gapless)
-                            high: price,
-                            low: price,
-                            close: price
-                        };
-                        activeBarRef.current = newBar;
-                        seriesAPI.current.update(newBar);
-                    } else {
-                        // UPDATE EXISTING CANDLE
-                        const updatedBar = {
-                            ...currentBar,
-                            high: Math.max(currentBar.high, price),
-                            low: Math.min(currentBar.low, price),
-                            close: price
-                        };
-                        activeBarRef.current = updatedBar;
-                        seriesAPI.current.update(updatedBar);
-                    }
-                }
-            }
-        });
-
-        return () => {
-            if (socketRef.current) socketRef.current.disconnect();
-        };
+        selectedSymbolRef.current = selectedSymbol;
     }, [selectedSymbol]);
 
-    // 2. Fetch Historical Data & Account State
-    const fetchData = useCallback(async () => {
+    // ===== OPTIVON MARKET DATA WEBSOCKET =====
+    useEffect(() => {
+        // Cleanup previous connection
+        if (wsRef.current) {
+            wsRef.current.close();
+        }
+
+        // Connect to Optivon Market Data API
+        const ws = new WebSocket('ws://localhost:5000/market');
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+            console.log('[Optivon] Market Data WebSocket connected');
+
+            // Subscribe to market data
+            ws.send(JSON.stringify({
+                type: 'subscribe',
+                payload: {
+                    symbol: selectedSymbol,
+                    accountId: account?.id || 1,
+                    speed: 1  // 1x speed (real-time simulation)
+                }
+            }));
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+
+                // GUARD: Ignore messages from other sessions/symbols
+                // SessionID format: `${accountId}_${symbol}`
+                // Check if message belongs to current user/symbol context
+                if (message.sessionId) {
+                    const expectedSessionId = `${account?.id || 1}_${selectedSymbolRef.current}`;
+                    if (message.sessionId !== expectedSessionId) {
+                        console.warn(`[Optivon] Ignored stale packet: ${message.sessionId} (Expected: ${expectedSessionId})`);
+                        return;
+                    }
+                }
+
+                switch (message.type) {
+                    case 'connected':
+                        console.log('[Optivon]', message.message);
+                        break;
+                    // ... (rest of the switch)
+
+                    case 'subscribed':
+                        sessionIdRef.current = message.sessionId;
+                        console.log('[Optivon] Subscribed:', message);
+                        addToast(`Market session started: ${message.symbol}`, 'success');
+                        break;
+
+                    case 'candle':
+                        // New candle received
+                        const candleData = message.data;
+
+                        // Update quotes for header/panel
+                        setQuotes(prev => ({
+                            ...prev,
+                            [selectedSymbol]: {
+                                symbol: selectedSymbol,
+                                ltp: candleData.close,
+                                time: candleData.time,
+                                change: 0,
+                                changePercent: 0
+                            }
+                        }));
+
+                        // Update chart directly via API (No re-render)
+                        if (seriesAPI.current) {
+                            seriesAPI.current.update(candleData);
+                        }
+
+                        // SYNC STATE: Append to chartData to prevent stale state on re-render
+                        // Using functional update to ensure we have latest state
+                        setChartData(prev => {
+                            const newData = [...prev, candleData];
+                            // Keep last 2000 to avoid memory issues
+                            if (newData.length > 2000) return newData.slice(-2000);
+                            return newData;
+                        });
+
+                        // Accumulate in Ref (Silent update)
+                        if (chartDataRef.current) {
+                            chartDataRef.current.push(candleData);
+                            if (chartDataRef.current.length > 2000) chartDataRef.current.shift();
+                        }
+
+                        // CHECK ALERTS
+                        if (message.data && checkAlerts) {
+                            // Create a temporary quotes object for checking
+                            checkAlerts({
+                                [selectedSymbol]: {
+                                    ltp: candleData.close
+                                }
+                            });
+                        }
+                        break;
+
+                    case 'history':
+                        console.log(`[Optivon] Received history: ${message.data.length} candles`);
+
+                        // Update ref and state
+                        if (chartDataRef.current) {
+                            chartDataRef.current = [...message.data];
+                        }
+
+                        // Bulk update chart
+                        if (seriesAPI.current) {
+                            seriesAPI.current.setData(message.data);
+                        }
+
+                        // Update state (Initial Load)
+                        setChartData(message.data);
+
+                        // Explicitly fit content only on history load
+                        if (chartAPI.current) {
+                            chartAPI.current.timeScale().fitContent();
+                        }
+
+                        addToast('Session restored', 'success');
+                        break;
+
+                    case 'session_end':
+                        console.log('[Optivon] Session ended');
+                        addToast('Market session complete', 'info');
+                        break;
+
+                    case 'error':
+                        console.error('[Optivon] Error:', message.message);
+                        addToast(`Market data error: ${message.message}`, 'error');
+                        break;
+
+                    default:
+                        console.log('[Optivon] Unknown message:', message);
+                }
+            } catch (error) {
+                console.error('[Optivon] Message parse error:', error);
+            }
+        };
+
+        ws.onerror = (error) => {
+            console.error('[Optivon] WebSocket error:', error);
+            addToast('Market data connection error', 'error');
+        };
+
+        ws.onclose = () => {
+            console.log('[Optivon] WebSocket disconnected');
+        };
+
+        return () => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'unsubscribe' }));
+            }
+            ws.close();
+        };
+    }, [selectedSymbol, account?.id]);
+
+    // Fetch Account State & Positions
+    // NEW: Fetch ALL accounts to handle switching and auto-selection
+    const [allAccounts, setAllAccounts] = useState([]);
+
+    const fetchAccountData = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
+            // If we have a selected account, refresh its details specifically
             const accId = account?.id;
 
-            // Fetch Upstox History
-            console.log('[Layout] Fetching Upstox history for', selectedSymbol);
-            // Use new Upstox API
-            const dataRes = await fetch(`/api/upstox/intraday?symbol=${selectedSymbol}`);
+            const headers = { 'Authorization': `Bearer ${token}` };
 
-            if (dataRes.ok) {
-                const history = await dataRes.json();
-                console.log('[Layout] Received', history.length, 'candles');
-                if (history && history.length > 0) {
-                    setChartData(history);
-                } else {
-                    // Start empty or handle gracefully
-                    setChartData([]);
+            // Always fetch list of accounts to support switching
+            const accountsRes = await fetch('/api/trade/accounts', { headers });
+
+            let currentPositions = [];
+            let currentAccountData = null;
+
+            if (accountsRes.ok) {
+                const accountsData = await accountsRes.json();
+                setAllAccounts(accountsData);
+
+                // Auto-Select logic if no account is selected
+                if (!accId && accountsData.length > 0) {
+                    // Prefer 'active' accounts, then 'pending', then latest
+                    const active = accountsData.find(a => a.status === 'active') ||
+                        accountsData.find(a => a.status === 'pending') ||
+                        accountsData[0];
+                    setAccount(active);
+                    // Return here, next cycle will fetch positions for this new ID
+                    return;
                 }
-            } else {
-                throw new Error("Failed to fetch Upstox data");
             }
 
-            // Fetch positions and account only if logged in
-            if (!accId) return;
+            if (accId) {
+                const [posRes, accRes] = await Promise.all([
+                    fetch('/api/trade/positions', { headers }),
+                    fetch(`/api/trade/account/${accId}`, { headers })
+                ]);
 
-            const [posRes, accRes] = await Promise.all([
-                fetch('/api/trade/positions', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`/api/trade/account/${accId}`, { headers: { 'Authorization': `Bearer ${token}` } })
-            ]);
+                if (posRes.ok) {
+                    const pos = await posRes.json();
+                    setPositions(pos.filter(p => p.account_id === accId));
+                }
 
-            if (posRes.ok) {
-                const pos = await posRes.json();
-                setPositions(pos.filter(p => p.account_id === accId));
-            }
-
-            if (accRes.ok) {
-                const acc = await accRes.json();
-                setAccount(acc);
+                if (accRes.ok) {
+                    currentAccountData = await accRes.json();
+                    setAccount(currentAccountData);
+                }
             }
         } catch (e) {
-            console.error("Fetch Data Error:", e);
-            // Fallback mock data only if CRITICAL failure to prevent blank screen?
-            // User likely wants to know if Upstox fails.
-            // Let's NOT use fallback data yet so user sees "No Data" if API fails,
-            // which confirms we aren't faking it anymore.
-            setChartData([]);
+            console.error("Fetch Account Data Error:", e);
         }
-    }, [selectedSymbol, timeframe, account?.id]);
+    }, [account?.id]);
 
     useEffect(() => {
-        // Initial fetch only
-        fetchData();
-        // Polling removed to rely on Socket.IO
-    }, [fetchData]);
+        fetchAccountData();
+        // Poll every 5 seconds for account updates
+        const interval = setInterval(fetchAccountData, 5000);
+        return () => clearInterval(interval);
+    }, [fetchAccountData]);
 
-    // 3. Trade Handlers
+    // Close Position
+    const handleClosePosition = async (positionId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/trade/close', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ accountId: account.id, positionId })
+            });
+
+            if (res.ok) {
+                addToast('Position Closed', 'success');
+                fetchAccountData(); // Refresh account data
+                if (onTrade) onTrade();
+            } else {
+                const data = await res.json();
+                addToast(data.error || 'Failed to close position', 'error');
+            }
+        } catch (error) {
+            console.error('[Optivon] Close position error:', error);
+            addToast('Network Error', 'error');
+        }
+    };
+
+    // Trade Handlers (keeping existing logic)
     const handleOrder = async (symbol, side, lots, type, price, limitPrice, sl, tp, isClose = false) => {
-        // GLOBAL RISK LOCK CHECK
         if (!isClose && accountLocked) {
             addToast(`BLOCKED: ${lockReason}`, 'error');
             return;
@@ -203,9 +321,22 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         try {
             const token = localStorage.getItem('token');
             const endpoint = isClose ? '/api/trade/close' : '/api/trade/place';
-            const body = isClose ? { tradeId: symbol.id } : { accountId: account.id, symbol, side, lots, type, price: limitPrice, sl, tp };
 
-            const res = await fetch(`${endpoint}`, {
+            const body = isClose
+                ? { accountId: account.id, positionId: lots }
+                : {
+                    accountId: account.id,
+                    symbol,
+                    side,
+                    lots,
+                    type,
+                    price,
+                    limitPrice,
+                    sl,
+                    tp
+                };
+
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -215,221 +346,146 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             });
 
             const result = await res.json();
+
             if (res.ok) {
-                addToast(isClose ? 'Position Closed' : 'Order Executed', 'success');
-                // Remove fetchData() to prevent chart reset. Live updates handle price.
-                // Account update happens via parent props or SSE eventually.
+                addToast(result.message || 'Order executed', 'success');
+                fetchAccountData(); // Refresh account data
                 if (onTrade) onTrade();
             } else {
-                addToast(result.error || 'Execution Error', 'error');
+                addToast(result.error || 'Order failed', 'error');
             }
-        } catch (e) {
-            addToast('Pipeline Connection Lost', 'error');
+        } catch (error) {
+            console.error('Order error:', error);
+            addToast('Failed to execute order', 'error');
         }
     };
 
-    const handleChartReady = (chart, series) => {
+    const handleChartReady = useCallback((chart, series) => {
         chartAPI.current = chart;
         seriesAPI.current = series;
+    }, []);
+
+    const handleSymbolChange = (symbol) => {
+        if (symbol === selectedSymbol) return;
+        setChartData([]); // Clear chart immediately to prevent "stuck" old data
+        setSelectedSymbol(symbol);
     };
 
-    // Chart Control Handlers
-    const handleZoomIn = () => chartAPI.current?.timeScale().zoomIn();
-    const handleZoomOut = () => chartAPI.current?.timeScale().zoomOut();
-    const handleReset = () => chartAPI.current?.timeScale().fitContent();
-
     return (
-        <div className="flex flex-col h-full bg-background overflow-hidden font-sans relative transition-colors duration-300">
-            {/* Risk Banner Injection */}
+        <div className="h-screen flex flex-col bg-[#0a0e27] overflow-hidden">
+            {/* Risk Status Banner */}
             <RiskStatusBanner />
 
+            {/* Terminal Header */}
             <TerminalHeader
-                account={account}
-                quotes={quotes}
                 selectedSymbol={selectedSymbol}
-                onSelectSymbol={setSelectedSymbol}
-                onSearch={setSearchTerm}
-                onToggleRightPanel={() => setIsRightPanelOpen(!isRightPanelOpen)}
+                quote={quotes[selectedSymbol]}
+                account={account}
+                allAccounts={allAccounts}
+                onSelectAccount={setAccount}
+                onSelectSymbol={handleSymbolChange}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                isPanelOpen={isRightPanelOpen}
+                onToggleRightPanel={() => setIsRightPanelOpen(prev => !prev)}
                 chartType={chartType}
                 setChartType={setChartType}
-                isPanelOpen={isRightPanelOpen}
                 onOpenSettings={() => setShowSettings(true)}
                 onOpenAlerts={() => setShowAlertModal(true)}
             />
 
-            <div className="flex-1 flex min-h-0 relative overflow-hidden">
-                <div
-                    className={`flex-1 relative flex flex-col min-w-0 bg-background border-r border-border transition-all duration-300 ease-in-out ${isRightPanelOpen ? 'mr-0' : 'flex-1'}`}
-                >
-                    {/* CHART AREA with proper Flex container */}
-                    <div className="flex-1 flex overflow-hidden relative">
-                        <div className="flex-none">
-                            <ChartToolbar
-                                activeTool={activeTool}
-                                setActiveTool={setActiveTool}
-                                onOpenAlerts={() => setShowAlertModal(true)}
-                            />
-                        </div>
+            {/* Main Content */}
+            <div className="flex-1 flex overflow-hidden relative">
 
-                        <div className="flex-1 relative h-full min-h-0 min-w-0">
-                            <TerminalChart
-                                symbol={selectedSymbol}
-                                data={chartData}
-                                chartType={chartType}
-                                onChartReady={handleChartReady}
-                            />
+                {/* Chart Toolbar (Sidebar) */}
+                <ChartToolbar
+                    activeTool={activeTool}
+                    onToolChange={setActiveTool}
+                    chartType={chartType}
+                    onChartTypeChange={setChartType}
+                    onSettingsClick={() => setShowSettings(true)}
+                />
 
-                            {/* LIVE POSITION OVERLAYS */}
-                            <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-                                {positions
-                                    .filter(p => p.symbol === selectedSymbol)
-                                    .map(pos => {
-                                        let topPosition = '50%';
-                                        try {
-                                            if (chartAPI.current && chartAPI.current.priceScale) {
-                                                const entry = parseFloat(pos.entry_price || pos.price || 0);
-                                                const coordinate = chartAPI.current.priceScale('right').priceToCoordinate(entry);
-                                                if (coordinate !== null) {
-                                                    topPosition = `${coordinate}px`;
-                                                }
-                                            }
-                                        } catch (e) {
-                                            // Fallback to center if chart is not ready
-                                        }
+                {/* Chart Area */}
+                <div className="flex-1 flex flex-col overflow-hidden relative min-h-0 min-w-0">
 
-                                        return (
-                                            <div
-                                                key={pos.id}
-                                                className="absolute w-full"
-                                                style={{ top: topPosition }}
-                                            >
-                                                <PositionOverlay
-                                                    position={pos}
-                                                    currentPrice={quotes[selectedSymbol]?.ltp}
-                                                />
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </div>
+                    {/* Timeframe Selector */}
+                    <div className="shrink-0 z-20">
+                        <TimeframeSelector
+                            timeframe={timeframe}
+                            onTimeframeChange={setTimeframe}
+                        />
                     </div>
 
-                    <TimeframeSelector
-                        timeframe={timeframe}
-                        setTimeframe={setTimeframe}
-                        onZoomIn={handleZoomIn}
-                        onZoomOut={handleZoomOut}
-                        onReset={handleReset}
-                    />
+                    {/* Chart */}
+                    <div className="flex-1 relative min-h-0 min-w-0">
+                        <TerminalChart
+                            key={selectedSymbol}
+                            data={chartData}
+                            symbol={selectedSymbol}
+                            onChartReady={handleChartReady}
+                            chartType={chartType}
+                        />
 
-                    {/* ALERT MODAL OVERLAY */}
-                    <AlertModal
-                        isOpen={showAlertModal}
-                        onClose={() => setShowAlertModal(false)}
-                        symbol={selectedSymbol}
-                        quotes={quotes}
-                        currentPrice={quotes[selectedSymbol]?.ltp}
-                    />
+                        {/* Position Overlays */}
+                        {positions.map(pos => (
+                            <PositionOverlay
+                                key={pos.id}
+                                position={pos}
+                                currentPrice={quotes[pos.symbol]?.ltp}
+                            />
+                        ))}
+                    </div>
                 </div>
 
-                {/* Right Panel with Slide Animation */}
-                <div
-                    className={`transition-all duration-300 ease-in-out bg-surface border-l border-border ${isRightPanelOpen ? 'w-[360px] translate-x-0 opacity-100' : 'w-0 translate-x-full opacity-0 overflow-hidden'
-                        }`}
-                >
-                    <UnifiedRightPanel
-                        isOpen={true} // Always mounted but hidden by CSS width
-                        account={account}
-                        quotes={quotes}
-                        positions={positions}
-                        selectedSymbol={selectedSymbol}
-                        onSelectSymbol={setSelectedSymbol}
-                        searchTerm={searchTerm}
-                        onOrder={handleOrder}
-                        onClosePosition={(pos) => handleOrder(pos, null, null, null, null, null, null, null, true)}
-                        onOpenSettings={() => setShowSettings(true)}
-                    />
-                </div>
+                {/* Right Panel */}
+                <UnifiedRightPanel
+                    isOpen={isRightPanelOpen}
+                    selectedSymbol={selectedSymbol}
+                    quotes={quotes}
+                    account={account}
+                    positions={positions}
+                    user={user}
+                    onOrder={handleOrder}
+                    onClosePosition={handleClosePosition}
+                    onOpenSettings={() => setShowSettings(true)}
+                />
             </div>
 
-            {/* NEW GLOBAL SETTINGS PANEL */}
-            <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+            {/* Modals */}
+            {showSettings && (
+                <SettingsPanel isOpen={true} onClose={() => setShowSettings(false)} />
+            )}
+
+            {showAlertModal && (
+                <AlertModal
+                    isOpen={true}
+                    symbol={selectedSymbol}
+                    currentPrice={quotes[selectedSymbol]?.ltp}
+                    quotes={quotes}
+                    onClose={() => setShowAlertModal(false)}
+                />
+            )}
         </div>
     );
 }
 
-// Wrapper for Provider
-export default function TerminalLayout(props) {
-    const location = useLocation();
-    const accountFromState = location.state?.account;
-
-    // Priority: Props > Location State > Undefined (will fetch in wrapper)
-    const initialAccount = props.account || accountFromState;
+// Wrapper with Providers
+export default function TerminalLayout({ user, account: initialAccount, onTrade }) {
+    const [account, setAccount] = useState(initialAccount);
 
     return (
-        <TerminalLayoutStateWrapper {...props} account={initialAccount} />
-    );
-}
-
-
-
-function TerminalLayoutStateWrapper(props) {
-    const [account, setAccount] = useState(props.account);
-    const { addToast } = useToast();
-
-    // Sync with props
-    useEffect(() => {
-        if (props.account) setAccount(props.account);
-    }, [props.account]);
-
-    // Fallback: If no account provided, fetch the most recent active account
-    useEffect(() => {
-        if (!account) {
-            const fetchLastAccount = async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    if (!token) return;
-
-                    const res = await fetch('/api/trade/accounts', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-
-                    if (res.ok) {
-                        const accounts = await res.json();
-                        // Find first active, or just the most recent one
-                        const lastAccount = accounts.find(a => a.status === 'active') || accounts[0];
-
-                        if (lastAccount) {
-                            setAccount(lastAccount);
-                            console.log("Restored account from API:", lastAccount);
-                        } else {
-                            addToast('No Trading Accounts Found', 'warning');
-                        }
-                    }
-                } catch (e) {
-                    console.error("Account Restore Error:", e);
-                }
-            };
-            fetchLastAccount();
-        }
-    }, [account]);
-
-    // We also need to be able to UPDATE this account from inside.
-    const updateAccount = (newAcc) => setAccount(newAcc);
-
-    return (
-        <RiskManagementProvider
-            initialBalance={account?.daily_start_balance || props.account?.daily_start_balance || account?.balance || 100000}
-            currentBalance={account?.equity || account?.balance || 100000}
-        >
-            <AlgoProvider>
-                <TerminalLayoutContent
-                    {...props}
-                    account={account}
-                    setAccount={updateAccount}
-                />
+        <RiskManagementProvider accountId={account?.id}>
+            <AlgoProvider accountId={account?.id}>
+                <AlertProvider>
+                    <TerminalLayoutContent
+                        user={user}
+                        account={account}
+                        setAccount={setAccount}
+                        onTrade={onTrade}
+                    />
+                </AlertProvider>
             </AlgoProvider>
         </RiskManagementProvider>
     );
 }
-

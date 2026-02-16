@@ -1,9 +1,12 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { RiskManager } from '../utils/riskManagement';
 
+import { useSettings } from './SettingsContext';
+
 const RiskManagementContext = createContext();
 
 export function RiskManagementProvider({ children, initialBalance, currentBalance }) {
+    const { settings } = useSettings();
     const [riskStatus, setRiskStatus] = useState({
         isActive: true,
         dailyLoss: 0,
@@ -22,9 +25,16 @@ export function RiskManagementProvider({ children, initialBalance, currentBalanc
     useEffect(() => {
         // Initialize Manager only once or when initialBalance changes drastically (account switch)
         if (!managerRef.current && initialBalance) {
-            managerRef.current = new RiskManager(initialBalance, 2, 4);
+            managerRef.current = new RiskManager(initialBalance, settings?.['daily-loss-limit'] || 5, settings?.['max-drawdown'] || 10);
         }
     }, [initialBalance]);
+
+    // Update limits when settings change
+    useEffect(() => {
+        if (managerRef.current && settings) {
+            managerRef.current.updateLimits(settings['daily-loss-limit'], settings['max-drawdown']);
+        }
+    }, [settings]);
 
     useEffect(() => {
         if (!managerRef.current || !currentBalance) return;
@@ -58,7 +68,25 @@ export function RiskManagementProvider({ children, initialBalance, currentBalanc
     );
 }
 
-export const useRiskManagement = () => useContext(RiskManagementContext);
+export const useRiskManagement = () => {
+    const context = useContext(RiskManagementContext);
+    if (!context) {
+        // Fallback when context is not available
+        return {
+            riskStatus: {
+                isActive: true,
+                dailyLoss: 0,
+                dailyLossPercentage: 0,
+                maxDrawdown: 0,
+                maxDrawdownPercentage: 0,
+                warnings: []
+            },
+            accountLocked: false,
+            lockReason: ''
+        };
+    }
+    return context;
+};
 
 // Risk Status Display Component
 export function RiskStatusBanner() {

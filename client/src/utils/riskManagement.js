@@ -1,10 +1,15 @@
 export class RiskManager {
-    constructor(initialBalance, dailyDrawdownPercent = 2, maxDrawdownPercent = 4) {
+    constructor(initialBalance, dailyDrawdownPercent = 5, maxDrawdownPercent = 10) {
         this.initialBalance = initialBalance;
-        this.dailyDrawdownLimit = initialBalance * (dailyDrawdownPercent / 100);
-        this.maxDrawdownLimit = initialBalance * (maxDrawdownPercent / 100);
+        this.dailyDrawdownLimitPercent = dailyDrawdownPercent;
+        this.maxDrawdownLimitPercent = maxDrawdownPercent;
         this.dailyStartBalance = initialBalance;
         this.highWaterMark = initialBalance;
+    }
+
+    updateLimits(dailyPercent, maxPercent) {
+        if (dailyPercent) this.dailyDrawdownLimitPercent = dailyPercent;
+        if (maxPercent) this.maxDrawdownLimitPercent = maxPercent;
     }
 
     checkDrawdown(currentBalance) {
@@ -32,21 +37,21 @@ export class RiskManager {
         }
 
         // Daily Drawdown Check
-        if (dailyDrawdownPercent >= 2) {
+        if (dailyDrawdownPercent >= this.dailyDrawdownLimitPercent) {
             return {
                 violated: true,
                 type: 'DAILY_DRAWDOWN',
-                message: `Daily Limit Exceeded: -${dailyDrawdownPercent.toFixed(2)}%`,
+                message: `Personal Daily Limit Exceeded: -${dailyDrawdownPercent.toFixed(2)}% (Limit: ${this.dailyDrawdownLimitPercent}%)`,
                 lockAccount: true
             };
         }
 
         // Maximum Drawdown Check
-        if (drawdownPercent >= 4) {
+        if (drawdownPercent >= this.maxDrawdownLimitPercent) {
             return {
                 violated: true,
                 type: 'MAX_DRAWDOWN',
-                message: `Max Drawdown Exceeded: -${drawdownPercent.toFixed(2)}%`,
+                message: `Personal Max Drawdown Exceeded: -${drawdownPercent.toFixed(2)}% (Limit: ${this.maxDrawdownLimitPercent}%)`,
                 lockAccount: true
             };
         }
