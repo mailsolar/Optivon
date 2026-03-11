@@ -99,6 +99,14 @@ function initializeTables() {
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
         )`);
+
+        // Migrations: Add columns that may be missing in older databases
+        // SQLite doesn't support IF NOT EXISTS for ALTER TABLE, so we catch errors silently
+        db.run(`ALTER TABLE accounts ADD COLUMN last_payout_date DATETIME`, (err) => {
+            if (err && !err.message.includes('duplicate column')) {
+                // Column already exists — this is fine, ignore
+            }
+        });
     });
 }
 

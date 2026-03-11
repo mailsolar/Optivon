@@ -88,8 +88,12 @@ export default function OptivonSidebar() {
                                             : 'text-gray-400 hover:text-white hover:bg-white/5'}
                   `}
                                 >
-                                    <item.icon size={18} className={({ isActive }) => isActive ? 'stroke-[2.5px]' : 'stroke-2'} />
-                                    <span>{item.name}</span>
+                                    {({ isActive }) => (
+                                        <>
+                                            <item.icon size={18} className={isActive ? 'stroke-[2.5px]' : 'stroke-2'} />
+                                            <span>{item.name}</span>
+                                        </>
+                                    )}
                                 </NavLink>
                             ))}
                         </div>

@@ -28,16 +28,33 @@ router.get('/callback', async (req, res) => {
     }
 });
 
-// 3. Get Intraday History
-// GET /api/upstox/intraday?symbol=NSE_EQ|INE848I01012
+// 3. Status check — for frontend diagnostics
+router.get('/status', (req, res) => {
+    console.log('[Upstox] GET /status hit');
+    const svc = upstoxService;
+    const secondsSinceToken = svc.tokenLoadedAt
+        ? Math.floor((Date.now() - svc.tokenLoadedAt) / 1000)
+        : null;
+
+    res.json({
+        authenticated: svc.isAuthenticated,
+        polling: !!svc.pollInterval,
+        symbol: svc.currentSymbol,
+        tokenAge: secondsSinceToken ? `${secondsSinceToken}s ago` : 'unknown',
+        error: svc.lastError || (!svc.isAuthenticated ? 'Auth missing. Click Login Upstox.' : null)
+    });
+});
+
+// 4. Get Intraday History
 router.get('/intraday', async (req, res) => {
     try {
         const symbol = req.query.symbol;
-        const data = await upstoxService.getIntradayHistory(symbol);
+        console.log('[Upstox] GET /intraday hit for', symbol);
+        const interval = req.query.interval || '1m';
+        const data = await upstoxService.getIntradayHistory(symbol, interval);
 
-        // Start Real-Time Polling for this symbol
-        // The service is already initialized in index.js
-        upstoxService.startPolling(req.query.symbolName || 'NIFTY');
+        const symbolName = symbol.includes('|') ? (symbol.includes('50') ? 'NIFTY' : (symbol.includes('Bank') ? 'BANKNIFTY' : symbol)) : symbol;
+        upstoxService.startPolling(symbolName);
 
         res.json(data);
     } catch (error) {

@@ -4,14 +4,9 @@ const TIMEFRAMES = [
     { id: '1m', label: '1m', value: 1 },
     { id: '5m', label: '5m', value: 5 },
     { id: '15m', label: '15m', value: 15 },
-    { id: '1h', label: '1h', value: 60 },
-    { id: '4h', label: '4h', value: 240 },
+    { id: '1h', label: '1H', value: 60 },
+    { id: '4h', label: '4H', value: 240 },
     { id: '1D', label: '1D', value: 1440 },
-    { id: '1W', label: '1W', value: 10080 },
-    { id: '1M', label: '1M', value: 43200 },
-    { id: '3M', label: '3M', value: 129600 },
-    { id: '1Y', label: '1Y', value: 525600 },
-    { id: 'MAX', label: 'MAX', value: -1 },
 ];
 
 export default function TimeframeSelector({ timeframe, setTimeframe, onZoomIn, onZoomOut, onReset }) {
@@ -67,10 +62,13 @@ function CurrentTime() {
     }, []);
 
     const formatTime = () => {
-        const hours = time.getUTCHours().toString().padStart(2, '0');
-        const minutes = time.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = time.getUTCSeconds().toString().padStart(2, '0');
-        return `${hours}:${minutes}:${seconds} UTC+0`;
+        return time.toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Kolkata',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        }) + ' IST';
     };
 
     return (

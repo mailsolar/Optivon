@@ -8,12 +8,19 @@ const replayEngine = require('./replayEngine');
  */
 
 class MarketWebSocketServer {
-    constructor(server) {
-        this.wss = new WebSocket.Server({ server, path: '/market' });
+    constructor(options) {
+        // Use noServer: true to prevent automatic attachment and conflict with Socket.IO
+        this.wss = new WebSocket.Server({ noServer: true });
         this.clients = new Map(); // ws -> { sessionId, symbol, accountId }
 
         this.setupServer();
-        console.log('📡 Market WebSocket Server initialized on /market');
+        console.log('📡 Market WebSocket Server initialized (No Server Mode)');
+    }
+
+    handleUpgrade(request, socket, head) {
+        this.wss.handleUpgrade(request, socket, head, (ws) => {
+            this.wss.emit('connection', ws, request);
+        });
     }
 
     setupServer() {

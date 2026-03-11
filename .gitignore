@@ -7,3 +7,15 @@ build/
 coverage/
 .gemini/
 *.log
+
+# Large data/output files
+tunnel_out.txt
+market_data_dump.json
+market_data_output.json
+market_data_output.txt
+link_final_v2.txt
+link_final_v3.txt
+link_verified.txt
+test_write.txt
+app.log
+task.md

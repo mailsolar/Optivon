@@ -145,7 +145,12 @@ export default function TerminalHeader({
                 </div>
 
                 {/* Upstox Login Button */}
-
+                <a 
+                    href="http://localhost:5000/api/upstox/login"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-brand-lime/10 border border-brand-lime/20 text-brand-lime rounded-lg hover:bg-brand-lime hover:text-brand-dark transition-colors font-bold text-[11px] uppercase tracking-wider"
+                >
+                    Login Upstox
+                </a>
 
                 {/* Symbol Toggle Tabs (NIFTY / BANKNIFTY) */}
                 <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border">

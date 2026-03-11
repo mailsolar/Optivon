@@ -53,7 +53,6 @@ export default function Landing({ onAuthRequest }) {
                     </div>
 
                     <h1 className="text-[14vw] leading-[0.8] font-black tracking-tighter font-display uppercase mix-blend-screen">
-                        Design<span className="text-brand-lime">.</span><br />
                         Trade<span className="text-brand-lime">.</span><br />
                         Scale<span className="text-brand-lime">.</span>
                     </h1>

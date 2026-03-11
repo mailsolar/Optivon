@@ -6,8 +6,9 @@ export const validateOrder = (orderType, entryPrice, stopLoss, takeProfit) => {
     const sl = stopLoss ? parseFloat(stopLoss) : null;
     const tp = takeProfit ? parseFloat(takeProfit) : null;
 
-    if (!entry || isNaN(entry)) {
-        return { isValid: false, errors: ['Invalid Entry Price'] };
+    // If no price yet (quotes not loaded), let backend handle validation
+    if (!entry || isNaN(entry) || entry <= 0) {
+        return { isValid: true, errors: [] };
     }
 
     if (orderType === 'BUY' || orderType === 'LONG' || orderType === 'buy') {

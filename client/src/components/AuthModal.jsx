@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Mail, ArrowRight, ShieldCheck, KeyRound, CheckCircle } from 'lucide-react';
+import { X, Lock, Mail, ArrowRight, ShieldCheck, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { API_BASE_URL } from '../config';
 
@@ -343,20 +343,34 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
 
 // Reusable Input Component
 function Input({ label, icon: Icon, type, value, onChange, placeholder, maxLength, center }) {
+    const [showPassword, setShowPassword] = useState(false);
+    const isPassword = type === 'password';
+    const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
+
     return (
         <div className="space-y-2">
             <label className={`text-[10px] font-black text-secondary uppercase tracking-widest pl-1 block ${center ? 'text-center' : ''}`}>{label}</label>
             <div className="relative group">
                 <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary group-focus-within:text-accent transition-colors ${center ? 'hidden' : ''}`} />
                 <input
-                    type={type}
+                    type={inputType}
                     value={value}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full bg-background border border-border rounded-xl py-3.5 text-sm font-medium text-primary outline-none focus:border-accent transition-all placeholder:text-secondary/30 ${center ? 'text-center px-4 tracking-[0.5em] font-mono' : 'pl-12 pr-4'}`}
+                    className={`w-full bg-background border border-border rounded-xl py-3.5 text-sm font-medium text-primary outline-none focus:border-accent transition-all placeholder:text-secondary/30 ${center ? 'text-center px-4 tracking-[0.5em] font-mono' : 'pl-12 pr-10'}`}
                     placeholder={placeholder}
                     required
                     maxLength={maxLength}
                 />
+                {isPassword && (
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(prev => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors p-1"
+                        tabIndex={-1}
+                    >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                )}
             </div>
         </div>
     );

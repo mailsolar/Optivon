@@ -27,10 +27,11 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                 {positions.map(pos => {
                     const quote = quotes[pos.symbol];
                     const entry = parseFloat(pos.entry_price || pos.price || 0);
-                    const curr = quote ? (pos.side === 'buy' ? quote.ltp : quote.ltp) : entry;
+                    const curr = quote ? quote.ltp : entry;
 
-                    const multiplier = pos.symbol === 'BANKNIFTY' ? 15 : (pos.symbol === 'NIFTY' ? 50 : 1);
+                    const multiplier = pos.symbol === 'BANKNIFTY' ? 15 : (pos.symbol === 'NIFTY' ? 65 : 1);
                     const pnl = (pos.side === 'buy' ? curr - entry : entry - curr) * pos.lots * multiplier;
+
                     totalPnL += pnl;
 
                     const isProfit = pnl >= 0;
@@ -56,15 +57,17 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                                 </div>
                                 <div className="text-right">
                                     <div className={`text-sm font-mono font-black ${isProfit ? 'text-emerald-500' : 'text-red-500'}`}>
-                                        {isProfit ? '+' : ''}₹{Math.abs(pnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        {isProfit ? '+' : '-'}₹{Math.abs(pnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
-                                    <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Real-Time P&L</div>
+                                    <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">
+                                        {isProfit ? 'PROFIT' : 'LOSS'}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => onClosePosition(pos)}
+                                    onClick={() => onClosePosition(pos.id)}
                                     className="flex-1 py-2.5 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-lg text-[9px] font-black uppercase tracking-[2px] transition-all flex items-center justify-center gap-2"
                                 >
                                     <XCircle className="w-3 h-3" />
@@ -85,7 +88,7 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                 <div className="flex justify-between items-center mb-1">
                     <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Aggregate Exposure</span>
                     <span className={`text-xl font-mono font-black ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {totalPnL >= 0 ? '+' : ''}₹{Math.abs(totalPnL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {totalPnL >= 0 ? '+' : '-'}₹{Math.abs(totalPnL).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                 </div>
                 <div className="text-[8px] text-gray-600 font-bold uppercase tracking-[3px] text-right">Net Portfolio Value</div>

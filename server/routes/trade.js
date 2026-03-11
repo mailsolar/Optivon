@@ -252,66 +252,78 @@ router.post('/cancel', authenticateToken, (req, res) => {
     });
 });
 
-// Close Position
-router.post('/close', authenticateToken, (req, res) => {
-    const { tradeId } = req.body;
-    db.get("SELECT * FROM trades WHERE id = ?", [tradeId], (err, trade) => {
-        if (err || !trade || trade.status !== 'open') return res.status(400).send({ error: 'Invalid Trade' });
+// Update Position (TP / SL Modification)
+router.post('/update-position', authenticateToken, async (req, res) => {
+    try {
+        const { positionId, sl, tp } = req.body;
 
-        // NEW: Get Price from UpstoxService (which is polling)
-        // Since we removed 'market.js', we need another way to get LTP.
-        // For now, let's assume market price close is allowed, or fetch from Upstox.
-        // Ideally, frontend sends the price, but backend should verify.
-        // For simplicity in this quick fix, we'll fetch a fresh quote or use the last polled value if stored.
+        if (!positionId) return res.status(400).send({ error: 'Missing Position ID' });
 
-        // Since UpstoxService emits to socket, we might not have synchronous access to LTP easily unless we store it.
-        // Let's do a quick FETCH to Upstox API for the close execution to be accurate.
+        // Authenticate ownership
+        const trade = await new Promise((resolve, reject) => {
+            db.get(`SELECT t.* FROM trades t
+                    JOIN accounts a ON t.account_id = a.id
+                    WHERE t.id = ? AND a.user_id = ?`,
+                [positionId, req.user.id], (err, row) => resolve(row));
+        });
 
-        const upstoxService = require('../services/upstox');
-        // We can't await inside this callback easily without refactoring to async/await.
-        // Let's refactor this handler to async.
+        if (!trade || trade.status !== 'open') return res.status(400).send({ error: 'Invalid or Closed Trade' });
 
-        // Temporary: Force Close at last known or just allow it.
-        // BETTER: Use the clean polling service instructions
+        // Validate SL/TP logic based on side
+        const price = trade.entry_price;
+        if (sl !== undefined && sl !== null && sl !== '') {
+            const numSl = parseFloat(sl);
+            if (trade.side === 'buy' && numSl >= price) return res.status(400).send({ error: 'SL must be below Entry' });
+            if (trade.side === 'sell' && numSl <= price) return res.status(400).send({ error: 'SL must be above Entry' });
+        }
 
-        // REFACTOR to Async for Quote Fetch
-        const closeTrade = async () => {
-            try {
-                // Fetch latest quote for accuracy
-                // We can add a method to UpstoxService to getLTP(symbol) returning Promise
-                // But for now, let's just use strict "Close at Market" meaning we trust the execution time.
-                // We need A price.
-
-                // Reuse logic from UpstoxService to fetch LTD
-                // Or better yet, ask UpstoxService.
-
-                // Since UpstoxService is a singleton exporting 'new UpstoxService()', we can add a method there?
-                // But I can't modify UpstoxService right now without context switch.
-
-                // HACK: Just close at "0" or "Market" and let the loop handle it? No, PnL needs price.
-                // Let's trust the client price? User didn't send it.
-                // Let's fetch it directly here (Raw HTTPS) or mock it safely? 
-                // NO MOCKING. User hates it.
-
-                // I will modify this route to just close the trade for now, assuming the user is looking at the chart.
-                // Ideally we fetch the price.
-
-                // ... Actually, `OrderManager` might depend on `market` too? Checking...
-                // If OrderManager uses market.js, we have a bigger problem.
-
-                // Assuming OrderManager handles the DB update.
-                // Let's check OrderManager next.
-
-                // For now, remove the crash:
-                const price = 0; // Placeholder until we fix OrderManager or fetch real price
-                OrderManager.executeClose(trade, price, 'MANUAL_CLOSE');
-                res.send({ message: 'Position Closed' });
-            } catch (e) {
-                res.status(500).send({ error: 'Close Failed' });
+        // Apply Update
+        db.run(
+            "UPDATE trades SET sl = ?, tp = ? WHERE id = ?",
+            [sl || null, tp || null, positionId],
+            (err) => {
+                if (err) return res.status(500).send({ error: 'Failed to update position' });
+                res.send({ message: 'Position Updated Successfully', sl, tp });
             }
-        };
-        closeTrade();
-    });
+        );
+    } catch (e) {
+        console.error("Update Position Error:", e);
+        res.status(500).send({ error: 'Update Failed' });
+    }
 });
+
+// Close Position
+router.post('/close', authenticateToken, async (req, res) => {
+    try {
+        const { tradeId, positionId } = req.body;
+        const id = tradeId || positionId;
+
+        if (!id) return res.status(400).send({ error: 'Missing Position ID' });
+
+        const trade = await new Promise((resolve, reject) => {
+            db.get("SELECT * FROM trades WHERE id = ?", [id], (err, row) => resolve(row));
+        });
+
+        if (!trade || trade.status !== 'open') return res.status(400).send({ error: 'Invalid Trade' });
+
+        // Get current price
+        let closePrice = await OrderManager.fetchPrice(trade.symbol);
+
+        // If price unavailable, maybe allow a "forced close" at entry price or return error?
+        // Let's assume error for now to prevent massive account damage
+        if (!closePrice) {
+            return res.status(400).send({ error: 'Market Data Unavailable (Cannot Close)' });
+        }
+
+        // Execute Close
+        await OrderManager.executeClose(trade, closePrice, 'MANUAL_CLOSE');
+        res.send({ message: 'Position Closed' });
+
+    } catch (e) {
+        console.error("Close Error:", e);
+        res.status(500).send({ error: 'Close Failed' });
+    }
+});
+
 
 module.exports = router;
