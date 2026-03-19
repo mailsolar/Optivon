@@ -96,18 +96,18 @@ export default function Orders({ accountId }) {
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#1e1e24] text-sm overflow-hidden">
+        <div className="flex flex-col h-full bg-surface text-sm overflow-hidden">
             {/* Tabs */}
             <div className="flex border-b border-white/5">
                 <button
                     onClick={() => setActiveTab('ACTIVE')}
-                    className={`flex-1 py-2 text-[10px] font-bold tracking-wider ${activeTab === 'ACTIVE' ? 'text-blue-400 border-b-2 border-blue-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-3 text-[11px] font-bold font-display uppercase tracking-widest ${activeTab === 'ACTIVE' ? 'text-accent border-b-2 border-accent bg-white/5 shadow-[0_0_15px_rgba(197,0,34,0.15)]' : 'text-secondary hover:text-white hover:bg-white/[0.02]'}`}
                 >
                     ACTIVE
                 </button>
                 <button
                     onClick={() => setActiveTab('HISTORY')}
-                    className={`flex-1 py-2 text-[10px] font-bold tracking-wider ${activeTab === 'HISTORY' ? 'text-blue-400 border-b-2 border-blue-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-3 text-[11px] font-bold font-display uppercase tracking-widest ${activeTab === 'HISTORY' ? 'text-accent border-b-2 border-accent bg-white/5 shadow-[0_0_15px_rgba(197,0,34,0.15)]' : 'text-secondary hover:text-white hover:bg-white/[0.02]'}`}
                 >
                     HISTORY
                 </button>

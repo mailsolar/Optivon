@@ -4,7 +4,7 @@ import { XCircle, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 export default function Positions({ positions, quotes, onClosePosition }) {
     if (!positions || positions.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-gray-700 bg-[#0a0e27] p-8 text-center">
+            <div className="flex flex-col items-center justify-center h-full text-secondary bg-surface p-8 text-center">
                 <div className="w-16 h-16 rounded-full bg-white/[0.02] flex items-center justify-center mb-4 border border-white/5">
                     <Clock className="w-8 h-8 opacity-20" />
                 </div>
@@ -17,7 +17,7 @@ export default function Positions({ positions, quotes, onClosePosition }) {
     let totalPnL = 0;
 
     return (
-        <div className="flex flex-col h-full bg-[#0a0e27] font-sans">
+        <div className="flex flex-col h-full bg-surface font-sans">
             <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Active Positions</span>
                 <span className="text-[9px] font-black text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded uppercase">{positions.length} Live</span>

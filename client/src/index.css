@@ -4,78 +4,53 @@
 
 @layer base {
   :root {
-    /* SATOSHI AGENCY THEME (Global Default) */
+    /* OPTIVON STRONG RED THEME (Global Default) */
 
-    /* Deep Purple / Navy Backgrounds */
-    --bg-background: 23 23 43;
-    /* #17172B */
-    --bg-surface: 31 31 53;
-    /* #1F1F35 */
-    --bg-card: 37 37 64;
-    /* #252540 */
+    /* Premium Neutrals */
+    --bg-background: 0 0 0;        /* True Black #000000 */
+    --bg-surface: 10 10 10;        /* Deep Gray #0A0A0A */
+    --bg-card: 17 17 17;           /* Ebony #111111 */
 
-    /* High Contrast Text */
-    --text-primary: 255 255 255;
-    /* #FFFFFF */
-    --text-secondary: 156 163 175;
-    /* #9CA3AF (Gray-400) */
-    --text-muted: 75 85 99;
-    /* #4B5563 (Gray-600) */
+    /* Editorial Typography */
+    --text-primary: 255 255 255;   /* White #FFFFFF */
+    --text-secondary: 160 160 160; /* Gray #A0A0A0 */
+    --text-muted: 100 100 100;     /* Slate #646464 */
 
-    /* Borders */
-    --border-color: 52 49 165;
-    /* #3431A5 (Royal Blue) - used for subtle borders */
+    /* Precision Borders */
+    --border-color: 255 255 255;   /* White (with 0.05 opacity) */
 
-    /* Accents */
-    --accent-primary: 245 255 171;
-    /* #F5FFAB (Acid Lime) */
-    --accent-secondary: 52 49 165;
-    /* #3431A5 (Royal Blue) */
+    /* Refined Accents */
+    --accent-primary: 197 0 34;    /* Strong Red #C50022 */
+    --accent-secondary: 160 160 160; /* Stone */
 
-    /* Status Colors (kept functional but adjusted saturation if needed) */
-    --status-success: 34 197 94;
-    /* Green-500 */
-    --status-error: 239 68 68;
-    /* Red-500 */
-    --status-warning: 234 179 8;
-    /* Yellow-500 */
-
-    /* OPTIVON THEME COLORS */
-    --optivon-primary: 109 40 217;
-    /* #6d28d9 (Purple-700) */
-    --optivon-primary-hover: 124 58 237;
-    /* #7c3aed (Purple-600) */
-    --optivon-surface: 255 255 255;
-    /* White */
-    --optivon-bg: 243 244 246;
-    /* Gray-100 */
-    --optivon-text: 17 24 39;
-    /* Gray-900 */
-    --optivon-muted: 107 114 128;
-    /* Gray-500 */
+    /* Functional Status (Muted) */
+    --status-success: 104 214 148;
+    --status-error: 248 113 113;
+    --status-warning: 251 191 36;
+    
+    /* Global Radius */
+    --radius-premium: 1.5rem;
+    --radius-instrument: 0.5rem;
   }
 
-  /* Force Dark logic even if class remains for compatibility */
   .dark {
-    --bg-background: 23 23 43;
-    --bg-surface: 31 31 53;
-    --bg-card: 37 37 64;
+    /* Identical to root for enforced monochrome premium vibe */
+    --bg-background: 0 0 0;
+    --bg-surface: 10 10 10;
+    --bg-card: 17 17 17;
     --text-primary: 255 255 255;
-    --text-secondary: 156 163 175;
-    --border-color: 52 49 165;
-    --accent-primary: 245 255 171;
-    --accent-secondary: 52 49 165;
+    --text-secondary: 160 160 160;
+    --border-color: 255 255 255;
+    --accent-primary: 197 0 34;
   }
 }
 
-/* Base Styles */
 /* Base Styles */
 html,
 body {
   height: 100%;
   margin: 0;
-  /* overflow: hidden;  <-- REMOVED to allow scrolling on Landing Page */
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   background-color: rgb(var(--bg-background));
   color: rgb(var(--text-primary));
   -webkit-font-smoothing: antialiased;
@@ -83,15 +58,14 @@ body {
 
 #root {
   height: 100%;
-  /* overflow: hidden; <-- REMOVED */
   display: flex;
   flex-direction: column;
 }
 
-/* Custom Scrollbar (Lime Accent) */
+/* Custom Scrollbar (Muted Metallic) */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -99,12 +73,29 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--bg-card));
-  border-radius: 3px;
+  background: rgb(var(--text-muted) / 0.5);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--accent-primary) / 0.5);
+  background: rgb(var(--accent-primary) / 0.8);
+}
+
+/* Premium Typography Mixins */
+.text-h1 {
+    @apply text-[clamp(2.5rem,8vw,6rem)] font-bold tracking-[-0.04em] leading-[0.9] uppercase;
+}
+
+.text-label {
+    @apply text-[10px] font-bold uppercase tracking-[0.2em] text-secondary;
+}
+
+.border-hairline {
+    @apply border border-white/[0.05];
+}
+
+.premium-gradient {
+    background: linear-gradient(135deg, rgba(245,245,247,0.05) 0%, rgba(245,245,247,0.01) 100%);
 }
 
 /* Remove Number Input Spinners */

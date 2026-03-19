@@ -50,67 +50,69 @@ export default function ResetPassword() {
 
     if (!email || !code) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                <div className="bg-surface p-8 rounded-3xl border border-red-500/20 text-center">
-                    <h2 className="text-red-500 font-bold mb-2">Invalid Link</h2>
-                    <p className="text-secondary text-sm">Missing recovery parameters.</p>
+            <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans">
+                <div className="bg-surface p-12 rounded-premium border border-red-400/20 text-center shadow-2xl">
+                    <h2 className="text-red-400 font-bold uppercase tracking-widest mb-4">Invalid Sequence</h2>
+                    <p className="text-secondary font-medium text-sm">Missing core recovery parameters.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-            <div className="w-full max-w-sm bg-surface rounded-3xl shadow-2xl border border-border overflow-hidden p-8">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans">
+            <div className="w-full max-w-sm bg-surface rounded-premium shadow-2xl border border-white/5 overflow-hidden p-10">
 
                 {success ? (
-                    <div className="text-center space-y-4 py-8">
-                        <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto text-emerald-500">
-                            <CheckCircle className="w-8 h-8" />
+                    <div className="text-center space-y-8 py-10">
+                        <div className="w-20 h-20 bg-accent/5 border border-accent/20 rounded-premium flex items-center justify-center mx-auto text-accent shadow-soft">
+                            <CheckCircle className="w-10 h-10" />
                         </div>
-                        <h2 className="text-2xl font-black font-display text-primary">Password Reset!</h2>
-                        <p className="text-secondary text-sm">Redirecting you to login...</p>
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-bold text-primary uppercase tracking-tight">Key Synchronized</h2>
+                            <p className="text-secondary text-[10px] font-bold uppercase tracking-widest">Redirecting to terminal sync...</p>
+                        </div>
                     </div>
                 ) : (
                     <>
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-black font-display text-primary tracking-tight">Reset Password</h2>
-                            <p className="text-secondary text-xs font-mono mt-1">
-                                Secure your account for {email}
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-primary uppercase tracking-tight">Cailbrate Key</h2>
+                            <p className="text-secondary text-[10px] font-bold uppercase tracking-[0.3em] mt-3">
+                                Securing node {email}
                             </p>
                         </div>
 
                         {error && (
-                            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
-                                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                                <span className="text-red-500 text-[10px] font-black uppercase tracking-wider">{error}</span>
+                            <div className="mb-8 p-4 bg-red-400/5 border border-red-400/20 rounded-instrument flex items-center gap-4">
+                                <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                                <span className="text-red-400 text-[10px] font-bold uppercase tracking-widest">{error}</span>
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1">New Password</label>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-bold text-muted uppercase tracking-[0.3em] ml-1">New Access Key</label>
                                 <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary group-focus-within:text-accent transition-colors" />
+                                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within:text-accent transition-all" />
                                     <input
                                         type="password"
                                         value={newPassword}
                                         onChange={e => setNewPassword(e.target.value)}
-                                        className="w-full bg-background border border-border rounded-xl pl-12 pr-4 py-3.5 text-sm font-medium text-primary outline-none focus:border-accent transition-all placeholder:text-secondary/30"
+                                        className="w-full bg-background border border-white/5 rounded-instrument py-4 pl-14 pr-6 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20"
                                         placeholder="••••••••"
                                         required
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1">Confirm Password</label>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-bold text-muted uppercase tracking-[0.3em] ml-1">Confirm Key</label>
                                 <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary group-focus-within:text-accent transition-colors" />
+                                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within:text-accent transition-all" />
                                     <input
                                         type="password"
                                         value={confirmPassword}
                                         onChange={e => setConfirmPassword(e.target.value)}
-                                        className="w-full bg-background border border-border rounded-xl pl-12 pr-4 py-3.5 text-sm font-medium text-primary outline-none focus:border-accent transition-all placeholder:text-secondary/30"
+                                        className="w-full bg-background border border-white/5 rounded-instrument py-4 pl-14 pr-6 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -120,9 +122,9 @@ export default function ResetPassword() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 bg-accent text-brand-dark rounded-xl font-bold uppercase tracking-wider text-xs hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 transition-all flex items-center justify-center gap-2 group"
+                                className="w-full py-5 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-primary transition-all disabled:opacity-50 shadow-soft flex items-center justify-center gap-4 group mt-4"
                             >
-                                {loading ? 'Resetting...' : 'Reset Password'}
+                                {loading ? 'Calibrating...' : 'Sync New Key'}
                                 {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                             </button>
                         </form>
@@ -132,4 +134,3 @@ export default function ResetPassword() {
         </div>
     );
 }
-

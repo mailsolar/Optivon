@@ -57,9 +57,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     // Ref to accumulate data without re-rendering
     const chartDataRef = useRef([]);
 
-    // specific effect to sync data when chart type changes (forcing a remount)
     useEffect(() => {
-        // Clear data on timeframe change to prevent sync issues between history and live ticks
         chartDataRef.current = [];
         setChartData([]);
     }, [timeframe]);
@@ -70,7 +68,6 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         }
     }, [chartType]);
 
-    // Track current symbol ref to avoid stale closures in WS callbacks
     const selectedSymbolRef = useRef(selectedSymbol);
     const timeframeRef = useRef(timeframe);
 
@@ -82,7 +79,6 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         timeframeRef.current = timeframe;
     }, [timeframe]);
 
-    // Timeframe Configuration (in Seconds)
     const TIMEFRAME_SECONDS = {
         '1m': 60,
         '5m': 300,
@@ -94,10 +90,9 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         '1M': 2592000
     };
 
-    // Helper: Aggregate 1m candles into higher timeframes
     const aggregateCandles = (candles, seconds) => {
         if (!candles || candles.length === 0) return [];
-        if (seconds === 60) return candles; // No aggregation needed for 1m
+        if (seconds === 60) return candles;
 
         const aggregated = [];
         let currentCandle = null;
@@ -108,13 +103,11 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             if (!currentCandle) {
                 currentCandle = { ...candle, time: candleTime };
             } else if (currentCandle.time === candleTime) {
-                // Update existing bucket
                 currentCandle.high = Math.max(currentCandle.high, candle.high);
                 currentCandle.low = Math.min(currentCandle.low, candle.low);
                 currentCandle.close = candle.close;
                 currentCandle.volume += candle.volume || 0;
             } else {
-                // Push finished candle and start new one
                 aggregated.push(currentCandle);
                 currentCandle = { ...candle, time: candleTime };
             }
@@ -129,7 +122,6 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         return currentOrigin.includes('5173') ? currentOrigin.replace('5173', '5000') : currentOrigin;
     };
 
-    // ===== OPTIVON MARKET DATA WEBSOCKET (Socket.IO) =====
     useEffect(() => {
         const backendUrl = getBackendUrl();
         const socket = io(backendUrl, {
@@ -140,36 +132,24 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         wsRef.current = socket;
 
         socket.on('connect', () => {
-            console.log('[Upstox] Socket Connected (ID:', socket.id, ')');
             setSocketStatus('Connected');
-            setIsLive(true); // Treat connection as 'potential live'
+            setIsLive(true);
             socket.emit('subscribe', selectedSymbolRef.current);
         });
 
         socket.on('stock_update', (tick) => {
-            console.log('[Upstox] Live Tick:', tick);
             const activeSymbol = selectedSymbolRef.current;
-
-            if (!seriesAPI.current && tick.symbol === activeSymbol) {
-                console.warn(`[Upstox] CHART STUCK: Tick received for ${tick.symbol} but chart series is not connected.`);
-            }
-
             if (tick.symbol !== activeSymbol) return;
 
             setLastTickMessage(`${tick.symbol}: ${tick.ltp}`);
             setLastTickTime(Date.now());
             setIsLive(true);
 
-            // 1. Update Quotes
-            setQuotes(prev => {
-                const updated = {
-                    ...prev,
-                    [activeSymbol]: { symbol: activeSymbol, ltp: tick.ltp, time: tick.time, change: 0, changePercent: 0 }
-                };
-                return updated;
-            });
+            setQuotes(prev => ({
+                ...prev,
+                [activeSymbol]: { symbol: activeSymbol, ltp: tick.ltp, time: tick.time, change: 0, changePercent: 0 }
+            }));
 
-            // 2. Aggregate Tick (Standard Midnight Alignment)
             const seconds = TIMEFRAME_SECONDS[timeframeRef.current] || 60;
             const candleTime = Math.floor(tick.time / seconds) * seconds;
 
@@ -191,19 +171,12 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                 if (currentData.length > 2000) currentData.shift();
             }
 
-            // 3. Update Chart Directly
             if (seriesAPI.current) {
                 seriesAPI.current.update(updatedCandle);
             }
 
             chartDataRef.current = currentData;
-
-            // NO THROTTLING - Instant UI Sync
             setChartData([...currentData]);
-            setQuotes(prev => ({
-                ...prev,
-                [activeSymbol]: { symbol: activeSymbol, ltp: tick.ltp, time: tick.time, change: 0, changePercent: 0 }
-            }));
 
             if (checkAlerts) checkAlerts({ [activeSymbol]: { ltp: tick.ltp } });
         });
@@ -211,17 +184,12 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         return () => socket.disconnect();
     }, []);
 
-    // Handle Symbol Changes without reconnecting
     useEffect(() => {
         if (wsRef.current && wsRef.current.connected) {
             wsRef.current.emit('subscribe', selectedSymbol);
         }
-    }, [selectedSymbol]); // Only reconnect socket on symbol/account change, NOT timeframe (uses ref)
+    }, [selectedSymbol]);
 
-
-
-
-    // Poll Upstox status every 5s for diagnostics
     useEffect(() => {
         const checkStatus = async () => {
             try {
@@ -230,10 +198,10 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                     const data = await res.json();
                     setUpstoxStatus(data);
                 } else {
-                    setUpstoxStatus(prev => ({ ...prev, error: `Backend ${res.status}: Check terminal` }));
+                    setUpstoxStatus(prev => ({ ...prev, error: `Protocol ${res.status}` }));
                 }
             } catch (e) {
-                setUpstoxStatus(prev => ({ ...prev, error: 'Cannot reach backend server' }));
+                setUpstoxStatus(prev => ({ ...prev, error: 'Link Down' }));
             }
         };
         checkStatus();
@@ -241,31 +209,23 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         return () => clearInterval(interval);
     }, []);
 
-    // Fetch Intraday History separately
     useEffect(() => {
         const fetchHistory = async () => {
             try {
                 const isIntraday = ['1m', '5m', '15m', '1h', '4h'].includes(timeframe);
                 const fetchInterval = isIntraday ? '1m' : timeframe;
-
-                // IMPORTANT: Pass the raw symbol (e.g., 'BANKNIFTY'). The backend handles mapping to Upstox instrument tokens.
                 const apiSymbol = selectedSymbol;
 
                 const res = await fetch(`/api/upstox/intraday?symbol=${encodeURIComponent(apiSymbol)}&interval=${fetchInterval}`);
                 if (res.ok) {
                     let data = await res.json();
-
                     if (Array.isArray(data)) {
                         if (isIntraday && timeframe !== '1m') {
                             const seconds = TIMEFRAME_SECONDS[timeframe] || 60;
                             data = aggregateCandles(data, seconds);
                         }
-
-                        console.log(`[Upstox] History Loaded: ${data.length} candles`);
                         chartDataRef.current = [...data];
                         setChartData([...data]);
-
-                        // Direct Push to Chart API if ready
                         if (seriesAPI.current) {
                             seriesAPI.current.setData(data);
                             chartAPI.current?.timeScale().fitContent();
@@ -276,38 +236,27 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                 console.error("History fetch error:", e);
             }
         };
-
         fetchHistory();
     }, [selectedSymbol, timeframe]);
 
-    // Remove old visibility handler which was corrupting live state
     useEffect(() => {
-        setIsLive(false); // Reset live status on symbol change
+        setIsLive(false);
     }, [selectedSymbol]);
 
-    // Fetch Account State & Positions
     const [allAccounts, setAllAccounts] = useState([]);
 
     const fetchAccountData = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const accId = account?.id;
-
             const headers = { 'Authorization': `Bearer ${token}` };
-
             const accountsRes = await fetch('/api/trade/accounts', { headers });
-
-            let currentPositions = [];
-            let currentAccountData = null;
 
             if (accountsRes.ok) {
                 const accountsData = await accountsRes.json();
                 setAllAccounts(accountsData);
-
                 if (!accId && accountsData.length > 0) {
-                    const active = accountsData.find(a => a.status === 'active') ||
-                        accountsData.find(a => a.status === 'pending') ||
-                        accountsData[0];
+                    const active = accountsData.find(a => a.status === 'active') || accountsData.find(a => a.status === 'pending') || accountsData[0];
                     setAccount(active);
                     return;
                 }
@@ -318,14 +267,12 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                     fetch('/api/trade/positions', { headers }),
                     fetch(`/api/trade/account/${accId}`, { headers })
                 ]);
-
                 if (posRes.ok) {
                     const pos = await posRes.json();
                     setPositions(pos.filter(p => p.account_id === accId));
                 }
-
                 if (accRes.ok) {
-                    currentAccountData = await accRes.json();
+                    const currentAccountData = await accRes.json();
                     setAccount(currentAccountData);
                 }
             }
@@ -340,34 +287,28 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         return () => clearInterval(interval);
     }, [fetchAccountData]);
 
-    // Close Position
     const handleClosePosition = async (positionId) => {
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/trade/close', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ accountId: account.id, positionId })
             });
 
             if (res.ok) {
-                addToast('Position Closed', 'success');
+                addToast('Position Terminated', 'success');
                 fetchAccountData();
                 if (onTrade) onTrade();
             } else {
                 const data = await res.json();
-                addToast(data.error || 'Failed to close position', 'error');
+                addToast(data.error || 'Termination Failed', 'error');
             }
         } catch (error) {
-            console.error('[Optivon] Close position error:', error);
-            addToast('Network Error', 'error');
+            addToast('Protocol Error', 'error');
         }
     };
 
-    // Trade Handler
     const handleOrder = async (symbol, side, lots, type, price, limitPrice, sl, tp, isClose = false) => {
         if (!isClose && accountLocked) {
             addToast(`BLOCKED: ${lockReason}`, 'error');
@@ -375,49 +316,31 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         }
 
         if (!account && !isClose) {
-            addToast("No Active Account Selected", "error");
+            addToast("Node Inactive", "error");
             return;
         }
 
         try {
             const token = localStorage.getItem('token');
             const endpoint = isClose ? '/api/trade/close' : '/api/trade/place';
-
-            const body = isClose
-                ? { accountId: account.id, positionId: lots }
-                : {
-                    accountId: account.id,
-                    symbol,
-                    side,
-                    lots,
-                    type,
-                    price,
-                    limitPrice,
-                    sl,
-                    tp
-                };
+            const body = isClose ? { accountId: account.id, positionId: lots } : { accountId: account.id, symbol, side, lots, type, price, limitPrice, sl, tp };
 
             const res = await fetch(endpoint, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(body)
             });
 
             const result = await res.json();
-
             if (res.ok) {
-                addToast(result.message || 'Order executed', 'success');
+                addToast(result.message || 'Sequence Executed', 'success');
                 fetchAccountData();
                 if (onTrade) onTrade();
             } else {
-                addToast(result.error || 'Order failed', 'error');
+                addToast(result.error || 'Execution Failed', 'error');
             }
         } catch (error) {
-            console.error('Order error:', error);
-            addToast('Failed to execute order', 'error');
+            addToast('Critical Logic Error', 'error');
         }
     };
 
@@ -435,11 +358,9 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     };
 
     return (
-        <div className="h-screen flex flex-col bg-[#0a0e1a] overflow-hidden text-slate-300 font-sans selection:bg-indigo-500/30">
-            {/* Risk Status Banner (Institutional) */}
+        <div className="h-screen flex flex-col bg-background overflow-hidden text-secondary font-sans selection:bg-accent/30">
             <RiskStatusBanner />
 
-            {/* Terminal Top Bar (Global Navigation & Symbol Search) */}
             <TerminalHeader
                 selectedSymbol={selectedSymbol}
                 quote={quotes[selectedSymbol]}
@@ -457,11 +378,8 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                 onOpenAlerts={() => setShowAlertModal(true)}
             />
 
-            {/* Main Operational Area */}
             <div className="flex-1 flex overflow-hidden min-h-0 relative">
-
-                {/* sidebar: Chart Tools */}
-                <div className="w-12 border-r border-white/5 flex flex-col items-center py-4 bg-[#0a0e1a] shrink-0 z-30">
+                <div className="w-14 border-r border-white/[0.02] flex flex-col items-center py-6 bg-surface shrink-0 z-30 shadow-2xl">
                     <ChartToolbar
                         activeTool={activeTool}
                         onToolChange={setActiveTool}
@@ -471,31 +389,23 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                     />
                 </div>
 
-                {/* Center: Timeframe + Chart Canvas */}
-                <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#0a0e1a]">
+                <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-background">
+                    <div className="h-10 border-b border-white/[0.02] flex items-center justify-between px-4 bg-surface/50 backdrop-blur-md shrink-0 z-20">
+                        <TimeframeSelector timeframe={timeframe} setTimeframe={setTimeframe} />
 
-                    {/* Secondary Header: Timeframes & System Status */}
-                    <div className="h-9 border-b border-white/5 flex items-center justify-between px-2 bg-white/[0.01] shrink-0 z-20">
-                        <TimeframeSelector
-                            timeframe={timeframe}
-                            setTimeframe={setTimeframe}
-                        />
-
-                        {/* Status Matrix (Minimalist) */}
-                        <div className="flex items-center gap-4 pr-3">
+                        <div className="flex items-center gap-6 pr-4">
                             {upstoxStatus.error && (
-                                <span className="text-[10px] text-red-500 font-black animate-pulse uppercase tracking-wider flex items-center gap-1">
-                                    <span className="w-1 h-1 rounded-full bg-red-500" /> {upstoxStatus.error}
+                                <span className="text-[10px] text-red-500 font-bold animate-pulse uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <div className="w-1 h-1 rounded-full bg-red-500" /> {upstoxStatus.error}
                                 </span>
                             )}
-                            <div className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-all cursor-default">
-                                <span className={`w-1.5 h-1.5 rounded-full ${socketStatus === 'Connected' ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-red-500 animate-ping'}`} />
-                                <span className="text-[9px] font-black text-white/40 uppercase tracking-[2px]">{socketStatus}</span>
+                            <div className="flex items-center gap-3 opacity-50 hover:opacity-100 transition-all cursor-default group">
+                                <span className={`w-2 h-2 rounded-full ${socketStatus === 'Connected' ? 'bg-accent shadow-soft' : 'bg-red-500 animate-ping'}`} />
+                                <span className="text-[9px] font-bold text-primary uppercase tracking-[0.3em] group-hover:text-accent transition-colors">{socketStatus}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Chart Implementation */}
                     <div className="flex-1 relative overflow-hidden" ref={chartContainerRef}>
                         <TerminalChart
                             data={chartData}
@@ -507,7 +417,6 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                             timeframe={timeframe}
                             activeIndicators={activeIndicators}
                         />
-                        {/* UI layers (Tooltip, TradeBox, etc) */}
                         <ChartOverlay
                             chartInstance={chartInstance}
                             containerRef={chartContainerRef}
@@ -520,9 +429,8 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                     </div>
                 </div>
 
-                {/* Right Panel: Account & Execution */}
                 {isRightPanelOpen && (
-                    <div className="w-[310px] shrink-0 border-l border-white/5 bg-[#0a0e1a] z-30 transition-all duration-300 ease-in-out">
+                    <div className="w-[320px] shrink-0 border-l border-white/[0.02] bg-surface z-30 shadow-2xl">
                         <UnifiedRightPanel
                             isOpen={true}
                             selectedSymbol={selectedSymbol}
@@ -538,28 +446,14 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                 )}
             </div>
 
-            {/* Overlays & Modals */}
-            {showSettings && (
-                <SettingsPanel isOpen={true} onClose={() => setShowSettings(false)} />
-            )}
-
-            {showAlertModal && (
-                <AlertModal
-                    isOpen={true}
-                    symbol={selectedSymbol}
-                    currentPrice={quotes[selectedSymbol]?.ltp}
-                    quotes={quotes}
-                    onClose={() => setShowAlertModal(false)}
-                />
-            )}
+            {showSettings && <SettingsPanel isOpen={true} onClose={() => setShowSettings(false)} />}
+            {showAlertModal && <AlertModal isOpen={true} symbol={selectedSymbol} currentPrice={quotes[selectedSymbol]?.ltp} quotes={quotes} onClose={() => setShowAlertModal(false)} />}
         </div>
     );
 }
 
-// Global Application Wrapper (Providers)
 export default function TerminalLayout({ user, account: initialAccount, onTrade }) {
     const [account, setAccount] = useState(initialAccount);
-
     return (
         <RiskManagementProvider accountId={account?.id}>
             <AlgoProvider accountId={account?.id}>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Settings, LogOut, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import Footer from '../components/Global/Footer';
 
 export default function AdminLayout() {
     const { logout } = useAuth();
@@ -13,13 +14,16 @@ export default function AdminLayout() {
     };
 
     return (
-        <div className="flex h-screen bg-[#0a0a0f] text-white font-sans overflow-hidden">
+        <div className="flex h-screen bg-background text-primary font-sans overflow-hidden selection:bg-accent selection:text-background">
             {/* Admin Sidebar */}
-            <aside className="w-64 bg-[#12121a] border-r border-white/5 flex flex-col">
-                <div className="p-6 border-b border-white/5">
-                    <div className="flex items-center gap-2 text-brand-lime font-display font-black text-xl tracking-wider">
-                        <ShieldAlert size={24} />
-                        ADMIN
+            <aside className="w-64 bg-surface border-r border-white/5 flex flex-col">
+                <div className="p-8 border-b border-white/5">
+                    <div className="flex flex-col gap-2">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-secondary">Optivon Admin</div>
+                        <div className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
+                            <ShieldAlert size={20} className="text-accent" />
+                            VAULT
+                        </div>
                     </div>
                 </div>
 
@@ -43,16 +47,25 @@ export default function AdminLayout() {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-16 border-b border-white/5 flex items-center px-8 justify-between bg-[#12121a]">
-                    <h1 className="font-bold text-gray-400">Restricted Area</h1>
+                <header className="h-16 border-b border-white/5 flex items-center px-8 justify-between bg-surface">
+                    <button 
+                        onClick={() => navigate('/dashboard')}
+                        className="flex items-center gap-3 text-secondary hover:text-primary transition-colors group"
+                    >
+                        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Return to Site</span>
+                    </button>
                     <div className="flex items-center gap-4">
-                        <div className="w-2 h-2 bg-brand-lime rounded-full animate-pulse" />
-                        <span className="text-xs font-mono text-brand-lime">SYSTEM ONLINE</span>
+                        <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                        <span className="text-[10px] font-bold text-accent uppercase tracking-[0.2em]">Live Protocol</span>
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-8 bg-brand-dark">
-                    <Outlet />
+                <main className="flex-1 overflow-y-auto bg-background">
+                    <div className="p-8 pb-32">
+                        <Outlet />
+                    </div>
+                    <Footer />
                 </main>
             </div>
         </div>

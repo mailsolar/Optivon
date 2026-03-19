@@ -32,7 +32,7 @@ export default function PositionOverlay({ position, currentPrice }) {
         <div className="absolute bottom-0 left-0 right-0 flex items-center pointer-events-none z-20">
             {/* Position Information Badge - Bottom Bar */}
             <div className="flex items-center w-full pointer-events-auto">
-                <div className={`flex items-center gap-4 flex-1 px-4 py-2 shadow-2xl backdrop-blur-xl bg-[#1a1e2e]/95 border-t-2 ${position.side === 'buy' ? 'border-[#00c853]' : 'border-[#ff1744]'} transition-all duration-300 ${flash === 'profit' ? 'ring-1 ring-[#00c853]/50' : flash === 'loss' ? 'ring-1 ring-[#ff1744]/50' : ''
+                <div className={`flex items-center gap-4 flex-1 px-4 py-2 shadow-2xl backdrop-blur-xl bg-background/95 border-t-2 ${position.side === 'buy' ? 'border-[#00c853]' : 'border-[#ff1744]'} transition-all duration-300 ${flash === 'profit' ? 'ring-1 ring-[#00c853]/50' : flash === 'loss' ? 'ring-1 ring-[#ff1744]/50' : ''
                     }`}>
                     <div className="flex items-center gap-2">
                         <span className={`text-[9px] font-black tracking-[2px] uppercase ${position.side === 'buy' ? 'text-[#00c853]' : 'text-[#ff1744]'}`}>

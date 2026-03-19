@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Timer, Flame, ArrowRight, Target, Zap } from 'lucide-react';
+import { Trophy, Timer, Flame, ArrowRight, Target, Zap, Users, Award } from 'lucide-react';
 
 export default function Competitions() {
     const competitions = [
@@ -8,130 +8,140 @@ export default function Competitions() {
             title: "Global Sprint Alpha",
             status: "Active",
             participants: 1240,
-            prize: "$5,000 + 100k Account",
+            prize: "₹5,00,000 + Funding",
             endsIn: "4d 12h",
-            bg: "from-purple-500/20 to-blue-600/20",
-            accent: "text-purple-400"
+            bg: "bg-accent/5",
+            accent: "text-accent"
         },
         {
             id: 2,
             title: "Weekend Blitz",
             status: "Upcoming",
             participants: 450,
-            prize: "$1,000 Cash",
+            prize: "₹1,00,000 Cash",
             startsIn: "1d 04h",
-            bg: "from-brand-lime/10 to-green-500/10",
-            accent: "text-brand-lime"
+            bg: "bg-white/5",
+            accent: "text-primary"
         }
     ];
 
     return (
-        <div className="flex flex-col gap-8 max-w-6xl mx-auto h-full">
-
-            {/* HEADER */}
-            <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <Trophy className="text-brand-lime w-6 h-6" />
-                    <h1 className="text-3xl font-display font-black text-white uppercase tracking-tight">Competitions</h1>
-                </div>
-                <p className="text-gray-400 text-lg">Compete with simulated capital. Prove your dominance. Win real prizes.</p>
+        <div className="flex flex-col gap-10 max-w-6xl mx-auto font-sans">
+            
+            {/* Header */}
+            <div className="flex flex-col gap-2">
+                <div className="text-[10px] font-bold text-accent uppercase tracking-[0.4em]">Arena Phase</div>
+                <h1 className="text-3xl font-bold text-primary uppercase tracking-tight text-shadow-glow flex items-center gap-4">
+                    <Trophy className="text-accent" size={32} />
+                    Competitive Protocols
+                </h1>
+                <p className="text-secondary font-medium text-sm">Validate your edge against the global collective. Secured prizes await.</p>
             </div>
 
             {/* FEATURED HACKATHON CARD */}
-            <div className="relative rounded-2xl p-8 overflow-hidden bg-[#1F1F35] border border-brand-lime/20 group">
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,255,147,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_infinite]" />
-                <div className="absolute top-0 right-0 w-96 h-96 bg-brand-lime/10 rounded-full blur-[120px] -mr-32 -mt-32 pointer-events-none" />
+            <div className="relative rounded-premium p-12 overflow-hidden bg-surface border border-accent/20 shadow-2xl group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(197,160,89,0.05),transparent)] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] -mr-32 -mt-32 pointer-events-none" />
 
-                <div className="relative z-10 flex flex-col md:flex-row justify-between gap-8">
-                    <div className="flex-1">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-lime text-brand-dark rounded-md font-bold text-xs uppercase tracking-widest mb-4">
-                            <Flame size={12} fill="currentColor" /> Live Event
-                        </div>
-                        <h2 className="text-4xl font-display font-black text-white uppercase mb-4 italic">
-                            The Optivon <span className="text-brand-lime">Hackathon</span>
-                        </h2>
-                        <p className="text-gray-300 max-w-xl mb-6 leading-relaxed">
-                            The ultimate high-frequency trading sprint. You start with $100,000 simulated equity. Highest profit percentage after 72 hours wins huge prizes. No drawdown rules. Just pure PnL velocity.
-                        </p>
-
-                        <div className="flex gap-8 mb-8">
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">First Prize</p>
-                                <p className="text-2xl font-bold text-white">$10,000 Cash</p>
+                <div className="relative z-10 flex flex-col xl:flex-row justify-between gap-12">
+                    <div className="flex-1 space-y-8">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent text-background rounded-instrument font-black text-[9px] uppercase tracking-widest mb-6 shadow-soft">
+                                <Flame size={12} fill="currentColor" /> Live Transmission
                             </div>
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Entry Fee</p>
-                                <p className="text-2xl font-bold text-brand-lime">Free</p>
-                            </div>
+                            <h2 className="text-5xl font-black text-primary uppercase mb-4 tracking-tighter leading-none">
+                                The Optivon <span className="text-accent italic">Hackathon</span>
+                            </h2>
+                            <p className="text-secondary font-medium text-lg max-w-2xl leading-relaxed">
+                                The ultimate high-frequency trading sprint. Initialize with <span className="text-primary font-bold">₹1,00,00,000</span> simulated allocation. Peak yield velocity over 72 hours secures the prime directive.
+                            </p>
                         </div>
 
-                        <button className="bg-white text-brand-dark font-black px-8 py-4 rounded-xl hover:bg-brand-lime transition-colors flex items-center gap-2">
-                            Enter Competition <ArrowRight size={16} strokeWidth={3} />
+                        <div className="flex gap-12">
+                            <div>
+                                <p className="text-[10px] text-muted uppercase tracking-[0.3em] font-bold mb-2">Prime Reward</p>
+                                <p className="text-3xl font-bold text-primary tracking-tighter">₹10,00,000 CASH</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-muted uppercase tracking-[0.3em] font-bold mb-2">Access Cost</p>
+                                <p className="text-3xl font-bold text-accent tracking-tighter">NULL</p>
+                            </div>
+                        </div>
+
+                        <button className="bg-primary text-background font-black px-10 py-5 rounded-instrument hover:bg-accent transition-all flex items-center gap-3 uppercase text-xs tracking-widest shadow-premium group/btn">
+                            Initialize Protocol <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
 
                     {/* Stats / Graphic Side */}
-                    <div className="w-full md:w-80 bg-[#121220] rounded-xl border border-white/10 p-6 flex flex-col gap-4">
-                        <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                            <span className="text-xs text-gray-400 uppercase tracking-widest font-bold">Live Leaderboard</span>
-                            <span className="flex items-center gap-1 text-[10px] text-green-500 font-mono"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> UPDATING</span>
+                    <div className="w-full xl:w-96 bg-background/50 backdrop-blur-md rounded-premium border border-white/5 p-8 flex flex-col gap-6 shadow-inner">
+                        <div className="flex justify-between items-center pb-6 border-b border-white/5">
+                            <span className="text-[10px] text-muted uppercase tracking-[0.3em] font-bold">Live Standings</span>
+                            <span className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-widest"><span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse shadow-[0_0_10px_#C50022]" /> Syncing</span>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {[1, 2, 3].map((rank, i) => (
-                                <div key={i} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold ${rank === 1 ? 'bg-yellow-500 text-black' : 'bg-white/10 text-gray-400'}`}>
+                                <div key={i} className="flex items-center justify-between group/rank">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-8 h-8 rounded-instrument flex items-center justify-center text-xs font-black border ${rank === 1 ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-white/5 border-white/10 text-muted'}`}>
                                             {rank}
                                         </div>
-                                        <span className="text-sm font-mono text-gray-300">User_{Math.floor(Math.random() * 9000) + 1000}</span>
+                                        <span className="text-xs font-bold text-secondary uppercase tracking-widest font-mono">Node_{Math.floor(Math.random() * 9000) + 1000}</span>
                                     </div>
-                                    <span className="text-sm font-bold text-brand-lime">+{100 - (rank * 12)}%</span>
+                                    <span className={`text-sm font-black tracking-tighter ${rank === 1 ? 'text-accent' : 'text-primary'}`}>+{100 - (rank * 12)}.4%</span>
                                 </div>
                             ))}
+                        </div>
+
+                        <div className="mt-auto pt-6 border-t border-white/5">
+                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted">
+                                <span>Pulse Nodes</span>
+                                <span className="text-primary font-mono">1,240 Linked</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* UPCOMING & ACTIVE LIST */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {competitions.map((comp) => (
-                    <div key={comp.id} className="group bg-[#1F1F35] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-all relative overflow-hidden">
-                        <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${comp.bg} rounded-full blur-[50px] -mr-10 -mt-10 pointer-events-none opacity-50`} />
+                    <div key={comp.id} className="group bg-surface rounded-premium p-8 border border-white/5 hover:border-accent/30 transition-all relative overflow-hidden shadow-xl">
+                        <div className={`absolute top-0 right-0 w-48 h-48 ${comp.bg} rounded-full blur-[60px] -mr-16 -mt-16 pointer-events-none opacity-40`} />
 
-                        <div className="flex justify-between items-start mb-6 relative z-10">
+                        <div className="flex justify-between items-start mb-10 relative z-10">
                             <div>
-                                <span className={`inline-block px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-widest mb-3 border ${comp.status === 'Active' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                <span className={`inline-block px-3 py-1 rounded-instrument text-[9px] uppercase font-black tracking-widest mb-4 border ${comp.status === 'Active' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-white/5 text-muted border-white/10'}`}>
                                     {comp.status}
                                 </span>
-                                <h3 className="text-xl font-bold text-white">{comp.title}</h3>
+                                <h3 className="text-2xl font-bold text-primary uppercase tracking-tight">{comp.title}</h3>
                             </div>
-                            <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                                <Target size={20} className="text-gray-400 group-hover:text-white" />
+                            <div className="w-12 h-12 bg-background border border-white/5 rounded-premium flex items-center justify-center group-hover:bg-accent group-hover:text-background transition-all shadow-soft">
+                                <Target size={24} className="group-hover:text-current" />
                             </div>
                         </div>
 
-                        <div className="space-y-3 mb-6 relative z-10">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Prize Pool</span>
-                                <span className={`font-bold ${comp.accent}`}>{comp.prize}</span>
+                        <div className="space-y-4 mb-10 relative z-10">
+                            <div className="flex justify-between items-center py-2 border-b border-white/[0.03]">
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Prize Allocation</span>
+                                <span className={`text-sm font-black tracking-tighter ${comp.accent}`}>{comp.prize}</span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Participants</span>
-                                <span className="text-white font-mono">{comp.participants}</span>
+                            <div className="flex justify-between items-center py-2 border-b border-white/[0.03]">
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Active Nodes</span>
+                                <span className="text-sm font-black text-primary font-mono tracking-tighter">{comp.participants}</span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">{comp.status === 'Active' ? 'Ends In' : 'Starts In'}</span>
-                                <span className="text-white font-mono flex items-center gap-2">
-                                    <Timer size={12} className="text-gray-500" />
+                            <div className="flex justify-between items-center py-2">
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{comp.status === 'Active' ? 'Time Remaining' : 'Initializing In'}</span>
+                                <span className="text-sm font-black text-primary font-mono flex items-center gap-2 tracking-tighter">
+                                    <Timer size={14} className="text-muted" />
                                     {comp.endsIn || comp.startsIn}
                                 </span>
                             </div>
                         </div>
 
-                        <button className="w-full py-3 bg-white/5 border border-white/5 text-gray-300 font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-white/10 hover:text-white transition-colors">
-                            View Details
+                        <button className="w-full py-4 bg-background border border-white/5 text-muted font-black text-[10px] uppercase tracking-[0.2em] rounded-instrument hover:bg-accent/10 hover:text-accent hover:border-accent/30 transition-all">
+                            Access Protocol Specs
                         </button>
                     </div>
                 ))}
@@ -140,4 +150,3 @@ export default function Competitions() {
         </div>
     );
 }
-

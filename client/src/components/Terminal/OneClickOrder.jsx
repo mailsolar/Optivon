@@ -27,7 +27,7 @@ export default function OneClickOrderToggle({ enabled, onToggle }) {
           flex items-center gap-2 px-3 py-2 rounded-lg transition-all
           ${enabled
                         ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                        : 'bg-[#1a1e2e] text-gray-400 border-white/5'
+                        : 'bg-surface text-gray-400 border-white/5'
                     }
           border hover:border-white/10
         `}
@@ -40,7 +40,7 @@ export default function OneClickOrderToggle({ enabled, onToggle }) {
             {/* Warning Modal */}
             {showWarning && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-in fade-in duration-200">
-                    <div className="bg-[#1a1e2e] border border-yellow-500/30 rounded-xl p-6 max-w-md shadow-2xl">
+                    <div className="bg-background border border-accent/30 rounded-none p-6 max-w-md shadow-2xl">
                         <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
                                 <Zap className="w-6 h-6 text-yellow-500" />

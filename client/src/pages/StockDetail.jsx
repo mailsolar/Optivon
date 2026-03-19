@@ -1,38 +1,50 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { createChart } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
+import { ArrowLeft, Globe, Activity, ShieldCheck, Zap } from 'lucide-react';
 
 const StockDetail = () => {
     const { symbol } = useParams();
     const navigate = useNavigate();
     const chartContainerRef = useRef(null);
+    const chartRef = useRef(null);
 
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
         const chart = createChart(chartContainerRef.current, {
             layout: {
-                background: { type: 'solid', color: 'transparent' },
-                textColor: '#00f3ff', // Cyber Cyan
+                background: { type: ColorType.Solid, color: 'transparent' },
+                textColor: '#646466',
             },
             grid: {
-                vertLines: { color: 'rgba(0, 243, 255, 0.1)' },
-                horzLines: { color: 'rgba(0, 243, 255, 0.1)' },
+                vertLines: { color: 'rgba(255, 255, 255, 0.02)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.02)' },
             },
             width: chartContainerRef.current.clientWidth,
             height: 500,
+            rightPriceScale: {
+                borderVisible: false,
+                scaleMargins: {
+                    top: 0.2,
+                    bottom: 0.2,
+                },
+            },
+            timeScale: {
+                borderVisible: false,
+            },
         });
+
+        chartRef.current = chart;
 
         const candleSeries = chart.addCandlestickSeries({
-            upColor: '#00f3ff',
-            downColor: '#ff00dc', // Cyber Pink
+            upColor: '#C50022',
+            downColor: '#A6A6A6',
             borderVisible: false,
-            wickUpColor: '#00f3ff',
-            wickDownColor: '#ff00dc',
+            wickUpColor: '#C50022',
+            wickDownColor: '#A6A6A6',
         });
 
-        // Simulated Data Generator
         const generateData = () => {
             let data = [];
             let time = new Date('2024-01-01').getTime() / 1000;
@@ -51,107 +63,125 @@ const StockDetail = () => {
 
         candleSeries.setData(generateData());
 
-        const handleResize = () => {
-            chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+        const handleResize = (entries) => {
+            if (entries.length === 0 || !chart) return;
+            const newRect = entries[0].contentRect;
+            chart.applyOptions({ width: newRect.width, height: newRect.height });
         };
-        window.addEventListener('resize', handleResize);
+
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(chartContainerRef.current);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
-            chart.remove();
+            resizeObserver.disconnect();
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+            }
         };
     }, [symbol]);
 
     return (
-        <div className="min-h-screen bg-cyber-black text-cyber-cyan p-6 relative overflow-hidden font-mono">
-            {/* Background Grid */}
-            <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(0,243,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,243,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-
-            <div className="relative z-10 max-w-7xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="flex justify-between items-center bg-black/40 backdrop-blur-md rounded-xl p-6 border border-cyber-cyan/30 shadow-[0_0_15px_rgba(0,243,255,0.2)]">
-                    <div>
-                        <button onClick={() => navigate(-1)} className="text-sm text-gray-400 hover:text-white mb-2">← Back to Terminal</button>
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyber-cyan to-cyber-purple animate-pulse">
-                            {symbol}
-                        </h1>
-                        <span className="text-sm text-gray-300">Technology / AI / Robotics</span>
+        <div className="min-h-screen bg-background text-primary p-8 font-sans">
+            <div className="max-w-7xl mx-auto space-y-10">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-surface rounded-premium p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
+                    
+                    <div className="relative z-10 flex flex-col gap-4">
+                        <button 
+                            onClick={() => navigate(-1)} 
+                            className="flex items-center gap-3 text-[10px] font-bold text-muted hover:text-accent uppercase tracking-[0.3em] transition-all group"
+                        >
+                            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to Terminal
+                        </button>
+                        <div className="flex flex-col gap-1">
+                            <h1 className="text-5xl font-bold tracking-tighter uppercase">{symbol}</h1>
+                            <div className="flex items-center gap-4">
+                                <span className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/5 px-3 py-1 rounded-full border border-accent/20">Institutional Asset</span>
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Global Sector / Alpha Core</span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="text-right">
-                        <div className="text-5xl font-bold text-cyber-cyan text-shadow-neon">
+
+                    <div className="relative z-10 text-right mt-6 md:mt-0">
+                        <div className="text-6xl font-bold tracking-tighter text-primary">
                             24,532.05
                         </div>
-                        <div className="text-lg text-cyber-green flex items-center justify-end gap-2">
-                            <span>▲</span> +1.24% (+342.10)
+                        <div className="text-sm font-bold text-accent flex items-center justify-end gap-3 mt-2 uppercase tracking-widest">
+                            <Activity size={16} /> +1.24% (+342.10)
                         </div>
                     </div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-                    {/* Main Chart */}
-                    <div className="lg:col-span-3 bg-black/40 backdrop-blur-md rounded-xl p-4 border border-cyber-purple/30 shadow-[0_0_15px_rgba(189,0,255,0.15)] h-[600px] flex flex-col">
-                        <div className="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
-                            <h2 className="text-xl font-semibold text-cyber-purple">Market Analysis</h2>
-                            <div className="flex gap-2">
+                {/* Main Content */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    
+                    {/* Primary Chart Area */}
+                    <div className="lg:col-span-8 bg-surface rounded-premium p-10 border border-white/5 shadow-2xl flex flex-col h-[700px]">
+                        <div className="flex justify-between items-center mb-10">
+                            <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">Chronological Performance</h3>
+                            <div className="flex gap-4 p-1 bg-background rounded-instrument border border-white/5">
                                 {['1H', '4H', '1D', '1W'].map(tf => (
-                                    <button key={tf} className="px-3 py-1 bg-cyber-purple/10 border border-cyber-purple/50 rounded hover:bg-cyber-purple/30 transition shadow-[0_0_5px_rgba(189,0,255,0.3)]">
+                                    <button key={tf} className={`px-6 py-2 rounded-instrument text-[10px] font-bold uppercase tracking-widest transition-all ${tf === '1D' ? 'bg-accent text-background shadow-soft' : 'text-muted hover:text-primary'}`}>
                                         {tf}
                                     </button>
                                 ))}
                             </div>
                         </div>
-                        <div ref={chartContainerRef} className="flex-1 w-full h-full" />
+                        <div ref={chartContainerRef} className="flex-1 w-full" />
                     </div>
 
-                    {/* Sidebar Info */}
-                    <div className="space-y-6">
+                    {/* Secondary Metrics */}
+                    <div className="lg:col-span-4 flex flex-col gap-10">
+                        
                         {/* Fundamentals */}
-                        <div className="bg-black/40 backdrop-blur-md rounded-xl p-6 border border-cyber-pink/30 shadow-[0_0_15px_rgba(255,0,220,0.15)]">
-                            <h3 className="text-lg font-semibold text-cyber-pink mb-4 border-b border-cyber-pink/30 pb-2">Fundamentals</h3>
-                            <div className="space-y-4 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Market Cap</span>
-                                    <span className="text-white">1.2T Credits</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">P/E Ratio</span>
-                                    <span className="text-white">32.4</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Vol (24h)</span>
-                                    <span className="text-white">45.2M</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Yield</span>
-                                    <span className="text-white">0.05%</span>
-                                </div>
+                        <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl">
+                            <h3 className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-8">Base Metrics</h3>
+                            <div className="space-y-6">
+                                <MetricLine label="Market Cap" value="1.2T" />
+                                <MetricLine label="P/E Ratio" value="32.4" />
+                                <MetricLine label="Volume (24h)" value="45.2M" />
+                                <MetricLine label="Yield" value="0.05%" />
                             </div>
                         </div>
 
-                        {/* Cyber News */}
-                        <div className="bg-black/40 backdrop-blur-md rounded-xl p-6 border border-cyber-cyan/30 shadow-[0_0_15px_rgba(0,243,255,0.15)] flex-1">
-                            <h3 className="text-lg font-semibold text-cyber-cyan mb-4 border-b border-cyber-cyan/30 pb-2">Cyber Network News</h3>
-                            <div className="space-y-4">
+                        {/* Network Intel */}
+                        <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl flex-1">
+                            <h3 className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-8">Node Intel</h3>
+                            <div className="space-y-6">
                                 {[
-                                    "AI Regulation Talks Stall in Neo-Tokyo",
-                                    "Optivon Corp Announces Q3 Quantum Leap",
-                                    "Energy Credits Surge after Solar Event"
+                                    { tag: "REGULATION", text: "Global compliance mandates for Alpha clusters." },
+                                    { tag: "INCEPTION", text: "Optivon Core Phase 3 successfully synchronized." },
+                                    { tag: "VOLATILITY", text: "High-frequency spike detected in sector 9." }
                                 ].map((news, i) => (
-                                    <div key={i} className="p-3 bg-white/5 rounded border-l-2 border-cyber-cyan hover:bg-white/10 transition cursor-pointer">
-                                        <p className="text-xs text-gray-500 mb-1">LIVE FEED • NOW</p>
-                                        <p className="text-sm font-medium text-gray-200">{news}</p>
+                                    <div key={i} className="group cursor-pointer">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <Zap size={10} className="text-accent" />
+                                            <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{news.tag}</span>
+                                        </div>
+                                        <p className="text-sm font-bold text-primary leading-snug group-hover:text-accent transition-colors">
+                                            {news.text}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     );
 };
 
-export default StockDetail;
+function MetricLine({ label, value }) {
+    return (
+        <div className="flex justify-between items-center py-2 border-b border-white/[0.03]">
+            <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{label}</span>
+            <span className="text-sm font-bold text-primary tracking-tight">{value}</span>
+        </div>
+    );
+}
 
+export default StockDetail;

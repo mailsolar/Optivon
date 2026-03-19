@@ -41,7 +41,7 @@ export const ToastProvider = ({ children }) => {
                             pointer-events-auto min-w-[200px] max-w-sm p-4 rounded-lg shadow-xl border-l-4 text-sm font-medium animate-slide-in
                             ${toast.type === 'success' ? 'bg-[#1e1e24] border-green-500 text-white' : ''}
                             ${toast.type === 'sell' || toast.type === 'error' ? 'bg-[#1e1e24] border-red-500 text-white' : ''}
-                            ${toast.type === 'info' ? 'bg-[#1e1e24] border-blue-500 text-white' : ''}
+                            ${toast.type === 'info' ? 'bg-[#1e1e24] border-accent text-white' : ''}
                         `}
                     >
                         {toast.message}

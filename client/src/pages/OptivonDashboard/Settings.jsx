@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Monitor, Smartphone, Volume2, Globe, Shield, Bell, Moon, Sun, Layout } from 'lucide-react';
 
 export default function Settings() {
-    // Dummy state for UI toggles
     const [settings, setSettings] = useState({
         soundEnabled: true,
         animations: true,
@@ -18,100 +16,76 @@ export default function Settings() {
     };
 
     return (
-        <div className="flex flex-col gap-8 max-w-4xl mx-auto">
+        <div className="flex flex-col gap-10 max-w-4xl mx-auto font-sans">
 
-            <div>
-                <h1 className="text-3xl font-display font-black text-white uppercase tracking-tight mb-2">Platform Settings</h1>
-                <p className="text-gray-400">Configure your workspace aesthetics and system preferences.</p>
+            <div className="flex flex-col gap-2">
+                <div className="text-[10px] font-bold text-accent uppercase tracking-[0.4em]">Configuration</div>
+                <h1 className="text-3xl font-bold text-primary uppercase tracking-tight">Platform Preferences</h1>
+                <p className="text-secondary font-medium text-sm">Calibrate your workspace aesthetics and system behavior.</p>
             </div>
 
-            {/* PREFERENCES GROUPS */}
-            <div className="space-y-6">
+            <div className="space-y-10">
 
-                {/* APPEARANCE */}
-                <div className="bg-[#1F1F35] rounded-2xl overflow-hidden border border-white/5">
-                    <div className="px-6 py-4 bg-white/5 border-b border-white/5 flex items-center gap-2">
-                        <Monitor size={18} className="text-brand-lime" />
-                        <h3 className="font-bold text-white text-sm uppercase tracking-widest">Interface & Theme</h3>
+                {/* Appearance */}
+                <div className="bg-surface rounded-premium overflow-hidden border border-white/5 shadow-2xl">
+                    <div className="px-10 py-6 bg-surface/50 border-b border-white/5 flex items-center gap-4">
+                        <Monitor size={18} className="text-accent" />
+                        <h3 className="font-bold text-primary text-[10px] uppercase tracking-[0.3em]">Aesthetics & Theme</h3>
                     </div>
 
-                    <div className="divide-y divide-white/5">
-                        <div className="p-6 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-medium mb-1">Theme Mode</h4>
-                                <p className="text-xs text-gray-500">Currently locked to 'Optivon Dark' for optimal contrast.</p>
+                    <div className="divide-y divide-white/[0.03]">
+                        <div className="p-10 flex items-center justify-between">
+                            <div className="flex flex-col gap-1">
+                                <h4 className="text-primary font-bold text-sm uppercase tracking-widest">Theme Protocol</h4>
+                                <p className="text-[10px] text-muted font-bold uppercase">Locked to 'Optivon Graphite' for precision.</p>
                             </div>
-                            <div className="flex p-1 bg-[#121220] rounded-lg border border-white/10">
-                                <button className="px-4 py-2 bg-white/10 rounded-md text-white text-xs font-bold flex items-center gap-2">
-                                    <Moon size={14} /> Dark
+                            <div className="flex p-1 bg-background rounded-instrument border border-white/5">
+                                <button className="px-6 py-2 bg-accent/10 border border-accent/20 rounded-instrument text-accent text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
+                                    <Moon size={14} /> Graphite
                                 </button>
-                                <button className="px-4 py-2 text-gray-600 text-xs font-bold flex items-center gap-2 cursor-not-allowed opacity-50">
-                                    <Sun size={14} /> Light
+                                <button className="px-6 py-2 text-muted text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 cursor-not-allowed opacity-30">
+                                    <Sun size={14} /> Ivory
                                 </button>
                             </div>
                         </div>
 
-                        <div className="p-6 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-medium mb-1">Compact Mode</h4>
-                                <p className="text-xs text-gray-500">Reduce padding for higher information density.</p>
-                            </div>
-                            <button
-                                onClick={() => toggle('compactMode')}
-                                className={`w-12 h-6 rounded-full transition-colors relative ${settings.compactMode ? 'bg-brand-lime' : 'bg-gray-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.compactMode ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
+                        <SettingToggle 
+                            label="Compact Mode" 
+                            sub="Increase information density across the terminal matrix."
+                            active={settings.compactMode}
+                            onToggle={() => toggle('compactMode')}
+                        />
 
-                        <div className="p-6 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-medium mb-1">Reduce Motion</h4>
-                                <p className="text-xs text-gray-500">Disable heavy animations and blurs.</p>
-                            </div>
-                            <button
-                                onClick={() => toggle('animations')}
-                                className={`w-12 h-6 rounded-full transition-colors relative ${!settings.animations ? 'bg-brand-lime' : 'bg-gray-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${!settings.animations ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
+                        <SettingToggle 
+                            label="Kinetic Effects" 
+                            sub="Enable smooth transitions and micro-interactions."
+                            active={settings.animations}
+                            onToggle={() => toggle('animations')}
+                        />
                     </div>
                 </div>
 
-                {/* TRADING & SYSTEM */}
-                <div className="bg-[#1F1F35] rounded-2xl overflow-hidden border border-white/5">
-                    <div className="px-6 py-4 bg-white/5 border-b border-white/5 flex items-center gap-2">
-                        <Layout size={18} className="text-brand-blue" />
-                        <h3 className="font-bold text-white text-sm uppercase tracking-widest">Workspace</h3>
+                {/* Trading & Workspace */}
+                <div className="bg-surface rounded-premium overflow-hidden border border-white/5 shadow-2xl">
+                    <div className="px-10 py-6 bg-surface/50 border-b border-white/5 flex items-center gap-4">
+                        <Layout size={18} className="text-accent" />
+                        <h3 className="font-bold text-primary text-[10px] uppercase tracking-[0.3em]">Workspace Synchronization</h3>
                     </div>
 
-                    <div className="divide-y divide-white/5">
-                        <div className="p-6 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-medium mb-1">Trade Sounds</h4>
-                                <p className="text-xs text-gray-500">Play confirmation sounds on order execution.</p>
-                            </div>
-                            <button
-                                onClick={() => toggle('soundEnabled')}
-                                className={`w-12 h-6 rounded-full transition-colors relative ${settings.soundEnabled ? 'bg-brand-lime' : 'bg-gray-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.soundEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
+                    <div className="divide-y divide-white/[0.03]">
+                        <SettingToggle 
+                            label="Auditory Feedback" 
+                            sub="Initialize audio signals for order execution and system alerts."
+                            active={settings.soundEnabled}
+                            onToggle={() => toggle('soundEnabled')}
+                        />
 
-                        <div className="p-6 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-medium mb-1">Show Un-realized PnL in Title</h4>
-                                <p className="text-xs text-gray-500">Display current profit/loss in browser tab title.</p>
-                            </div>
-                            <button
-                                onClick={() => toggle('showLivePnl')}
-                                className={`w-12 h-6 rounded-full transition-colors relative ${settings.showLivePnl ? 'bg-brand-lime' : 'bg-gray-700'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.showLivePnl ? 'translate-x-6' : 'translate-x-0'}`} />
-                            </button>
-                        </div>
+                        <SettingToggle 
+                            label="Temporal P&L Stream" 
+                            sub="Project real-time yield status to the global application header."
+                            active={settings.showLivePnl}
+                            onToggle={() => toggle('showLivePnl')}
+                        />
                     </div>
                 </div>
 
@@ -120,3 +94,21 @@ export default function Settings() {
     );
 }
 
+function SettingToggle({ label, sub, active, onToggle }) {
+    return (
+        <div className="p-10 flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+                <h4 className="text-primary font-bold text-sm uppercase tracking-widest">{label}</h4>
+                <p className="text-[10px] text-muted font-bold uppercase">{sub}</p>
+            </div>
+            <button
+                onClick={onToggle}
+                className={`w-14 h-7 rounded-full transition-all relative border border-white/10 ${active ? 'bg-accent shadow-soft' : 'bg-background'}`}
+            >
+                <div className={`absolute top-1 left-1.5 w-4.5 h-4.5 bg-primary rounded-full transition-all flex items-center justify-center ${active ? 'translate-x-6 bg-background' : 'translate-x-0'}`}>
+                    {active && <div className="w-1.5 h-1.5 bg-accent rounded-full" />}
+                </div>
+            </button>
+        </div>
+    );
+}

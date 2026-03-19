@@ -105,7 +105,7 @@ export default function Users() {
                                                 <Shield className="w-3 h-3" /> ADMIN
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent border border-accent/20">
                                                 TRADER
                                             </span>
                                         )}

@@ -44,54 +44,52 @@ export default function ChallengeSelector() {
     const activeSize = SIZES.find(s => s.id === selectedSizeId);
 
     // Calculate values based on percentages for display
-    // e.g. 8% of 5L = 40k
     const calculateValue = (percentageStr) => {
         const pct = parseInt(percentageStr) / 100;
         return `₹${(activeSize.value * pct).toLocaleString()}`;
     };
 
     return (
-        <div className="max-w-[1400px] mx-auto">
+        <div className="max-w-[1400px] mx-auto font-sans">
 
-            {/* 1. Model Selection (Single Header for now) */}
+            {/* 1. Model Selection */}
             <div className="flex justify-center mb-12">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-1 inline-flex">
+                <div className="bg-surface border border-white/5 rounded-instrument p-1 inline-flex shadow-soft">
                     {MODELS.map((model) => (
                         <button
                             key={model.id}
                             onClick={() => setSelectedModel(model.id)}
-                            className={`flex items-center gap-3 px-8 py-3 rounded-xl transition-all ${selectedModel === model.id
-                                ? 'bg-brand-lime text-brand-dark font-bold shadow-[0_0_20px_rgba(204,255,0,0.3)]'
-                                : 'text-gray-400 hover:text-white'
+                            className={`flex items-center gap-4 px-10 py-3 rounded-instrument transition-all ${selectedModel === model.id
+                                ? 'bg-accent text-background font-bold shadow-soft'
+                                : 'text-secondary hover:text-primary'
                                 }`}
                         >
-                            <model.icon size={20} />
-                            <span className="uppercase tracking-wider text-sm">{model.label}</span>
+                            <model.icon size={18} />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{model.label}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* 2. Account Size Selection (Bar) */}
+            {/* 2. Account Size Selection */}
             <div className="mb-12">
-                <div className="flex justify-between items-end mb-4 px-2">
-                    <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Select Capital</span>
-                    <span className="text-brand-lime font-bold font-display text-xl">{activeSize.label}</span>
+                <div className="flex justify-between items-end mb-6 px-2">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">Selection / Capital</span>
+                    <span className="text-accent font-bold text-2xl tracking-tighter">{activeSize.label}</span>
                 </div>
-                <div className="bg-[#0f0f1a] p-2 rounded-xl flex flex-wrap gap-2 border border-white/10 relative">
+                <div className="bg-background/50 p-2 rounded-instrument flex flex-wrap gap-2 border border-white/5 relative shadow-inner">
                     {SIZES.map((size) => (
                         <button
                             key={size.id}
                             onClick={() => setSelectedSizeId(size.id)}
-                            className={`flex-1 min-w-[100px] py-4 rounded-lg font-bold text-sm tracking-widest uppercase transition-all relative z-10 ${selectedSizeId === size.id ? 'text-brand-dark' : 'text-gray-400 hover:text-white'
+                            className={`flex-1 min-w-[100px] py-4 rounded-instrument font-bold text-[10px] tracking-[0.2em] uppercase transition-all relative z-10 ${selectedSizeId === size.id ? 'text-background' : 'text-muted hover:text-primary'
                                 }`}
                         >
-                            {/* Mobile line break prevention */}
                             <span className="whitespace-nowrap">{size.label}</span>
                             {selectedSizeId === size.id && (
                                 <motion.div
                                     layoutId="sizePill"
-                                    className="absolute inset-0 bg-brand-lime rounded-lg -z-10 shadow-[0_0_20px_rgba(204,255,0,0.4)]"
+                                    className="absolute inset-0 bg-accent rounded-instrument -z-10 shadow-soft"
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 />
                             )}
@@ -100,66 +98,69 @@ export default function ChallengeSelector() {
                 </div>
             </div>
 
-            {/* 3. Details Visualizer (The "Spec Sheet") */}
-            <div className="relative bg-[#1F1F35] rounded-[40px] border border-white/10 overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-lime/5 rounded-full blur-[120px] pointer-events-none -mr-20 -mt-20" />
+            {/* 3. Details Visualizer */}
+            <div className="relative bg-surface rounded-premium border border-white/5 overflow-hidden shadow-2xl">
+                {/* Subtle Accent Glow */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none -mr-20 -mt-20" />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3">
 
                     {/* Left: Specs Grid */}
-                    <div className="lg:col-span-2 p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12 relative z-10">
+                    <div className="lg:col-span-2 p-12 grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-16 relative z-10">
                         <SpecItem
-                            label="Profit Target"
+                            label="Phase 1 Target"
                             value={activeData.target}
                             subValue={calculateValue(activeData.target)}
                         />
                         <SpecItem
-                            label="Max Daily Loss"
+                            label="Daily Loss Limit"
                             value={activeData.dailyDrawdown}
                             subValue={calculateValue(activeData.dailyDrawdown)}
                             highlight
                         />
                         <SpecItem
-                            label="Max Total Loss"
+                            label="Maximum Breach"
                             value={activeData.maxDrawdown}
                             subValue={calculateValue(activeData.maxDrawdown)}
                             highlight
                         />
-                        <SpecItem label="Profit Split" value={activeData.profitSplit} />
-                        <SpecItem label="Max Lot Size" value={`${activeSize.maxLots} Lots`} highlight />
-                        <SpecItem label="Min Trading Days" value={activeData.minDays} />
+                        <SpecItem label="Performance Split" value={activeData.profitSplit} />
+                        <SpecItem label="Risk Scaling" value={`${activeSize.maxLots} Lots Max`} highlight />
+                        <SpecItem label="Minimum Period" value={activeData.minDays} />
 
-                        <div className="md:col-span-2 mt-4 pt-8 border-t border-white/5 flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-                            {['Refundable Fee', 'No Time Limit', 'News Trading Allowed', 'EAs Enabled'].map((tag, i) => (
-                                <div key={i} className="flex items-center gap-2 whitespace-nowrap bg-white/5 px-4 py-2 rounded-full border border-white/5 text-xs font-mono text-gray-400">
-                                    <Sparkles size={12} className="text-brand-lime" />
+                        <div className="md:col-span-2 mt-8 pt-12 border-t border-white/5 flex gap-4 overflow-x-auto pb-4 scrollbar-none">
+                            {['Refundable Capital', 'Infinite Duration', 'News Protocol Active', 'EA Authorized'].map((tag, i) => (
+                                <div key={i} className="flex items-center gap-3 whitespace-nowrap bg-white/[0.03] px-6 py-3 rounded-full border border-white/5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted">
+                                    <Sparkles size={12} className="text-accent" />
                                     {tag}
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Right: Price & CTA (Glass Panel) */}
-                    <div className="lg:col-span-1 bg-black/20 backdrop-blur-md border-l border-white/5 p-8 md:p-12 flex flex-col justify-between relative">
+                    {/* Right: Fee & Action */}
+                    <div className="lg:col-span-1 bg-background/20 backdrop-blur-md border-l border-white/5 p-12 flex flex-col justify-between relative">
                         <div>
-                            <div className="text-xs font-mono text-gray-500 uppercase tracking-widest mb-2">One-Time Fee</div>
-                            <div className="text-5xl font-black text-white tracking-tight mb-2">
-                                <span className="text-2xl text-gray-500 align-top mr-1">₹</span>
+                            <div className="text-[12px] font-bold text-white/50 uppercase tracking-[0.3em] mb-4">Master Allocation Fee</div>
+                            <div className="text-7xl font-display font-black text-white tracking-tighter mb-4">
+                                <span className="text-3xl text-white/50 font-bold align-top mr-1">₹</span>
                                 {activeSize.price.toLocaleString()}
                             </div>
-                            <p className="text-xs text-brand-lime/80 font-mono">100% Refundable with first payout.</p>
+                            <p className="text-[11px] text-accent font-bold uppercase tracking-[0.15em] opacity-90">
+                                Standard Refund Protocol Enabled
+                            </p>
                         </div>
 
-                        <div className="mt-12 space-y-4">
+                        <div className="mt-16 space-y-6">
                             <button
                                 onClick={handleSelect}
-                                className="w-full py-5 bg-brand-lime text-brand-dark rounded-xl font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(204,255,0,0.3)] flex items-center justify-center gap-3 group"
+                                className="w-full py-6 bg-white text-black font-bold uppercase tracking-[0.3em] text-[13px] hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-4 group border border-white/10"
                             >
-                                Select Challenge <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                Initialize Node 
+                                <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
                             </button>
-                            <p className="text-[10px] text-center text-gray-600 font-mono uppercase tracking-widest">
-                                Instant Credentials Delivery
+                            <p className="text-[10px] text-center text-white/50 font-bold uppercase tracking-[0.4em]">
+                                Secured by Optivon Vault
                             </p>
                         </div>
                     </div>
@@ -176,15 +177,14 @@ function SpecItem({ label, value, subValue, highlight }) {
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            key={label + value} // Re-animate on change
-            className="flex flex-col gap-1"
+            key={label + value}
+            className="flex flex-col gap-2"
         >
-            <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">{label}</span>
-            <div className="flex items-baseline gap-2">
-                <span className={`text-2xl md:text-3xl font-bold ${highlight ? 'text-brand-lime' : 'text-white'}`}>{value}</span>
-                {subValue && <span className="text-sm text-gray-400 font-mono">({subValue})</span>}
+            <span className="text-[11px] font-bold text-white/50 uppercase tracking-[0.3em]">{label}</span>
+            <div className="flex items-baseline gap-3">
+                <span className={`text-5xl font-display font-black tracking-tighter ${highlight ? 'text-accent' : 'text-white'}`}>{value}</span>
+                {subValue && <span className="text-sm text-white/50 font-medium">({subValue})</span>}
             </div>
         </motion.div>
     );
 }
-

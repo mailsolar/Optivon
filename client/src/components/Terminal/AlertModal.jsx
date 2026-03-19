@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Bell, Trash2, TrendingUp, TrendingDown, Clock, Shield, Target, Plus, Minus } from 'lucide-react';
+import { X, Bell, Trash2, TrendingUp, TrendingDown, Clock, Shield, Target, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useAlerts } from '../../context/AlertContext';
 
 export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quotes }) {
@@ -30,131 +30,139 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
     const ask = quote.ask || currentPrice;
 
     return (
-        <div className="absolute inset-y-0 right-0 w-80 bg-[#0a0e27] border-l border-white/10 z-[60] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col animate-in slide-in-from-right duration-300">
+        <div className="absolute inset-y-0 right-0 w-80 bg-background border-l border-white/[0.05] z-[60] shadow-premium flex flex-col animate-in slide-in-from-right duration-300 font-sans">
             {/* Header */}
-            <div className="p-5 border-b border-white/5 flex items-center justify-between bg-[#070b1a]">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                        <Bell className="w-4 h-4 text-blue-400" />
+            <div className="p-6 border-b border-white/[0.03] flex items-center justify-between bg-surface/30">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-instrument bg-accent/5 flex items-center justify-center border border-accent/10 shadow-inner">
+                        <Bell size={18} className="text-accent" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Price Alerts</span>
-                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">{symbol} • ACTIVE NODE</span>
+                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Price Alerts</span>
+                        <span className="text-[8px] font-black text-muted uppercase tracking-widest mt-0.5">{symbol} // ACTIVE_NODE</span>
                     </div>
                 </div>
-                <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                    <X className="w-4 h-4 text-gray-500" />
+                <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-all text-muted hover:text-primary">
+                    <X size={16} />
                 </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-white/5 bg-[#070b1a]/50">
+            <div className="flex border-b border-white/[0.03] bg-surface/20">
                 <button
                     onClick={() => setActiveTab('create')}
-                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'create' ? 'text-blue-400 border-b-2 border-blue-500 bg-white/[0.02]' : 'text-gray-600 hover:text-gray-400'}`}
+                    className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'create' ? 'text-accent' : 'text-muted hover:text-secondary'}`}
                 >
-                    Create Alert
+                    Create
+                    {activeTab === 'create' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-accent" />}
                 </button>
                 <button
                     onClick={() => setActiveTab('manage')}
-                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'manage' ? 'text-blue-400 border-b-2 border-blue-500 bg-white/[0.02]' : 'text-gray-600 hover:text-gray-400'}`}
+                    className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'manage' ? 'text-accent' : 'text-muted hover:text-secondary'}`}
                 >
-                    Manage ({symbolAlerts.length})
-                    {symbolAlerts.some(a => a.triggered) && <div className="absolute top-2 right-4 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>}
+                    Nodes ({symbolAlerts.length})
+                    {activeTab === 'manage' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-accent" />}
+                    {symbolAlerts.some(a => a.triggered) && <div className="absolute top-3 right-8 w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse shadow-[0_0_5px_#ff1744]"></div>}
                 </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 hide-scrollbar">
                 {activeTab === 'create' ? (
-                    <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="space-y-8 animate-in fade-in duration-300">
                         {/* Selector */}
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                             <button
                                 onClick={() => setDirection('sell')}
-                                className={`p-3 rounded-xl border transition-all flex flex-col items-center gap-1 ${direction === 'sell' ? 'bg-[#ff1744]/10 border-[#ff1744]/30 text-white' : 'bg-white/[0.02] border-white/5 text-gray-500'}`}
+                                className={`p-4 rounded-premium border transition-all flex flex-col items-center gap-2 group ${direction === 'sell' ? 'bg-red-400/5 border-red-400/20 text-primary shadow-inner' : 'bg-surface/30 border-white/[0.03] text-muted'}`}
                             >
-                                <TrendingDown className={`w-4 h-4 ${direction === 'sell' ? 'text-[#ff1744]' : 'text-gray-700'}`} />
-                                <span className="text-[8px] font-black uppercase">Wait Below</span>
-                                <span className="text-[10px] font-mono font-bold opacity-50">{bid.toFixed(2)}</span>
+                                <TrendingDown size={14} className={`${direction === 'sell' ? 'text-red-400' : 'text-muted opacity-30'}`} />
+                                <span className="text-[8px] font-black uppercase tracking-widest">Wait Below</span>
+                                <span className="text-[10px] font-mono font-bold opacity-50">{bid?.toFixed(2)}</span>
                             </button>
                             <button
                                 onClick={() => setDirection('buy')}
-                                className={`p-3 rounded-xl border transition-all flex flex-col items-center gap-1 ${direction === 'buy' ? 'bg-[#00c853]/10 border-[#00c853]/30 text-white' : 'bg-white/[0.02] border-white/5 text-gray-500'}`}
+                                className={`p-4 rounded-premium border transition-all flex flex-col items-center gap-2 group ${direction === 'buy' ? 'bg-accent/5 border-accent/20 text-primary shadow-inner' : 'bg-surface/30 border-white/[0.03] text-muted'}`}
                             >
-                                <TrendingUp className={`w-4 h-4 ${direction === 'buy' ? 'text-[#00c853]' : 'text-gray-700'}`} />
-                                <span className="text-[8px] font-black uppercase">Wait Above</span>
-                                <span className="text-[10px] font-mono font-bold opacity-50">{ask.toFixed(2)}</span>
+                                <TrendingUp size={14} className={`${direction === 'buy' ? 'text-accent' : 'text-muted opacity-30'}`} />
+                                <span className="text-[8px] font-black uppercase tracking-widest">Wait Above</span>
+                                <span className="text-[10px] font-mono font-bold opacity-50">{ask?.toFixed(2)}</span>
                             </button>
                         </div>
 
                         {/* Price Input */}
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <div className="flex justify-between items-center px-1">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Target Price</span>
-                                <span className="text-[9px] font-mono text-blue-500/50">IST SYNC</span>
+                                <span className="text-[9px] font-black text-muted uppercase tracking-[0.4em]">Target Price</span>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-1 h-1 rounded-full bg-accent animate-pulse" />
+                                    <span className="text-[8px] font-mono text-accent/50 uppercase">SYNC_LIVE</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex-1 flex items-center bg-[#1a1e2e] rounded-2xl border border-white/5 overflow-hidden focus-within:border-blue-500/50 transition-all shadow-inner px-2">
-                                    <button onClick={() => setTargetPrice(targetPrice - 1)} className="p-3 text-gray-600 hover:text-white transition-colors"><Minus className="w-4 h-4" /></button>
+                            
+                            <div className="relative group/input">
+                                <div className="absolute inset-0 bg-accent/[0.02] rounded-premium pointer-events-none group-focus-within/input:bg-accent/[0.05] transition-all" />
+                                <div className="flex items-center bg-background/50 rounded-premium border border-white/[0.05] overflow-hidden focus-within:border-accent/30 transition-all shadow-inner relative z-10">
+                                    <button onClick={() => setTargetPrice(targetPrice - 1)} className="p-4 text-muted hover:text-primary transition-colors"><Minus size={14} /></button>
                                     <input
                                         type="number"
                                         value={targetPrice}
                                         onChange={(e) => setTargetPrice(parseFloat(e.target.value))}
-                                        className="w-full bg-transparent text-center font-mono font-black text-xl text-white outline-none py-4"
+                                        className="w-full bg-transparent text-center font-mono font-black text-xl text-primary outline-none py-5 tracking-tighter"
                                     />
-                                    <button onClick={() => setTargetPrice(targetPrice + 1)} className="p-3 text-gray-600 hover:text-white transition-colors"><Plus className="w-4 h-4" /></button>
+                                    <button onClick={() => setTargetPrice(targetPrice + 1)} className="p-4 text-muted hover:text-primary transition-colors"><Plus size={14} /></button>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-center gap-1">
-                                <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest text-center px-4 leading-relaxed">
-                                    Alert will trigger when price crosses <span className="text-white">{targetPrice.toFixed(2)}</span>
+                            
+                            <div className="flex flex-col items-center gap-2 pt-2">
+                                <p className="text-[9px] text-muted font-bold uppercase tracking-[0.1em] text-center px-6 leading-relaxed opacity-60">
+                                    Protocol will trigger when price reaches <span className="text-primary font-black italic">{targetPrice.toFixed(2)}</span>
                                 </p>
-                                <span className={`text-[10px] font-mono font-bold ${Math.abs(targetPrice - currentPrice) < 5 ? 'text-blue-400' : 'text-gray-700'}`}>
+                                <span className={`text-[10px] font-mono font-bold ${Math.abs(targetPrice - currentPrice) < 5 ? 'text-accent' : 'text-muted'}`}>
                                     Distance: {Math.abs(targetPrice - currentPrice).toFixed(2)} pts
                                 </span>
                             </div>
                         </div>
 
                         {/* Options */}
-                        <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
+                        <div className="p-6 bg-surface/30 border border-white/[0.03] rounded-premium space-y-5 shadow-inner">
                             <div className="flex items-center justify-between">
-                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Audio Protocol</span>
-                                <div className="w-8 h-4 bg-blue-500 rounded-full flex items-center justify-end px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-white rounded-full"></div></div>
+                                <span className="text-[9px] font-black text-secondary uppercase tracking-[0.3em]">Audio Signal</span>
+                                <div className="w-8 h-4 bg-accent rounded-full flex items-center justify-end px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-background rounded-full transition-all shadow-premium"></div></div>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Auto Decommission</span>
-                                <div className="w-8 h-4 bg-gray-800 rounded-full flex items-center justify-start px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-gray-600 rounded-full"></div></div>
+                            <div className="flex items-center justify-between opacity-40">
+                                <span className="text-[9px] font-black text-secondary uppercase tracking-[0.3em]">Persistent Link</span>
+                                <div className="w-8 h-4 bg-background border border-white/10 rounded-full flex items-center justify-start px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-muted rounded-full"></div></div>
                             </div>
                         </div>
 
                         <button
                             onClick={handleCreate}
-                            className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-[3px] rounded-2xl shadow-2xl shadow-blue-900/40 transition-all active:scale-95"
+                            className="w-full py-5 bg-accent text-background font-black text-[10px] uppercase tracking-[0.4em] rounded-instrument shadow-premium hover:bg-primary transition-all active:scale-95 flex items-center justify-center gap-3 group"
                         >
-                            Establish Alert Node
+                            Establish Node <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
                 ) : (
-                    <div className="space-y-3 animate-in fade-in duration-300">
+                    <div className="space-y-4 animate-in fade-in duration-300">
                         {symbolAlerts.length === 0 ? (
-                            <div className="py-20 text-center space-y-4">
-                                <Bell className="w-12 h-12 text-gray-800 mx-auto opacity-20" />
-                                <span className="text-[10px] font-black text-gray-700 uppercase tracking-[3px] block">No Active Nodes</span>
+                            <div className="py-24 text-center space-y-6 opacity-20">
+                                <Bell size={48} className="text-muted mx-auto" />
+                                <span className="text-[10px] font-black text-muted uppercase tracking-[0.5em] block">No Active Nodes</span>
                             </div>
                         ) : (
                             symbolAlerts.map(alert => (
-                                <div key={alert.id} className={`p-4 rounded-xl border transition-all relative overflow-hidden group ${alert.triggered ? 'bg-red-500/5 border-red-500/20 opacity-60' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
-                                    <div className="flex justify-between items-start mb-2 relative z-10">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${alert.triggered ? 'bg-red-500 animate-pulse' : 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'}`}></div>
-                                            <span className="text-[10px] font-mono font-black text-white">{alert.targetPrice.toFixed(2)}</span>
+                                <div key={alert.id} className={`p-5 rounded-premium border transition-all relative overflow-hidden group ${alert.triggered ? 'bg-red-400/5 border-red-400/20 opacity-60 shadow-inner' : 'bg-surface/30 border-white/[0.03] hover:border-accent/10 shadow-sm'}`}>
+                                    <div className="flex justify-between items-start mb-3 relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${alert.triggered ? 'bg-red-400 animate-pulse shadow-[0_0_5px_#ff1744]' : 'bg-accent shadow-[0_0_8px_#C50022]'}`}></div>
+                                            <span className="text-base font-mono font-black text-primary tracking-tighter">{alert.targetPrice.toFixed(2)}</span>
                                         </div>
-                                        <button onClick={() => removeAlert(alert.id)} className="p-1 hover:text-[#ff1744] transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                                        <button onClick={() => removeAlert(alert.id)} className="p-1 text-muted hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
                                     </div>
                                     <div className="flex items-center justify-between relative z-10">
-                                        <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{new Date(alert.createdAt).toLocaleTimeString()}</span>
-                                        <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${alert.triggered ? 'text-red-400 bg-red-400/10' : 'text-blue-400 bg-blue-400/10'}`}>
+                                        <span className="text-[9px] font-black text-muted uppercase tracking-widest font-mono opacity-60">{new Date(alert.createdAt).toLocaleTimeString()}</span>
+                                        <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${alert.triggered ? 'text-red-400 border-red-400/20 bg-red-400/5' : 'text-accent border-accent/20 bg-accent/5'}`}>
                                             {alert.triggered ? 'TRIGGERED' : 'WAITING'}
                                         </span>
                                     </div>
@@ -164,9 +172,9 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                         {symbolAlerts.some(a => a.triggered) && (
                             <button
                                 onClick={clearTriggered}
-                                className="w-full py-3 mt-4 text-[9px] font-black text-gray-500 hover:text-white uppercase tracking-widest border border-dashed border-white/10 rounded-xl transition-all"
+                                className="w-full py-4 mt-6 text-[9px] font-black text-muted hover:text-primary uppercase tracking-[0.4em] border border-dashed border-white/10 rounded-premium transition-all hover:bg-white/[0.02]"
                             >
-                                Clear Triggered History
+                                Clear Node History
                             </button>
                         )}
                     </div>
@@ -175,4 +183,3 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
         </div>
     );
 }
-

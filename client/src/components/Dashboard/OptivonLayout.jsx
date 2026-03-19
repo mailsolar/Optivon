@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import OptivonSidebar from './OptivonSidebar';
-import { Moon, Sun, User, ChevronDown, LogOut } from 'lucide-react';
+import { Moon, Sun, User, ChevronDown, LogOut, Shield, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import Footer from '../Global/Footer';
 
 export default function OptivonLayout() {
     const { theme, toggleTheme } = useTheme();
@@ -13,7 +14,6 @@ export default function OptivonLayout() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     console.log('[DEBUG] OptivonLayout Mounted. User:', user);
 
-    // Get current page title based on path
     const location = useLocation();
     const getPageTitle = () => {
         const path = location.pathname.split('/').pop();
@@ -27,30 +27,34 @@ export default function OptivonLayout() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-[#121220] font-sans text-white overflow-hidden selection:bg-brand-lime selection:text-brand-dark">
+        <div className="flex h-screen w-full bg-background font-sans text-primary overflow-hidden selection:bg-accent selection:text-background">
             {/* LEFT SIDEBAR */}
             <OptivonSidebar />
 
             {/* MAIN CONTENT AREA */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-brand-dark transition-colors relative">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-background transition-colors relative">
 
-                {/* Background Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
+                {/* Subtle Structural Accents */}
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/[0.02] rounded-full blur-[150px] pointer-events-none -mr-96 -mt-96" />
 
                 {/* HEADER */}
-                <header className="h-20 bg-brand-dark/90 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-8 flex-shrink-0 z-50 relative">
-                    <div>
-                        <h2 className="text-xl font-display font-bold text-white tracking-tight uppercase">
+                <header className="h-20 bg-background/80 backdrop-blur-xl border-b border-white/[0.02] flex items-center justify-between px-10 flex-shrink-0 z-50 relative">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-bold text-primary tracking-tight uppercase text-shadow-glow">
                             {getPageTitle()}
                         </h2>
-                        <p className="text-xs text-brand-lime font-mono tracking-wider opacity-80">System v2.0 // Connected</p>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] text-accent font-black tracking-[0.3em] uppercase">Protocol // Optivon Graphite</span>
+                            <span className="w-1 h-1 bg-white/20 rounded-full" />
+                            <span className="text-[10px] text-muted font-bold tracking-[0.2em] uppercase">v2.4.0-STABLE</span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-8">
                         {/* Status Indicator */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-xs font-mono text-green-500 font-bold uppercase">Markets Open</span>
+                        <div className="hidden lg:flex items-center gap-3 px-4 py-1.5 bg-accent/5 border border-accent/10 rounded-full shadow-inner">
+                            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_#C50022]" />
+                            <span className="text-[9px] font-black text-accent uppercase tracking-[0.2em]">Transmission Active</span>
                         </div>
 
                         {/* User Profile */}
@@ -59,59 +63,50 @@ export default function OptivonLayout() {
                             onMouseEnter={() => setIsDropdownOpen(true)}
                             onMouseLeave={() => setIsDropdownOpen(false)}
                         >
-                            <div className="flex items-center gap-3 pl-6 border-l border-white/5 cursor-pointer group">
-                                <div className="text-right hidden md:block transition-opacity duration-300 group-hover:opacity-80">
-                                    <p className="text-sm font-bold text-white leading-tight">{user?.name || 'Trader'}</p>
-                                    <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Tier 1</p>
+                            <div className="flex items-center gap-4 pl-8 border-l border-white/[0.05] cursor-pointer group">
+                                <div className="text-right hidden sm:block">
+                                    <p className="text-sm font-bold text-primary leading-none mb-1 group-hover:text-accent transition-colors">{user?.name || 'Authorized User'}</p>
+                                    <p className="text-[9px] font-black text-muted uppercase tracking-[0.2em]">Tier 01 // Node</p>
                                 </div>
                                 <div className={`
-                                    w-10 h-10 rounded-lg border flex items-center justify-center font-display font-bold text-sm transition-all duration-300
+                                    w-11 h-11 rounded-instrument border flex items-center justify-center font-bold text-sm transition-all duration-500
                                     ${isDropdownOpen
-                                        ? 'bg-brand-lime text-brand-dark border-brand-lime shadow-[0_0_15px_rgba(204,255,0,0.3)]'
-                                        : 'bg-white/5 border-white/10 text-brand-lime hover:bg-brand-lime/10'}
+                                        ? 'bg-accent text-background border-accent shadow-premium'
+                                        : 'bg-surface border-white/5 text-accent hover:border-accent/30'}
                                 `}>
-                                    {user?.name ? user.name.charAt(0) : 'T'}
+                                    {user?.name ? user.name.charAt(0) : <User size={18} />}
                                 </div>
-                                <motion.div
-                                    animate={{ rotate: isDropdownOpen ? 180 : 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <ChevronDown size={14} className={`transition-colors ${isDropdownOpen ? 'text-brand-lime' : 'text-gray-500'}`} />
-                                </motion.div>
                             </div>
 
                             {/* Dropdown Menu */}
                             <AnimatePresence>
                                 {isDropdownOpen && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
                                         transition={{ duration: 0.2, ease: "easeOut" }}
-                                        className="absolute top-full right-0 pt-4 w-56 z-50"
+                                        className="absolute top-full right-0 pt-4 w-64 z-50"
                                     >
-                                        <div className="bg-[#1F1F35]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden ring-1 ring-white/5">
-
+                                        <div className="bg-surface/95 backdrop-blur-2xl border border-white/5 rounded-premium shadow-premium overflow-hidden">
                                             {/* Header Section */}
-                                            <div className="px-4 py-3 border-b border-white/5 bg-white/5">
-                                                <p className="text-xs text-gray-400 font-medium">Signed in as</p>
-                                                <p className="text-sm font-bold text-white truncate">{user?.email || 'trader@optivon.com'}</p>
+                                            <div className="px-6 py-5 border-b border-white/[0.03] bg-background/30">
+                                                <p className="text-[9px] text-muted font-bold uppercase tracking-widest mb-1">Identity Verified</p>
+                                                <p className="text-sm font-bold text-primary truncate tracking-tight">{user?.email || 'trader@optivon.com'}</p>
                                             </div>
 
                                             {/* Menu Items */}
                                             <div className="p-2">
                                                 <button
                                                     onClick={handleLogout}
-                                                    className="w-full relative group flex items-center justify-between px-4 py-2.5 text-sm rounded-lg transition-all duration-300 overflow-hidden"
+                                                    className="w-full relative group flex items-center justify-between px-6 py-3 text-xs font-bold rounded-instrument transition-all duration-300"
                                                 >
-                                                    <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/10 transition-colors" />
-                                                    <div className="flex items-center gap-3 relative z-10 text-gray-400 group-hover:text-red-400">
+                                                    <div className="absolute inset-0 bg-red-400/0 group-hover:bg-red-400/5 transition-colors" />
+                                                    <div className="flex items-center gap-3 relative z-10 text-muted group-hover:text-red-400">
                                                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-                                                        <span className="font-medium">Logout</span>
+                                                        <span className="uppercase tracking-widest">Terminate Session</span>
                                                     </div>
-
-                                                    {/* Neon Glitch Effect on Hover */}
-                                                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-red-500 opacity-0 group-hover:opacity-100 shadow-[0_0_10px_rgba(239,68,68,0.5)] transition-opacity" />
+                                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-red-400 opacity-0 group-hover:opacity-100 shadow-[0_0_10px_#f87171] transition-opacity" />
                                                 </button>
                                             </div>
                                         </div>
@@ -123,12 +118,13 @@ export default function OptivonLayout() {
                 </header>
 
                 {/* SCROLLABLE CONTENT */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto p-8 relative z-0">
-                    <Outlet />
+                <main className="flex-1 overflow-x-hidden overflow-y-auto relative z-0 hide-scrollbar scroll-smooth bg-background">
+                    <div className="p-10 lg:p-12">
+                        <Outlet />
+                    </div>
+                    <Footer />
                 </main>
-
             </div>
         </div>
     );
 }
-

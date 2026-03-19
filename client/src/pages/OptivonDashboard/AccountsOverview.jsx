@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Key, Share2, ArrowRight, X, AlertCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,16 +7,16 @@ import { API_BASE_URL } from '../../config';
 
 // Simple Modal for Purchasing Challenge
 const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
-    const [selectedLevel, setSelectedLevel] = useState('5k');
+    const [selectedLevel, setSelectedLevel] = useState('5L');
     const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
 
     const levels = [
-        { id: '5L', label: '5L', size: 500000, price: 3000, color: 'text-brand-lime' },
-        { id: '10L', label: '10L', size: 1000000, price: 5000, color: 'text-brand-blue' },
-        { id: '20L', label: '20L', size: 2000000, price: 12000, color: 'text-purple-400' },
-        { id: '50L', label: '50L', size: 5000000, price: 22000, color: 'text-orange-400' },
+        { id: '5L', label: '5L', size: 500000, price: 3000 },
+        { id: '10L', label: '10L', size: 1000000, price: 5000 },
+        { id: '20L', label: '20L', size: 2000000, price: 12000 },
+        { id: '50L', label: '50L', size: 5000000, price: 22000 },
     ];
 
     const handleBuy = async () => {
@@ -34,32 +33,34 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-[#1F1F35] rounded-2xl border border-white/10 w-full max-w-md overflow-hidden shadow-2xl relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md p-4">
+            <div className="bg-surface rounded-premium border border-white/10 w-full max-w-md overflow-hidden shadow-2xl relative">
+                <button onClick={onClose} className="absolute top-6 right-6 text-muted hover:text-primary transition-colors"><X size={20} /></button>
 
-                <div className="p-8">
-                    <h2 className="text-2xl font-bold text-white mb-2">Select Challenge</h2>
-                    <p className="text-gray-400 text-sm mb-6">Choose your funding level to start evaluation.</p>
+                <div className="p-10">
+                    <div className="mb-8">
+                        <div className="text-[10px] font-bold text-accent uppercase tracking-[0.3em] mb-2">Protocol</div>
+                        <h2 className="text-2xl font-bold text-primary uppercase tracking-tight">Select Matrix</h2>
+                    </div>
 
-                    <div className="space-y-3 mb-8">
+                    <div className="space-y-3 mb-10">
                         {levels.map((level) => (
                             <div
                                 key={level.id}
                                 onClick={() => setSelectedLevel(level.id)}
-                                className={`p-4 rounded-xl border cursor-pointer flex justify-between items-center transition-all ${selectedLevel === level.id
-                                    ? 'bg-brand-lime/10 border-brand-lime'
-                                    : 'bg-white/5 border-white/5 hover:border-white/20'
+                                className={`p-5 rounded-instrument border flex justify-between items-center transition-all ${selectedLevel === level.id
+                                    ? 'bg-accent/5 border-accent'
+                                    : 'bg-background/50 border-white/5 hover:border-white/20'
                                     }`}
                             >
                                 <div>
-                                    <h4 className={`font-bold ${level.color}`}>{level.label} Account</h4>
-                                    <p className="text-xs text-gray-400 uppercase tracking-widest font-mono">Size: ₹{level.size.toLocaleString('en-IN')}</p>
-                                    <p className="text-sm font-bold text-white mt-1">₹{level.price.toLocaleString('en-IN')}</p>
+                                    <h4 className={`text-sm font-bold uppercase tracking-widest ${selectedLevel === level.id ? 'text-accent' : 'text-primary'}`}>{level.label} Account</h4>
+                                    <p className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1">Allocation: ₹{level.size.toLocaleString('en-IN')}</p>
+                                    <p className="text-sm font-bold text-primary mt-2">₹{level.price.toLocaleString('en-IN')}</p>
                                 </div>
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedLevel === level.id ? 'border-brand-lime' : 'border-gray-600'
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${selectedLevel === level.id ? 'border-accent bg-accent' : 'border-white/10'
                                     }`}>
-                                    {selectedLevel === level.id && <div className="w-2.5 h-2.5 bg-brand-lime rounded-full" />}
+                                    {selectedLevel === level.id && <div className="w-2.5 h-2.5 bg-background rounded-full" />}
                                 </div>
                             </div>
                         ))}
@@ -68,9 +69,9 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                     <button
                         onClick={handleBuy}
                         disabled={loading}
-                        className="w-full bg-brand-lime text-brand-dark font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-accent text-background font-bold py-4 rounded-instrument uppercase tracking-[0.3em] text-[11px] hover:bg-primary transition-all disabled:opacity-50 shadow-soft"
                     >
-                        {loading ? 'Processing...' : 'Purchase Challenge'}
+                        {loading ? 'Processing...' : 'Initialize Allocation'}
                     </button>
                 </div>
             </div>
@@ -132,7 +133,6 @@ export default function AccountsOverview() {
 
     const handleLaunch = async (acc) => {
         if (acc.status === 'pending') {
-            // Launch Logic
             const token = localStorage.getItem('token');
             const res = await fetch(`${API_BASE_URL}/api/trade/launch`, {
                 method: 'POST',
@@ -145,7 +145,6 @@ export default function AccountsOverview() {
 
             if (res.ok) {
                 navigate('/terminal', { state: { account: acc } });
-                // Note: Better to let Terminal fetch fresh, but state passing is ok for immediate props
             } else {
                 const data = await res.json();
                 addToast(data.error, 'error');
@@ -155,116 +154,120 @@ export default function AccountsOverview() {
         }
     };
 
-    // News (Static for now, could fetch later)
-
-
     return (
-        <div className="flex flex-col lg:flex-row gap-8 h-full">
-            {/* LEFT COLUMN: Main Content */}
-            <div className="flex-1 min-w-0 flex flex-col gap-8">
+        <div className="flex flex-col gap-10 h-full font-sans">
+            {/* Main Content */}
+            <div className="flex-1 min-w-0 flex flex-col gap-10">
 
-                {/* HERO CARD (Gradient Dark) */}
-                <div className="relative rounded-2xl p-8 overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#1F1F35] to-[#17172B] border border-white/5 rounded-2xl" />
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-brand-lime/5 rounded-full blur-[80px] -mr-16 -mt-16 pointer-events-none" />
+                {/* Hero Card */}
+                <div className="relative rounded-premium p-12 overflow-hidden bg-surface border border-white/5 shadow-2xl">
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none" />
 
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div>
-                            <div className="flex items-center gap-3 mb-3">
-                                <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-brand-lime bg-brand-lime/10 border border-brand-lime/20 rounded uppercase tracking-widest">
-                                    New Challenge
-                                </span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-2">Ready to Scale?</h3>
-                            <p className="text-gray-400 max-w-lg text-sm leading-relaxed">
-                                Unlock up to ₹50L buying power. Prove your edge in our high-frequency simulation environment.
+                    <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
+                        <div className="max-w-xl">
+                            <div className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-4">Protocol Evaluation</div>
+                            <h3 className="text-3xl font-bold text-primary mb-4 uppercase tracking-tight">Accelerated Capital Access</h3>
+                            <p className="text-secondary font-medium text-sm leading-relaxed mb-8">
+                                Deploy institutional-grade strategies on up to ₹50L capital. 
+                                Our precision environment rewards execution excellence.
                             </p>
+                            <div className="flex gap-4">
+                                {['Zero Commision', 'Direct Execution', 'Smart Payouts'].map((tag, i) => (
+                                    <div key={i} className="px-4 py-2 bg-background/50 rounded-full border border-white/5 text-[9px] font-bold uppercase tracking-widest text-muted">
+                                        {tag}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                         <button
                             onClick={() => setShowPurchase(true)}
-                            className="flex items-center gap-3 bg-brand-lime text-brand-dark px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:scale-105 shadow-[0_0_20px_rgba(245,255,171,0.2)]"
+                            className="flex items-center gap-4 bg-accent text-background px-8 py-4 rounded-instrument font-bold text-[11px] uppercase tracking-[0.3em] transition-all hover:bg-primary shadow-soft group"
                         >
                             Start Evaluation
-                            <ArrowRight size={16} strokeWidth={2.5} />
+                            <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
                         </button>
                     </div>
                 </div>
 
-                {/* ACCOUNTS TABLE */}
-                <div className="bg-[#1F1F35] rounded-2xl border border-white/5 flex flex-col flex-1 min-h-[300px] overflow-hidden">
-                    <div className="px-6 py-5 border-b border-white/5 flex justify-between items-center bg-[#1F1F35]">
-                        <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-1 h-4 bg-brand-lime rounded-full"></span>
-                            Accounts History
-                        </h3>
+                {/* Table Section */}
+                <div className="bg-surface rounded-premium border border-white/5 flex flex-col flex-1 min-h-[400px] overflow-hidden shadow-2xl">
+                    <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-surface/50 backdrop-blur-md">
+                        <div className="flex flex-col gap-1">
+                            <div className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">Historical Log</div>
+                            <h3 className="text-xl font-bold text-primary uppercase tracking-tight flex items-center gap-3">
+                                <span className="w-1.5 h-6 bg-accent rounded-full"></span>
+                                Matrix Instances
+                            </h3>
+                        </div>
                     </div>
 
-                    <div className="overflow-x-auto flex-1">
+                    <div className="overflow-x-auto flex-1 px-4">
                         {loading ? (
-                            <div className="p-8 text-center text-gray-500 font-mono text-sm">Loading Accounts...</div>
+                            <div className="p-20 text-center text-muted font-bold text-[10px] uppercase tracking-widest animate-pulse">Initializing Link...</div>
                         ) : accounts.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500 font-mono text-sm">
-                                No active accounts. Start an evaluation to begin.
+                            <div className="p-20 text-center text-muted font-medium text-sm">
+                                No active instances detected. Initialize a protocol to begin.
                             </div>
                         ) : (
-                            <table className="w-full text-left">
+                            <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b border-white/5 text-[10px] text-gray-500 uppercase tracking-widest font-mono">
-                                        <th className="px-6 py-4 font-normal">Program</th>
-                                        <th className="px-6 py-4 font-normal">Balance</th>
-                                        <th className="px-6 py-4 font-normal">Created / Session</th>
-                                        <th className="px-6 py-4 font-normal">Status</th>
-                                        <th className="px-6 py-4 font-normal">Actions</th>
-                                        <th className="px-6 py-4"></th>
+                                    <tr className="text-[10px] text-muted uppercase tracking-[0.3em] border-b border-white/5">
+                                        <th className="px-6 py-6 font-bold">Protocol ID / Program</th>
+                                        <th className="px-6 py-6 font-bold">Net Balance</th>
+                                        <th className="px-6 py-6 font-bold">Temporal Sync</th>
+                                        <th className="px-6 py-6 font-bold text-center">Status</th>
+                                        <th className="px-6 py-6 text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/5">
+                                <tbody className="divide-y divide-white/[0.03]">
                                     {accounts.map((acc, i) => (
                                         <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
-                                            <td className="px-6 py-4 text-sm font-medium text-white align-top">
-                                                <div className="flex flex-col">
-                                                    <span className="text-brand-lime font-mono text-xs mb-1">ID: #{acc.id.toString().padStart(4, '0')}</span>
-                                                    <span className="font-bold">{acc.type}</span>
-                                                    <span className="text-xs text-gray-500">Size: ₹{acc.size.toLocaleString('en-IN')}</span>
+                                            <td className="px-6 py-8">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-[10px] font-bold text-accent uppercase tracking-[0.2em]">#{acc.id.toString().padStart(6, '0')}</span>
+                                                    <span className="text-base font-bold text-primary uppercase">{acc.type}</span>
+                                                    <span className="text-[10px] text-muted font-bold uppercase tracking-wider">₹{acc.size.toLocaleString('en-IN')} ALLOCATION</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className="font-mono text-lg font-bold text-white tracking-tight">
-                                                    ₹{acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                                                </span>
+                                            <td className="px-6 py-8">
+                                                <div className="flex flex-col">
+                                                    <span className="text-2xl font-bold text-primary tracking-tighter">
+                                                        ₹{acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    </span>
+                                                    <div className="text-[9px] text-accent font-bold uppercase tracking-widest mt-1">Live Feed</div>
+                                                </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-400 font-mono">
-                                                {acc.session_start ? new Date(acc.session_start).toLocaleDateString() : new Date(acc.created_at).toLocaleDateString()}
-                                                {acc.session_expires && (
-                                                    <div className="text-[10px] text-red-400 mt-1">Exp: {new Date(acc.session_expires).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                )}
+                                            <td className="px-6 py-8">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-sm font-bold text-secondary uppercase tracking-tighter">
+                                                        {new Date(acc.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </span>
+                                                    {acc.session_expires && (
+                                                        <span className="text-[9px] text-red-400 font-bold uppercase tracking-widest">Expires in {Math.floor((new Date(acc.session_expires) - new Date()) / 3600000)}H</span>
+                                                    )}
+                                                </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded text-[10px] font-bold font-mono uppercase tracking-wider
-                                                    ${(acc.status === 'failed' || acc.status === 'expired') ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                                                        acc.status === 'active' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
-                                                            'bg-gray-500/10 text-gray-400 border border-gray-500/20'}
+                                            <td className="px-6 py-8 text-center">
+                                                <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest border
+                                                    ${(acc.status === 'failed' || acc.status === 'expired') ? 'bg-red-400/5 text-red-400 border-red-400/20' :
+                                                        acc.status === 'active' ? 'bg-accent/5 text-accent border-accent/20' :
+                                                            'bg-white/5 text-muted border-white/10'}
                                                 `}>
-                                                    {acc.status === 'active' && <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />}
+                                                    {acc.status === 'active' && <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />}
                                                     {acc.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                    <button className="text-gray-400 hover:text-brand-lime p-2 hover:bg-white/5 rounded transition-colors" title="Credentials"><Key size={16} /></button>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-6 py-8 text-right">
                                                 {(acc.status === 'pending' || acc.status === 'active') ? (
                                                     <button
                                                         onClick={() => handleLaunch(acc)}
-                                                        className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-dark bg-white hover:bg-brand-lime px-4 py-2 rounded transition-all"
+                                                        className="px-6 py-3 bg-background border border-white/10 text-primary hover:border-accent hover:text-accent rounded-instrument font-bold text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-3 ml-auto"
                                                     >
-                                                        {acc.status === 'pending' ? 'Launch' : 'Trade'} <ArrowRight size={12} />
+                                                        {acc.status === 'pending' ? 'Initiate' : 'Terminal'} <ArrowRight size={14} />
                                                     </button>
                                                 ) : (
-                                                    <Link to={`/dashboard/account/${acc.id}`} className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded transition-all">
-                                                        View Metrics <ArrowRight size={12} />
+                                                    <Link to={`/dashboard/account/${acc.id}`} className="px-6 py-3 bg-white/5 text-muted hover:text-primary rounded-instrument font-bold text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-3 ml-auto">
+                                                        Metrics <ArrowRight size={14} />
                                                     </Link>
                                                 )}
                                             </td>
@@ -277,8 +280,6 @@ export default function AccountsOverview() {
                 </div>
             </div>
 
-
-
             <PurchaseModal
                 isOpen={showPurchase}
                 onClose={() => setShowPurchase(false)}
@@ -287,4 +288,3 @@ export default function AccountsOverview() {
         </div>
     );
 }
-

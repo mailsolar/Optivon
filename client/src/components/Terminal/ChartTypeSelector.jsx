@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
     CandlestickChart, BarChart3, TrendingUp, Activity,
-    LineChart as LineChartIcon, Waves
+    LineChart as LineChartIcon, Waves, ChevronDown
 } from 'lucide-react';
 
 const CHART_TYPES = [
@@ -41,30 +41,23 @@ export default function ChartTypeSelector({ currentType, onChange }) {
     };
 
     return (
-        <div className="relative z-50" ref={dropdownRef}>
+        <div className="relative z-[100]" ref={dropdownRef}>
             {/* Trigger Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2 bg-[#1a1e2e] hover:bg-[#2a2e3e] border border-white/5 hover:border-white/10 rounded-xl transition-all shadow-inner"
+                className="flex items-center gap-3 px-4 py-2.5 bg-surface/30 hover:bg-surface border border-white/10 hover:border-accent/30 rounded-instrument transition-all shadow-sm group"
             >
-                <Icon className="w-4 h-4 text-blue-400" />
-                <span className="text-[10px] uppercase font-black tracking-widest text-gray-300 hidden xl:block">{currentChartType.label}</span>
-                <svg
-                    className={`w-3 h-3 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <Icon size={16} className="text-accent group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] uppercase font-black tracking-[0.2em] text-primary hidden xl:block">{currentChartType.label}</span>
+                <ChevronDown size={14} className={`text-muted transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
             {isOpen && (
                 <div
-                    className="absolute top-full right-0 mt-2 w-56 bg-[#1a1e2e] border border-white/10 rounded-xl shadow-2xl z-[100] py-2 animate-in fade-in zoom-in-95 duration-200"
+                    className="absolute top-full right-0 mt-3 w-64 bg-background border border-white/[0.05] rounded-premium shadow-premium z-[200] py-3 animate-in fade-in zoom-in-95 duration-200"
                 >
-                    <div className="px-4 py-2 text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1 border-b border-white/5 mx-2 pb-2">Visualization Mode</div>
+                    <div className="px-6 py-3 text-[9px] font-black text-accent uppercase tracking-[0.4em] mb-2 border-b border-white/[0.03] mx-2 pb-3">Projection Model</div>
                     {CHART_TYPES.map((type) => {
                         const TypeIcon = type.icon;
                         const isActive = type.id === currentType;
@@ -73,16 +66,16 @@ export default function ChartTypeSelector({ currentType, onChange }) {
                             <button
                                 key={type.id}
                                 onClick={() => handleSelect(type.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all relative
+                                className={`w-full flex items-center gap-4 px-6 py-3 text-left transition-all relative group
                            ${isActive
-                                        ? 'bg-blue-500/10 text-blue-400'
-                                        : 'hover:bg-[#2a2e3e] text-gray-400 hover:text-white'
+                                        ? 'bg-accent/5 text-accent border-l-2 border-accent'
+                                        : 'hover:bg-white/[0.02] text-secondary hover:text-primary'
                                     }`}
                             >
-                                <TypeIcon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-gray-500'}`} />
+                                <TypeIcon size={16} className={`${isActive ? 'text-accent' : 'text-muted group-hover:text-primary'} transition-colors`} />
                                 <span className="text-[11px] font-bold uppercase tracking-tight">{type.label}</span>
                                 {isActive && (
-                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(41,98,255,0.8)]"></div>
+                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_#C50022] animate-pulse"></div>
                                 )}
                             </button>
                         );
@@ -92,4 +85,3 @@ export default function ChartTypeSelector({ currentType, onChange }) {
         </div>
     );
 }
-

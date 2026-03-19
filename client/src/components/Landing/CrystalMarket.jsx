@@ -2,8 +2,9 @@ import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 // --- UTILS ---
-const randomHeight = () => Math.floor(Math.random() * 250) + 150; // Taller crystals
-const randomColor = () => Math.random() > 0.5 ? '#CCFF00' : '#00F0FF';
+const randomHeight = () => Math.floor(Math.random() * 250) + 150; 
+// Using Strong Red theme colors
+const randomColor = () => Math.random() > 0.5 ? '#C50022' : '#FFFFFF';
 
 // --- PRISM COMPONENT ---
 const CrystalPrism = ({ x, y, delay }) => {
@@ -17,7 +18,7 @@ const CrystalPrism = ({ x, y, delay }) => {
             style={{
                 left: x,
                 bottom: y,
-                width: 50, // Wider base
+                width: 50,
                 height: height.current,
                 transformStyle: 'preserve-3d',
                 perspective: 1000
@@ -46,60 +47,60 @@ const CrystalPrism = ({ x, y, delay }) => {
             >
                 {/* FRONT FACE */}
                 <div
-                    className="absolute inset-0 border border-white/30 backdrop-blur-md"
+                    className="absolute inset-0 border border-white/20 backdrop-blur-md"
                     style={{
-                        backgroundColor: `${color.current}20`,
+                        backgroundColor: `${color.current}10`,
                         transform: 'translateZ(25px)',
-                        boxShadow: `0 0 30px ${color.current}30 inset`
+                        boxShadow: `0 0 30px ${color.current}20 inset`
                     }}
                 />
 
                 {/* BACK FACE */}
                 <div
-                    className="absolute inset-0 border border-white/20"
+                    className="absolute inset-0 border border-white/10"
                     style={{
-                        backgroundColor: `${color.current}10`,
+                        backgroundColor: `${color.current}05`,
                         transform: 'translateZ(-25px) rotateY(180deg)'
                     }}
                 />
 
                 {/* RIGHT FACE */}
                 <div
-                    className="absolute inset-0 border border-white/30"
+                    className="absolute inset-0 border border-white/20"
                     style={{
                         width: 50,
                         transform: 'rotateY(90deg) translateZ(25px)',
-                        background: `linear-gradient(to bottom, transparent, ${color.current}40)`
+                        background: `linear-gradient(to bottom, transparent, ${color.current}30)`
                     }}
                 />
 
                 {/* LEFT FACE */}
                 <div
-                    className="absolute inset-0 border border-white/30"
+                    className="absolute inset-0 border border-white/20"
                     style={{
                         width: 50,
                         transform: 'rotateY(-90deg) translateZ(25px)',
-                        background: `linear-gradient(to top, transparent, ${color.current}30)`
+                        background: `linear-gradient(to top, transparent, ${color.current}20)`
                     }}
                 />
 
                 {/* TOP LID */}
                 <div
-                    className="absolute top-0 left-0 w-full bg-white"
+                    className="absolute top-0 left-0 w-full bg-white/20"
                     style={{
                         height: 50,
                         transform: 'rotateX(90deg) translateZ(25px)',
-                        boxShadow: `0 0 50px ${color.current}`
+                        boxShadow: `0 0 50px ${color.current}50`
                     }}
                 />
 
                 {/* INNER CORE */}
                 <div
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 bg-white"
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1 bg-white"
                     style={{
-                        height: '90%',
+                        height: '95%',
                         transform: 'translateZ(0px)',
-                        boxShadow: `0 0 20px ${color.current}`
+                        boxShadow: `0 0 15px ${color.current}`
                     }}
                 />
             </motion.div>
@@ -118,7 +119,7 @@ export default function CrystalMarket() {
     return (
         <div className="w-full h-full relative perspective-[1500px] overflow-visible">
             {/* AMBIENT GLOW */}
-            <div className="absolute inset-0 bg-brand-lime/10 blur-[120px] rounded-full mix-blend-screen" />
+            <div className="absolute inset-0 bg-accent/5 blur-[120px] rounded-full mix-blend-screen" />
 
             {/* THE PRISM GRID - Auto Rotating */}
             <motion.div
@@ -136,16 +137,15 @@ export default function CrystalMarket() {
             </motion.div>
 
             {/* FLOATING PARTICLES */}
-            {Array.from({ length: 15 }).map((_, i) => (
+            {Array.from({ length: 12 }).map((_, i) => (
                 <motion.div
                     key={`particle-${i}`}
-                    className="absolute w-1.5 h-1.5 bg-brand-lime rounded-full blur-[1px]"
-                    // FIX: Use numeric y value instead of percentage string to prevent animation type mismatch
-                    initial={{ opacity: 0, x: '100%', y: 300 }}
+                    className="absolute w-1 h-1 bg-accent rounded-full blur-[1px]"
+                    initial={{ opacity: 0, x: '80%', y: 300 }}
                     animate={{
-                        opacity: [0, 1, 0],
-                        x: '-20%',
-                        y: [300, Math.random() * 800]
+                        opacity: [0, 0.6, 0],
+                        x: '0%',
+                        y: [300, Math.random() * 600]
                     }}
                     transition={{
                         duration: Math.random() * 5 + 8,
@@ -158,4 +158,3 @@ export default function CrystalMarket() {
         </div>
     );
 }
-

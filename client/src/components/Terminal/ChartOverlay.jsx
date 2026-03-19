@@ -73,7 +73,7 @@ function CrosshairTooltip({ chartInstance, containerRef }) {
 
     return (
         <div
-            className="pointer-events-none absolute z-50 bg-[#12162a]/90 backdrop-blur-md border border-white/10 rounded-lg p-3 shadow-2xl flex flex-col gap-1.5 transition-all duration-75"
+            className="pointer-events-none absolute z-50 bg-background/90 backdrop-blur-md border border-white/10 rounded-none p-3 shadow-2xl flex flex-col gap-1.5 transition-all duration-75"
             style={{ left, top: y - 40 }}
         >
             <div className="flex items-center justify-between gap-4">
@@ -125,7 +125,7 @@ function TradeBox({ entryPrice, symbol, ltp, onOrder, onClose }) {
     }, [onOrder, symbol, side, lots, entry, slVal, tpVal, onClose]);
 
     return (
-        <div className="absolute right-[80px] top-1/2 -translate-y-1/2 z-[60] w-[240px] bg-[#0a0e1a] border border-white/10 rounded shadow-2xl overflow-hidden flex flex-col font-sans">
+        <div className="absolute right-[80px] top-1/2 -translate-y-1/2 z-[60] w-[240px] bg-background border border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col font-sans">
             {/* Header */}
             <div className="px-3 py-2 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
                 <span className="text-[9px] font-black uppercase tracking-[2px] text-white/40">Order Terminal</span>

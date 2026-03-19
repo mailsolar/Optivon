@@ -30,7 +30,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
 
     // HANDLERS ----------------------------------------------------------------
 
-    // 1. Send OTP (Register Step 1)
     const handleSendOtp = async (e) => {
         e.preventDefault();
         if (!password) {
@@ -53,7 +52,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
             } else {
                 addToast('Verification code sent to your email', 'success');
             }
-            setStep(2); // Move to OTP
+            setStep(2); 
         } catch (err) {
             setError(err.message);
         } finally {
@@ -61,7 +60,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
     };
 
-    // 2. Register (Register Step 2)
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -75,7 +73,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            // Auto-login to generate token for 2FA setup
             const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -85,8 +82,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
 
             if (loginData.token) {
                 setTempToken(loginData.token);
-                // addToast('Registration Successful! Please set up your 2FA PIN.', 'success');
-                setStep(3); // Move to 2FA Setup
+                setStep(3); 
             } else {
                 throw new Error("Registration succeeded but auto-login failed.");
             }
@@ -97,7 +93,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
     };
 
-    // 3. Setup 2FA (Register Step 3)
     const handleSetup2FA = async (e) => {
         e.preventDefault();
         if (pin.length !== 6) {
@@ -118,7 +113,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
             if (!res.ok) throw new Error(data.error);
 
             addToast('Registration & Setup Complete!', 'success');
-            onLoginSuccess({ user: { email }, token: tempToken }); // Finish
+            onLoginSuccess({ user: { email }, token: tempToken }); 
         } catch (err) {
             setError(err.message);
         } finally {
@@ -126,7 +121,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
     };
 
-    // 4. Login (Login Step 1)
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -142,7 +136,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
 
             if (data.require2FA) {
                 setUserId(data.userId);
-                setStep(2); // Move to 2FA Input
+                setStep(2); 
             } else {
                 addToast('Welcome back to Optivon', 'success');
                 onLoginSuccess({ user: data.user, token: data.token });
@@ -154,7 +148,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
     };
 
-    // 5. Verify 2FA Login (Login Step 2)
     const handleVerify2FA = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -177,7 +170,6 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
     };
 
-    // 6. Forgot Password Request
     const handleForgotPass = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -191,12 +183,8 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            if (!res.ok) throw new Error(data.error);
-
             if (data.devLink) {
                 addToast('DEV MODE: Check Console/Network for Link', 'success');
-                console.log("DEV RECOVERY LINK:", data.devLink);
-                // Prompt user to copy it
                 window.open(data.devLink, '_blank');
             } else {
                 addToast('Recovery link sent to your email', 'success');
@@ -210,127 +198,117 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
         }
     };
 
-
-    // RENDERERS ---------------------------------------------------------------
-
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/90 backdrop-blur-md p-4">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="relative w-full max-w-sm bg-surface rounded-3xl shadow-2xl border border-border overflow-hidden"
+                    className="relative w-full max-w-sm bg-surface rounded-premium shadow-2xl border border-white/5 overflow-hidden"
                 >
                     {/* Header */}
-                    <div className="px-8 pt-8 pb-4 flex justify-between items-start">
+                    <div className="px-10 pt-10 pb-4 flex justify-between items-start">
                         <div>
-                            <h2 className="text-2xl font-black font-display text-primary tracking-tight">
-                                {mode === 'LOGIN' ? 'Welcome Back' : mode === 'REGISTER' ? 'Join Optivon' : 'Recover Account'}
+                            <h2 className="text-2xl font-bold text-primary uppercase tracking-tight">
+                                {mode === 'LOGIN' ? 'Sync Profile' : mode === 'REGISTER' ? 'Initiate Node' : 'Recover Key'}
                             </h2>
-                            <p className="text-secondary text-xs font-mono mt-1">
+                            <p className="text-secondary text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
                                 {mode === 'LOGIN' ? (step === 2 ? 'Security Verification' : 'Access your terminal.') :
                                     mode === 'REGISTER' ? (step === 1 ? 'Begin your evaluation.' : step === 3 ? 'Secure your account.' : 'Verify Identity.') :
-                                        'We\'ll send you a link.'}
+                                        'System recovery sequence.'}
                             </p>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 -mr-2 text-secondary hover:text-primary hover:bg-background rounded-full transition-colors"
+                            className="p-3 bg-background border border-white/5 text-muted hover:text-accent rounded-full transition-all shadow-soft"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
 
                     {/* Error Banner */}
                     {error && (
-                        <div className="mx-8 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 animate-in slide-in-from-top-2">
-                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" />
-                            <span className="text-red-500 text-[10px] font-black uppercase tracking-wider">{error}</span>
+                        <div className="mx-10 mt-4 p-4 bg-red-400/5 border border-red-400/20 rounded-instrument flex items-center gap-4 animate-in slide-in-from-top-2">
+                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full flex-shrink-0 animate-pulse" />
+                            <span className="text-red-400 text-[10px] font-bold uppercase tracking-widest leading-none">{error}</span>
                         </div>
                     )}
 
-                    <div className="p-8 space-y-6">
+                    <div className="p-10 space-y-8">
 
-                        {/* --- LOGIN FLOW --- */}
                         {mode === 'LOGIN' && step === 1 && (
-                            <form onSubmit={handleLogin} className="space-y-4">
-                                <Input label="Email" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.com" />
-                                <Input label="Password" icon={Lock} type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+                            <form onSubmit={handleLogin} className="space-y-6">
+                                <Input label="Identifier" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.pro" />
+                                <Input label="Access Key" icon={Lock} type="password" value={password} onChange={setPassword} placeholder="••••••••" />
                                 <div className="flex justify-end">
-                                    <button type="button" onClick={() => { setMode('FORGOT'); resetState(); }} className="text-[10px] font-bold text-accent hover:underline">
-                                        Forgot Password?
+                                    <button type="button" onClick={() => { setMode('FORGOT'); resetState(); }} className="text-[10px] font-bold text-accent uppercase tracking-widest hover:text-primary transition-colors">
+                                        Lost Recovery Key?
                                     </button>
                                 </div>
-                                <SubmitButton loading={loading}>Sign In</SubmitButton>
+                                <SubmitButton loading={loading}>Initialize Protocol</SubmitButton>
                             </form>
                         )}
 
                         {mode === 'LOGIN' && step === 2 && (
-                            <form onSubmit={handleVerify2FA} className="space-y-6 text-center">
-                                <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto text-accent">
-                                    <ShieldCheck className="w-8 h-8" />
+                            <form onSubmit={handleVerify2FA} className="space-y-10 text-center">
+                                <div className="w-20 h-20 bg-accent/5 border border-accent/20 rounded-premium flex items-center justify-center mx-auto text-accent shadow-soft">
+                                    <ShieldCheck className="w-10 h-10" />
                                 </div>
-                                <Input label="6-Digit PIN" icon={KeyRound} type="password" value={pin} onChange={setPin} placeholder="000000" maxLength={6} center />
-                                <SubmitButton loading={loading}>Unlock Terminal</SubmitButton>
+                                <Input label="Security PIN" icon={KeyRound} type="password" value={pin} onChange={setPin} placeholder="000000" maxLength={6} center />
+                                <SubmitButton loading={loading}>Unlock Node</SubmitButton>
                             </form>
                         )}
 
-
-                        {/* --- REGISTER FLOW --- */}
                         {mode === 'REGISTER' && step === 1 && (
-                            <form onSubmit={handleSendOtp} className="space-y-4">
-                                <Input label="Email" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.com" />
-                                <Input label="Create Password" icon={Lock} type="password" value={password} onChange={setPassword} placeholder="••••••••" />
-                                <div className="text-[10px] text-secondary/60 font-mono">
-                                    We will send a verification code to this address.
+                            <form onSubmit={handleSendOtp} className="space-y-6">
+                                <Input label="Identifier" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.pro" />
+                                <Input label="Set Key" icon={Lock} type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+                                <div className="text-[9px] text-muted font-bold uppercase tracking-[0.2em] bg-background/50 p-3 rounded-instrument border border-white/5">
+                                    Protocol will dispatch a verification sequence to this node.
                                 </div>
-                                <SubmitButton loading={loading}>Register</SubmitButton>
+                                <SubmitButton loading={loading}>Initiate Sync</SubmitButton>
                             </form>
                         )}
 
                         {mode === 'REGISTER' && step === 2 && (
-                            <form onSubmit={handleRegister} className="space-y-4">
-                                <Input label="Verification Code" icon={ShieldCheck} type="text" value={otp} onChange={setOtp} placeholder="000000" />
-                                <SubmitButton loading={loading}>Verify & Create Account</SubmitButton>
+                            <form onSubmit={handleRegister} className="space-y-6">
+                                <Input label="Sequence Code" icon={ShieldCheck} type="text" value={otp} onChange={setOtp} placeholder="000000" />
+                                <SubmitButton loading={loading}>Verify & Connect</SubmitButton>
                             </form>
                         )}
 
                         {mode === 'REGISTER' && step === 3 && (
-                            <form onSubmit={handleSetup2FA} className="space-y-6 text-center">
-                                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto text-emerald-500">
-                                    <CheckCircle className="w-8 h-8" />
+                            <form onSubmit={handleSetup2FA} className="space-y-10 text-center">
+                                <div className="w-20 h-20 bg-accent/5 border border-accent/20 rounded-premium flex items-center justify-center mx-auto text-accent shadow-soft">
+                                    <CheckCircle className="w-10 h-10" />
                                 </div>
-                                <div className="space-y-1">
-                                    <h3 className="font-bold text-primary">Account Created!</h3>
-                                    <p className="text-secondary text-xs">Set up a 6-digit PIN for 2-Factor Auth.</p>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-bold text-primary uppercase tracking-tight">Node Activated</h3>
+                                    <p className="text-secondary text-[10px] font-bold uppercase tracking-widest">Configure 2FA PIN for secure transit.</p>
                                 </div>
-                                <Input label="Set 6-Digit PIN" icon={KeyRound} type="password" value={pin} onChange={setPin} placeholder="000000" maxLength={6} center />
-                                <SubmitButton loading={loading}>Enable 2FA & Login</SubmitButton>
+                                <Input label="Encryption PIN" icon={KeyRound} type="password" value={pin} onChange={setPin} placeholder="000000" maxLength={6} center />
+                                <SubmitButton loading={loading}>Secure & Finalize</SubmitButton>
                             </form>
                         )}
 
-
-                        {/* --- FORGOT PASSWORD --- */}
                         {mode === 'FORGOT' && (
-                            <form onSubmit={handleForgotPass} className="space-y-4">
-                                <Input label="Email" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.com" />
-                                <SubmitButton loading={loading}>Send Recovery Link</SubmitButton>
-                                <button type="button" onClick={() => { setMode('LOGIN'); resetState(); }} className="w-full text-center text-xs text-secondary hover:text-primary mt-4">
-                                    Back to Login
+                            <form onSubmit={handleForgotPass} className="space-y-6">
+                                <Input label="Identifier" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.pro" />
+                                <SubmitButton loading={loading}>Dispatch Recovery</SubmitButton>
+                                <button type="button" onClick={() => { setMode('LOGIN'); resetState(); }} className="w-full text-center text-[10px] font-bold text-muted uppercase tracking-[0.2em] hover:text-primary transition-all mt-4">
+                                    Return to Sync
                                 </button>
                             </form>
                         )}
 
-
-                        {/* Mode Switcher */}
                         {mode !== 'FORGOT' && step === 1 && (
-                            <div className="pt-4 border-t border-border text-center">
+                            <div className="pt-8 border-t border-white/5 text-center">
                                 <button
                                     onClick={() => { setMode(mode === 'LOGIN' ? 'REGISTER' : 'LOGIN'); resetState(); }}
-                                    className="text-[10px] font-black text-secondary hover:text-primary uppercase tracking-widest transition-colors"
+                                    className="text-[10px] font-bold text-muted hover:text-accent uppercase tracking-[0.3em] transition-all"
                                 >
-                                    {mode === 'LOGIN' ? 'New to Optivon? Start Challenge' : 'Have an account? Log In'}
+                                    {mode === 'LOGIN' ? 'Initialize New Node' : 'Established Node Log'}
                                 </button>
                             </div>
                         )}
@@ -341,22 +319,21 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
     );
 }
 
-// Reusable Input Component
 function Input({ label, icon: Icon, type, value, onChange, placeholder, maxLength, center }) {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === 'password';
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
     return (
-        <div className="space-y-2">
-            <label className={`text-[10px] font-black text-secondary uppercase tracking-widest pl-1 block ${center ? 'text-center' : ''}`}>{label}</label>
+        <div className="space-y-3">
+            <label className={`text-[10px] font-bold text-muted uppercase tracking-[0.3em] ml-1 block ${center ? 'text-center' : ''}`}>{label}</label>
             <div className="relative group">
-                <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary group-focus-within:text-accent transition-colors ${center ? 'hidden' : ''}`} />
+                <Icon className={`absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within:text-accent transition-all ${center ? 'hidden' : ''}`} />
                 <input
                     type={inputType}
                     value={value}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full bg-background border border-border rounded-xl py-3.5 text-sm font-medium text-primary outline-none focus:border-accent transition-all placeholder:text-secondary/30 ${center ? 'text-center px-4 tracking-[0.5em] font-mono' : 'pl-12 pr-10'}`}
+                    className={`w-full bg-background border border-white/5 rounded-instrument py-4 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20 ${center ? 'text-center px-4 tracking-[0.8em] font-mono' : 'pl-14 pr-12'}`}
                     placeholder={placeholder}
                     required
                     maxLength={maxLength}
@@ -365,7 +342,7 @@ function Input({ label, icon: Icon, type, value, onChange, placeholder, maxLengt
                     <button
                         type="button"
                         onClick={() => setShowPassword(prev => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors p-1"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-accent transition-all p-1"
                         tabIndex={-1}
                     >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -376,17 +353,15 @@ function Input({ label, icon: Icon, type, value, onChange, placeholder, maxLengt
     );
 }
 
-// Reusable Button
 function SubmitButton({ children, loading }) {
     return (
         <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-accent text-brand-dark rounded-xl font-bold uppercase tracking-wider text-xs hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 transition-all flex items-center justify-center gap-2 group"
+            className="w-full py-5 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-primary transition-all disabled:opacity-50 shadow-soft flex items-center justify-center gap-4 group"
         >
             {loading ? 'Processing...' : children}
             {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
         </button>
     );
 }
-

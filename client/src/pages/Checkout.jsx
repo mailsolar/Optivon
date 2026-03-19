@@ -4,21 +4,20 @@ import { ArrowLeft, CheckCircle2, ShieldCheck, Sparkles, CreditCard, Lock } from
 import { useAuth } from '../context/AuthContext';
 import { SIZES, DATA, MODELS } from '../components/Landing/ChallengeSelector';
 import { API_BASE_URL } from '../config';
+import Footer from '../components/Global/Footer';
 
 export default function Checkout() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Default to first options if no state (e.g. direct access)
-    const { user, login } = useAuth(); // Access auth context
+    const { user, login } = useAuth();
     const [selectedModelId, setSelectedModelId] = useState(location.state?.modelId || 'standard');
     const [selectedSizeId, setSelectedSizeId] = useState(location.state?.sizeId || '10L');
 
-    // Auth State
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
-    const [authStep, setAuthStep] = useState('input'); // 'input', 'verify', 'done' (or if user is already logged in)
+    const [authStep, setAuthStep] = useState('input');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -26,7 +25,6 @@ export default function Checkout() {
     const activeSize = SIZES.find(s => s.id === selectedSizeId);
     const activeData = DATA[selectedModelId];
 
-    // If user is already logged in, skip auth steps
     useEffect(() => {
         if (user) setAuthStep('done');
     }, [user]);
@@ -49,7 +47,6 @@ export default function Checkout() {
             const data = await res.json();
             if (res.ok) {
                 setAuthStep('verify');
-                // alert(`OTP Sent! (Dev: ${data.devOTP})`); // Remove dev hint in prod
             } else {
                 setError(data.error);
             }
@@ -72,7 +69,6 @@ export default function Checkout() {
             const data = await res.json();
 
             if (res.ok) {
-                // Triggering Login
                 const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -84,7 +80,7 @@ export default function Checkout() {
                     login(loginData.user, loginData.token);
                     setAuthStep('done');
                 } else {
-                    setError("Registration successful, but auto-login failed. Please login manually.");
+                    setError("Auto-login failed. Please login manually.");
                 }
             } else {
                 setError(data.error);
@@ -100,11 +96,6 @@ export default function Checkout() {
         if (!user) return setError("User not authenticated.");
         setIsLoading(true);
         try {
-            // Simulate Payment Success & Create Account
-            // In a real app, this would be a redirect to PG, then webhook callback
-            // Here we assume payment is done and we call the purchase endpoint directly
-
-            // Using the same purchase endpoint as Dashboard
             const res = await fetch(`${API_BASE_URL}/api/trade/purchase`, {
                 method: 'POST',
                 headers: {
@@ -115,7 +106,6 @@ export default function Checkout() {
             });
 
             if (res.ok) {
-                // alert("Payment Successful! Redirecting to Dashboard...");
                 navigate('/dashboard');
             } else {
                 const data = await res.json();
@@ -131,176 +121,166 @@ export default function Checkout() {
     };
 
     return (
-        <div className="min-h-screen bg-brand-dark text-white font-sans flex flex-col">
+        <div className="min-h-screen bg-background text-primary font-sans flex flex-col selection:bg-accent selection:text-background">
 
             {/* Header */}
-            <header className="h-20 border-b border-white/5 flex items-center px-6 md:px-12 bg-[#0a0a12]">
-                <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                    <ArrowLeft size={18} />
-                    <span className="text-xs font-mono uppercase tracking-widest">Back</span>
+            <header className="h-20 border-b border-white/5 flex items-center px-8 md:px-12 bg-surface/80 backdrop-blur-md">
+                <Link to="/" className="flex items-center gap-4 text-secondary hover:text-primary transition-all group">
+                    <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">HUB</span>
                 </Link>
-                <div className="mx-auto font-display font-black text-xl tracking-[0.2em]">CHECKOUT</div>
+                <div className="mx-auto font-bold text-lg tracking-[-0.04em] uppercase">Initialize Node</div>
                 <div className="w-16"></div>
             </header>
 
-            <main className="flex-1 max-w-7xl mx-auto w-full p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <main className="flex-1 max-w-[1400px] mx-auto w-full p-8 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-16">
 
                 {/* LEFT: Selection Panel */}
-                <div className="lg:col-span-4 space-y-8">
+                <div className="lg:col-span-4 space-y-12">
                     <div>
-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                            <div className="w-1 h-6 bg-brand-lime rounded-full" />
-                            Select Challenge
-                        </h2>
-
-                        {/* 1. Model Selector (Hidden if only 1, but kept for logic) */}
-                        {/* 
-                        <div className="mb-6">
-                            <label className="text-xs text-gray-500 font-mono uppercase block mb-3">Model</label>
-                            ...
+                        <div className="flex flex-col gap-2 mb-10">
+                            <div className="text-[12px] font-bold text-accent uppercase tracking-[0.3em] font-display">Protocol Selection</div>
+                            <h2 className="text-4xl font-display font-black tracking-tighter uppercase text-white">Active Matrix</h2>
                         </div>
-                        */}
 
-                        {/* 2. Size Selector (Vertical List) */}
-                        <div className="space-y-3">
-                            <label className="text-xs text-gray-500 font-mono uppercase tracking-widest block mb-1">Account Size</label>
+                        {/* Size Selector */}
+                        <div className="space-y-4">
                             {SIZES.map((size) => (
                                 <button
                                     key={size.id}
                                     onClick={() => setSelectedSizeId(size.id)}
-                                    className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${selectedSizeId === size.id
-                                        ? 'bg-brand-lime/10 border-brand-lime text-white'
-                                        : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10'
+                                    className={`w-full flex items-center justify-between p-8 border transition-all ${selectedSizeId === size.id
+                                        ? 'bg-accent/10 border-accent text-white shadow-[0_0_15px_rgba(197,0,34,0.3)]'
+                                        : 'bg-surface border-white/10 text-secondary hover:border-white/30'
                                         }`}
                                 >
-                                    <div className="flex flex-col items-start">
-                                        <span className={`font-bold ${selectedSizeId === size.id ? 'text-brand-lime' : ''}`}>{size.label}</span>
-                                        <span className="text-[10px] font-mono opacity-60">Capital</span>
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${selectedSizeId === size.id ? 'text-accent' : 'text-muted'}`}>Allocation</span>
+                                        <span className="text-2xl font-display font-black text-white uppercase tracking-tighter">{size.label}</span>
                                     </div>
                                     <div className="text-right">
-                                        <span className="block font-bold">₹{size.price.toLocaleString()}</span>
-                                        {selectedSizeId === size.id && <CheckCircle2 size={16} className="text-brand-lime ml-auto mt-1" />}
+                                        <span className="block font-display font-black text-2xl text-white">₹{size.price.toLocaleString()}</span>
+                                        {selectedSizeId === size.id && <div className="text-[10px] font-bold text-accent uppercase tracking-[0.3em] mt-1">Selected</div>}
                                     </div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="p-6 bg-[#1F1F35] rounded-2xl border border-white/5">
-                        <h3 className="text-sm font-bold text-gray-300 mb-4 flex items-center gap-2">
-                            <Lock size={14} /> Secure Payment
+                    <div className="p-8 bg-surface rounded-premium border border-white/5 shadow-soft">
+                        <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                            <Lock size={12} className="text-accent" /> Security Layer
                         </h3>
-                        <p className="text-xs text-gray-500 leading-relaxed">
-                            Your payment is processed securely. We accept UPI, Credit Cards, and Crypto.
+                        <p className="text-sm text-secondary leading-relaxed font-medium">
+                            Encrypted merchant protocol active. UPI and Institutional gateways available.
                         </p>
                     </div>
                 </div>
 
-                {/* RIGHT: Summary & Checkout */}
                 <div className="lg:col-span-8">
-                    <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                        <div className="w-1 h-6 bg-brand-blue rounded-full" />
-                        Challenge Overview
-                    </h2>
+                    <div className="flex flex-col gap-2 mb-10">
+                        <div className="text-[12px] font-bold text-accent uppercase tracking-[0.3em] font-display">Summary</div>
+                        <h2 className="text-4xl font-display font-black tracking-tighter uppercase text-white">Technical Overview</h2>
+                    </div>
 
-                    <div className="bg-[#121220] rounded-3xl border border-white/10 overflow-hidden relative mb-8">
-                        <div className="absolute top-0 right-0 p-32 bg-brand-lime/5 blur-[100px] rounded-full pointer-events-none" />
+                    <div className="bg-surface border border-white/10 overflow-hidden relative mb-12 shadow-2xl">
+                        <div className="absolute top-0 right-0 p-32 bg-accent/10 blur-[100px] rounded-full pointer-events-none" />
 
-                        <div className="p-8 border-b border-white/5 flex justify-between items-start">
+                        <div className="p-12 border-b border-white/10 flex justify-between items-end">
                             <div>
-                                <h1 className="text-4xl font-black text-white mb-2">{activeSize.label}</h1>
-                                <p className="text-brand-lime font-mono text-sm uppercase tracking-widest">{activeModel.label}</p>
+                                <h1 className="text-6xl font-display font-black text-white tracking-tighter mb-2 uppercase">{activeSize.label}</h1>
+                                <div className="text-[12px] font-bold text-accent uppercase tracking-[0.4em] font-display">{activeModel.label}</div>
                             </div>
                             <div className="text-right">
-                                <span className="block text-xs text-gray-500 uppercase tracking-widest mb-1">Total Fee</span>
-                                <span className="text-3xl font-bold text-white">₹{activeSize.price.toLocaleString()}</span>
+                                <span className="block text-[10px] text-muted font-bold uppercase tracking-[0.2em] mb-2">Protocol Fee</span>
+                                <span className="text-5xl font-display font-black text-white tracking-tighter">₹{activeSize.price.toLocaleString()}</span>
                             </div>
                         </div>
 
-                        <div className="p-8 grid grid-cols-2 md:grid-cols-3 gap-8">
-                            <DetailItem label="Profit Target" value={activeData.target} sub={calculateValue(activeData.target)} />
-                            <DetailItem label="Daily Drawdown" value={activeData.dailyDrawdown} sub={calculateValue(activeData.dailyDrawdown)} />
-                            <DetailItem label="Max Drawdown" value={activeData.maxDrawdown} sub={calculateValue(activeData.maxDrawdown)} />
-                            <DetailItem label="Leverage" value={activeData.leverage} />
-                            <DetailItem label="Max Lots" value={`${activeSize.maxLots} Lots`} />
+                        <div className="p-12 grid grid-cols-2 md:grid-cols-3 gap-12">
+                            <DetailItem label="Growth Target" value={activeData.target} sub={calculateValue(activeData.target)} />
+                            <DetailItem label="Daily Stop" value={activeData.dailyDrawdown} sub={calculateValue(activeData.dailyDrawdown)} />
+                            <DetailItem label="Hard Stop" value={activeData.maxDrawdown} sub={calculateValue(activeData.maxDrawdown)} />
+                            <DetailItem label="Risk Limit" value={activeData.leverage} />
+                            <DetailItem label="Scale Limit" value={`${activeSize.maxLots} Lots`} />
                             <DetailItem label="Profit Split" value={activeData.profitSplit} />
                         </div>
                     </div>
 
-                    {/* Authentication & Payment Section */}
-                    <div className="bg-[#121220] rounded-3xl border border-white/10 p-8 mb-8 transition-all">
+                    {/* Auth & Payment Section */}
+                    <div className="bg-surface rounded-premium border border-white/5 p-12 mb-16 shadow-2xl">
 
                         {!user && authStep === 'input' && (
                             <div className="animate-in fade-in slide-in-from-bottom-4">
-                                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                    <div className="p-2 rounded-lg bg-brand-lime/10 text-brand-lime">
+                                <h3 className="text-xl font-bold text-primary mb-10 flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-instrument bg-accent/10 flex items-center justify-center text-accent">
                                         <ShieldCheck size={20} />
                                     </div>
-                                    Create Account
+                                    Initialize Identity
                                 </h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-mono text-gray-500 uppercase tracking-widest">Email Address</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">Corporate Email</label>
                                         <input
                                             type="email"
                                             placeholder="trader@optivon.com"
-                                            className="w-full bg-[#0a0a0f] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-lime transition-colors"
+                                            className="w-full bg-background/50 border border-white/10 rounded-instrument px-6 py-4 text-primary font-medium focus:outline-none focus:border-accent transition-all placeholder:text-muted/30"
                                             value={email}
                                             onChange={(e) => { setEmail(e.target.value); setError(''); }}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-mono text-gray-500 uppercase tracking-widest">Password</label>
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">Access Code</label>
                                         <input
                                             type="password"
                                             placeholder="••••••••"
-                                            className="w-full bg-[#0a0a0f] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-lime transition-colors"
+                                            className="w-full bg-background/50 border border-white/10 rounded-instrument px-6 py-4 text-primary font-medium focus:outline-none focus:border-accent transition-all placeholder:text-muted/30"
                                             value={password}
                                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
                                         />
                                     </div>
                                 </div>
-                                {error && <div className="text-red-500 text-xs text-center mb-4 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{error}</div>}
+                                {error && <div className="text-red-400 text-[10px] font-bold uppercase tracking-widest text-center mb-6 bg-red-400/5 p-4 rounded-instrument border border-red-400/20">{error}</div>}
                                 <button
                                     onClick={handleSendOTP}
                                     disabled={isLoading}
-                                    className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold uppercase tracking-widest transition-all"
+                                    className="w-full py-5 bg-background border border-white/10 hover:border-accent/30 text-primary rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] transition-all"
                                 >
-                                    {isLoading ? 'Sending...' : 'Next: Verify Email'}
+                                    {isLoading ? 'Processing...' : 'Verify Node Connectivity'}
                                 </button>
                             </div>
                         )}
 
                         {!user && authStep === 'verify' && (
                             <div className="animate-in fade-in slide-in-from-bottom-4 text-center">
-                                <h3 className="text-xl font-bold text-white mb-2">Verify Email</h3>
-                                <p className="text-gray-400 text-sm mb-6">Enter the code sent to <span className="text-white">{email}</span></p>
+                                <h3 className="text-2xl font-bold text-primary mb-2 uppercase tracking-tight">Matrix Verification</h3>
+                                <p className="text-secondary text-sm mb-10 font-medium tracking-tight">Enter the protocol key sent to <span className="text-primary font-bold">{email}</span></p>
 
-                                {error && <div className="text-red-500 text-xs mb-4 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{error}</div>}
+                                {error && <div className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-6 bg-red-400/5 p-4 rounded-instrument border border-red-400/20">{error}</div>}
 
                                 <input
                                     type="text"
                                     placeholder="000000"
                                     maxLength={6}
-                                    className="w-48 bg-[#0a0a0f] border border-white/10 rounded-xl px-4 py-4 text-center text-2xl tracking-[0.5em] font-mono text-brand-lime focus:outline-none focus:border-brand-lime transition-colors mb-6"
+                                    className="w-64 bg-background border border-accent/20 rounded-instrument px-6 py-5 text-center text-4xl tracking-[0.4em] font-bold text-accent focus:outline-none focus:border-accent transition-all mb-10 placeholder:text-accent/10"
                                     value={otp}
                                     onChange={(e) => { setOtp(e.target.value); setError(''); }}
                                 />
 
-                                <div className="flex gap-4">
+                                <div className="flex gap-6 max-w-lg mx-auto">
                                     <button
                                         onClick={() => setAuthStep('input')}
-                                        className="flex-1 py-4 text-gray-500 hover:text-white transition-colors text-xs uppercase tracking-widest"
+                                        className="flex-1 py-4 text-muted hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-[0.3em]"
                                     >
-                                        Change Email
+                                        Recalibrate
                                     </button>
                                     <button
                                         onClick={handleVerifyAndRegister}
                                         disabled={isLoading || otp.length < 6}
-                                        className="flex-[2] py-4 bg-brand-lime text-brand-dark rounded-xl font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(204,255,0,0.3)]"
+                                        className="flex-[2] py-5 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] hover:shadow-soft transition-all"
                                     >
-                                        {isLoading ? 'Verifying...' : 'Verify & Register'}
+                                        {isLoading ? 'Verifying...' : 'Authenticate'}
                                     </button>
                                 </div>
                             </div>
@@ -308,25 +288,24 @@ export default function Checkout() {
 
                         {(user || authStep === 'done') && (
                             <div className="animate-in fade-in zoom-in">
-                                <div className="flex items-center justify-between p-4 bg-brand-lime/10 rounded-xl border border-brand-lime/20 mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-brand-lime text-brand-dark rounded-full">
-                                            <CheckCircle2 size={16} />
+                                <div className="flex items-center justify-between p-6 bg-accent/5 rounded-instrument border border-accent/20 mb-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-accent text-background rounded-full flex items-center justify-center">
+                                            <CheckCircle2 size={18} />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-white">Logged in as</div>
-                                            <div className="text-xs text-brand-lime font-mono">{user?.email || email}</div>
+                                            <div className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">Authenticated Node</div>
+                                            <div className="text-sm text-primary font-bold uppercase">{user?.email || email}</div>
                                         </div>
                                     </div>
-                                    {/* Optional: Change account button could go here */}
                                 </div>
 
                                 <button
                                     onClick={handleCreateOrder}
-                                    className="w-full py-4 bg-brand-lime text-brand-dark rounded-xl font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(204,255,0,0.4)] flex items-center justify-center gap-3"
+                                    className="w-full py-6 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] hover:bg-primary transition-all shadow-soft flex items-center justify-center gap-4"
                                 >
-                                    <CreditCard size={20} />
-                                    Pay ₹{activeSize.price.toLocaleString()}
+                                    <CreditCard size={18} />
+                                    Process Allocation Fee (₹{activeSize.price.toLocaleString()})
                                 </button>
                             </div>
                         )}
@@ -336,17 +315,18 @@ export default function Checkout() {
                 </div>
 
             </main>
+
+            <Footer />
         </div>
     );
 }
 
 function DetailItem({ label, value, sub }) {
     return (
-        <div>
-            <h4 className="text-xs text-gray-500 uppercase tracking-widest mb-1">{label}</h4>
-            <div className="font-bold text-xl text-white">{value}</div>
-            {sub && <div className="text-xs text-gray-400 font-mono mt-0.5">{sub}</div>}
+        <div className="flex flex-col gap-2 border-l-2 border-accent/30 pl-6">
+            <h4 className="text-[11px] font-bold text-muted uppercase tracking-[0.3em] font-display">{label}</h4>
+            <div className="font-display font-black text-3xl text-white tracking-tighter">{value}</div>
+            {sub && <div className="text-[11px] text-accent font-bold uppercase tracking-[0.1em]">{sub}</div>}
         </div>
     );
 }
-

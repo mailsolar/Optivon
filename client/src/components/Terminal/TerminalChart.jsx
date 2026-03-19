@@ -78,34 +78,34 @@ function buildChartOptions(container, timeframe) {
     const isIntraday = !['1D', '1W', '1M'].includes(timeframe);
     return {
         layout: {
-            background: { type: ColorType.Solid, color: '#0a0e1a' },
-            textColor: '#64748b', // Subtle grey for institutional feel
+            background: { type: ColorType.Solid, color: '#0F0F10' },
+            textColor: '#A6A6A6', // Stone
             fontSize: 11,
             fontFamily: "'Inter', sans-serif",
             attributionLogo: false,
         },
         grid: {
-            vertLines: { color: 'rgba(255,255,255,0.02)', style: LineStyle.Solid }, // Ultra-subtle grid
-            horzLines: { color: 'rgba(255,255,255,0.02)', style: LineStyle.Solid },
+            vertLines: { color: 'rgba(255,255,255,0.01)', style: LineStyle.Solid }, 
+            horzLines: { color: 'rgba(255,255,255,0.01)', style: LineStyle.Solid },
         },
         crosshair: {
             mode: 1, // CrosshairMode.Normal
             vertLine: {
-                color: '#475569',
+                color: '#646466', // Slate
                 width: 1,
                 style: LineStyle.Dashed,
-                labelBackgroundColor: '#475569',
+                labelBackgroundColor: '#1C1C1E', // Quartz
             },
             horzLine: {
-                color: '#475569',
+                color: '#646466', // Slate
                 width: 1,
                 style: LineStyle.Dashed,
-                labelBackgroundColor: '#475569',
+                labelBackgroundColor: '#1C1C1E', // Quartz
             },
         },
         rightPriceScale: {
-            borderColor: 'rgba(255,255,255,0.06)',
-            textColor: '#94a3b8',
+            borderColor: 'rgba(255,255,255,0.02)',
+            textColor: '#A6A6A6',
             autoScale: true,
             scaleMargins: {
                 top: 0.1,
@@ -115,7 +115,7 @@ function buildChartOptions(container, timeframe) {
             borderVisible: true,
         },
         timeScale: {
-            borderColor: 'rgba(255,255,255,0.06)',
+            borderColor: 'rgba(255,255,255,0.02)',
             timeVisible: true,
             secondsVisible: false,
             barSpacing: BAR_SPACING[timeframe] || 6,
@@ -669,7 +669,7 @@ export default function TerminalChart({
                             <div className={`flex items-center gap-1 overflow-hidden transition-all duration-300 ease-out ${isHovered || isDraggingTP || isDraggingSL ? 'w-auto opacity-100 pr-1' : 'w-0 opacity-0'}`}>
                                 {!hasTP && !isDraggingTP && (
                                     <div
-                                        className="cursor-pointer flex items-center justify-center w-7 h-[22px] bg-[#1a1e2e]/95 border border-[#089981] text-[#089981] font-mono text-[10px] font-bold rounded-sm select-none hover:bg-[#089981]/20 transition-colors"
+                                        className="cursor-pointer flex items-center justify-center w-7 h-[22px] bg-background/95 border border-[#089981] text-[#089981] font-mono text-[10px] font-bold rounded-sm select-none hover:bg-[#089981]/20 transition-colors"
                                         onMouseDown={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
@@ -684,7 +684,7 @@ export default function TerminalChart({
                                 )}
                                 {!hasSL && !isDraggingSL && (
                                     <div
-                                        className="cursor-pointer flex items-center justify-center w-7 h-[22px] bg-[#1a1e2e]/95 border border-[#f23645] text-[#f23645] font-mono text-[10px] font-bold rounded-sm select-none hover:bg-[#f23645]/20 transition-colors"
+                                        className="cursor-pointer flex items-center justify-center w-7 h-[22px] bg-background/95 border border-[#f23645] text-[#f23645] font-mono text-[10px] font-bold rounded-sm select-none hover:bg-[#f23645]/20 transition-colors"
                                         onMouseDown={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 export default function OptionChain({ symbol, spotPrice, onOrder }) {
@@ -38,46 +37,46 @@ export default function OptionChain({ symbol, spotPrice, onOrder }) {
     }, [spotPrice, symbol]);
 
     return (
-        <div className="bg-black border-l border-cyber-cyan/20 h-full flex flex-col font-mono text-xs">
-            <div className="p-2 border-b border-cyber-cyan/20 bg-cyber-cyan/5 flex justify-between items-center shadow-[0_0_10px_rgba(0,243,255,0.05)]">
-                <span className="font-bold text-cyber-cyan">CHAIN</span>
-                <span className="text-gray-500">{symbol} EXP: 26 JAN</span>
+        <div className="bg-surface border-l border-white/5 h-full flex flex-col font-sans">
+            <div className="p-4 border-b border-white/5 bg-background/50 flex justify-between items-center shadow-soft">
+                <span className="text-[11px] font-bold text-accent uppercase tracking-[0.3em] font-display">Module Chain</span>
+                <span className="text-[10px] font-bold text-muted uppercase tracking-widest font-display">{symbol} EXP: JAN 26</span>
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <table className="w-full text-center border-collapse">
-                    <thead className="bg-[#0a0a12] sticky top-0 z-10 text-[10px] text-gray-500 uppercase border-b border-white/5">
+                    <thead className="bg-[#121214] sticky top-0 z-10 text-[10px] text-muted font-bold uppercase tracking-widest border-b border-white/5 font-display">
                         <tr>
-                            <th className="p-1">Call</th>
-                            <th className="p-1">Strike</th>
-                            <th className="p-1">Put</th>
+                            <th className="p-3">CALLS</th>
+                            <th className="p-3 border-x border-white/5 text-white">STRIKE</th>
+                            <th className="p-3">PUTS</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-white/[0.03]">
                         {chain.map((row, i) => (
-                            <tr key={row.strike} className="hover:bg-white/5 border-b border-white/5 group relative transition-colors">
+                            <tr key={row.strike} className="hover:bg-white/[0.02] group relative transition-colors">
                                 {/* Call Side */}
                                 <td
                                     onClick={() => onOrder(symbol, 'buy', 1, 'call', row.strike)}
-                                    className={`p-2 cursor-pointer transition-colors ${row.strike < spotPrice ? 'bg-cyber-cyan/10 text-cyber-cyan' : 'text-gray-400'} hover:text-white hover:bg-cyber-cyan/30`}
+                                    className={`p-3 cursor-pointer transition-all ${row.strike < spotPrice ? 'bg-accent/5 text-accent' : 'text-secondary/60'} hover:text-accent hover:bg-accent/10`}
                                 >
-                                    <div className="flex justify-between px-1">
-                                        <span>{row.call.price.toFixed(2)}</span>
-                                        <span className="text-[9px] opacity-40 text-right">{(row.call.oi / 1000).toFixed(1)}k</span>
+                                    <div className="flex justify-between px-2">
+                                        <span className="font-bold tracking-tight">{row.call.price.toFixed(2)}</span>
+                                        <span className="text-[8px] font-bold opacity-30 text-right uppercase tracking-tighter">{(row.call.oi / 1000).toFixed(1)}K OI</span>
                                     </div>
                                 </td>
 
                                 {/* Strike */}
-                                <td className="p-2 bg-black font-bold text-gray-400 border-x border-white/10">{row.strike}</td>
+                                <td className="p-3 bg-background/30 font-display font-black text-white text-[13px] border-x border-white/5 tracking-tighter">{row.strike}</td>
 
                                 {/* Put Side */}
                                 <td
                                     onClick={() => onOrder(symbol, 'buy', 1, 'put', row.strike)}
-                                    className={`p-2 cursor-pointer transition-colors ${row.strike > spotPrice ? 'bg-cyber-pink/10 text-cyber-pink' : 'text-gray-400'} hover:text-white hover:bg-cyber-pink/30`}
+                                    className={`p-3 cursor-pointer transition-all ${row.strike > spotPrice ? 'bg-white/5 text-secondary' : 'text-secondary/60'} hover:text-accent hover:bg-accent/10`}
                                 >
-                                    <div className="flex justify-between px-1">
-                                        <span className="text-[9px] opacity-40 text-left">{(row.put.oi / 1000).toFixed(1)}k</span>
-                                        <span>{row.put.price.toFixed(2)}</span>
+                                    <div className="flex justify-between px-2">
+                                        <span className="text-[8px] font-bold opacity-30 text-left uppercase tracking-tighter">{(row.put.oi / 1000).toFixed(1)}K OI</span>
+                                        <span className="font-bold tracking-tight">{row.put.price.toFixed(2)}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -88,4 +87,3 @@ export default function OptionChain({ symbol, spotPrice, onOrder }) {
         </div>
     );
 }
-

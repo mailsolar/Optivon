@@ -1,308 +1,381 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Shield, AlertTriangle, TrendingUp, Ban, CheckCircle2, Gavel, Scale, Clock, Activity } from 'lucide-react';
+import { 
+    ArrowLeft, 
+    Shield, 
+    AlertTriangle, 
+    TrendingUp, 
+    Ban, 
+    CheckCircle2, 
+    Gavel, 
+    Scale, 
+    Clock, 
+    Activity,
+    ChevronRight,
+    Target,
+    Zap,
+    MoveRight,
+    Globe
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Footer from '../components/Global/Footer';
 
 export default function Rules() {
     return (
-        <div className="min-h-screen bg-brand-dark text-white font-sans selection:bg-brand-lime selection:text-brand-dark">
-            {/* Navigation Bar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-6 flex justify-between items-center bg-brand-dark/90 backdrop-blur-md border-b border-white/5">
-                <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                    <ArrowLeft size={20} />
-                    <span className="text-xs font-mono uppercase tracking-widest">Back to Home</span>
+        <div className="min-h-screen bg-background text-primary font-sans selection:bg-accent selection:text-background">
+            {/* Minimal Navigation */}
+            <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-8 flex justify-between items-center transition-all duration-500 hover:bg-black/90 backdrop-blur-md border-b border-white/[0.05]">
+                <Link to="/" className="flex items-center gap-4 text-secondary hover:text-white transition-all group">
+                    <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[12px] font-bold uppercase tracking-[0.2em]">HUB</span>
                 </Link>
-                <div className="font-display font-black text-xl tracking-[0.2em]">OPTIVON <span className="text-brand-lime">//</span> RULES</div>
-                <div className="w-24"></div> {/* Spacer for center alignment */}
+                <div className="flex flex-col items-center">
+                    <div className="font-display font-black text-2xl tracking-tighter uppercase">PROTOCOL</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Master Rulebook</div>
+                </div>
+                <div className="w-16"></div>
             </nav>
 
-            <main className="pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto">
-
-                {/* Header */}
-                <div className="mb-20 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-block"
-                    >
-                        <span className="block font-mono text-brand-lime text-sm uppercase tracking-widest mb-4">The Protocol v2.0</span>
-                        <h1 className="text-6xl md:text-8xl font-black font-display tracking-tighter uppercase mb-6">
-                            Official <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-lime to-emerald-400">Rulebook</span>
-                        </h1>
-                        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                            Transparency is our currency. Master these parameters to secure and retain your funding.
-                        </p>
-                    </motion.div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-
-                    {/* Sidebar Navigation (Hidden on mobile, sticky on desktop) */}
-                    <aside className="hidden lg:block lg:col-span-3">
-                        <div className="sticky top-32 space-y-2">
-                            <NavAnchor href="#core" label="Core Trading Rules" />
-                            <NavAnchor href="#risk" label="Risk Parameters" />
-                            <NavAnchor href="#behavior" label="Trading Behavior" />
-                            <NavAnchor href="#execution" label="Execution Policy" />
-                            <NavAnchor href="#stages" label="Challenge Stages" />
-                            <NavAnchor href="#disqualification" label="Disqualification" />
-                            <NavAnchor href="#integrity" label="Anti-Cheating" />
-                        </div>
-                    </aside>
-
-                    {/* Content Area */}
-                    <div className="lg:col-span-9 space-y-24">
-
-                        {/* 1. Core Trading Rules */}
-                        <Section id="core" title="Core Trading Rules" icon={Scale}>
-                            <div className="grid md:grid-cols-2 gap-6 mb-8">
-                                <RuleCard title="Profit Target" value="8%">
-                                    <ul className="space-y-2 text-sm text-gray-400 mt-2">
-                                        <li className="flex justify-between"><span>Challenge Phase:</span> <span className="text-white font-bold">8%</span></li>
-                                        <li className="flex justify-between"><span>Funded Stage:</span> <span className="text-brand-lime font-bold">No Target</span></li>
-                                    </ul>
-                                </RuleCard>
-                                <RuleCard title="Drawdown Limits" value="2% Daily / 3% Max">
-                                    <ul className="space-y-2 text-sm text-gray-400 mt-2">
-                                        <li className="flex justify-between"><span>Daily Max Loss:</span> <span className="text-red-400 font-bold">2%</span></li>
-                                        <li className="flex justify-between"><span>Max Trailing:</span> <span className="text-red-400 font-bold">3%</span></li>
-                                    </ul>
-                                </RuleCard>
+            <main className="pt-48 pb-20">
+                <div className="px-8 md:px-24 max-w-[1400px] mx-auto">
+                    
+                    {/* Editorial Header */}
+                    <header className="mb-32 border-b border-white/10 pb-20">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col items-start gap-8"
+                        >
+                            <div className="flex items-center gap-4">
+                                <span className="text-accent font-bold text-[12px] uppercase tracking-[0.3em] font-display">Optivon Enforcement v2.4.0</span>
+                                <div className="h-px w-24 bg-accent/50" />
                             </div>
+                            <h1 className="text-[12vw] md:text-[8vw] font-display font-black leading-[0.85] tracking-tighter uppercase text-white">
+                                THE MASTER<br />
+                                <span className="text-accent">RULEBOOK.</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-secondary max-w-2xl font-medium leading-relaxed mt-8">
+                                Transparency and precision define our partnership. These parameters protect both the firm's capital and your trading longevity. Strict adherence is mandatory.
+                            </p>
+                        </motion.div>
+                    </header>
 
-                            <div className="bg-[#1F1F35] rounded-2xl p-8 border border-white/5 mb-8">
-                                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                    <TrendingUp size={20} className="text-brand-lime" />
-                                    Leverage & Lot Limits
-                                </h3>
-                                <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-24">
+                        
+                        {/* Sidebar */}
+                        <aside className="lg:col-span-3 hidden lg:block">
+                            <div className="sticky top-48 flex flex-col gap-2">
+                                <NavAnchor href="#core" label="01 Core Trading" />
+                                <NavAnchor href="#risk" label="02 Risk Rules" />
+                                <NavAnchor href="#behavior" label="03 Trading Behavior" />
+                                <NavAnchor href="#execution" label="04 Execution" />
+                                <NavAnchor href="#stages" label="05 Challenge Stage" />
+                                <NavAnchor href="#funded" label="06 Funded Stage" />
+                                <NavAnchor href="#disqualification" label="07 Disqualification" />
+                                <NavAnchor href="#anticheat" label="08 Anti-Cheating" />
+                            </div>
+                        </aside>
+
+                        {/* Content */}
+                        <div className="lg:col-span-9 space-y-48">
+                            
+                            {/* 1. CORE TRADING RULES */}
+                            <Section id="core" number="01" title="Core Trading Rules" icon={Target}>
+                                <div className="text-secondary font-medium tracking-widest uppercase text-xs mb-8">(Applies to Challenge & Funded Accounts)</div>
+                                
+                                <div className="space-y-16">
+                                    {/* Profit Targets */}
                                     <div>
-                                        <h4 className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">Instrument Leverage</h4>
-                                        <ul className="space-y-3">
-                                            <BadgeRow label="Options Buying" value="1:1" />
-                                            <BadgeRow label="Intraday Equity" value="5x" />
-                                        </ul>
+                                        <h3 className="text-3xl font-display font-bold text-white mb-6 uppercase tracking-tighter">1. Profit Targets</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <StatItem label="1-Phase Challenge" value="10%" />
+                                            <StatItem label="2-Phase Challenge (Phase 1)" value="8%" />
+                                            <StatItem label="2-Phase Challenge (Phase 2)" value="5%" />
+                                            <StatItem label="Funded Stage" value="No target" highlight />
+                                        </div>
                                     </div>
+
+                                    {/* Drawdown Rules */}
                                     <div>
-                                        <h4 className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">Max Lots (Nifty / BankNifty)</h4>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹5L Acc</span> <span className="font-mono text-white">3 Lots</span></div>
-                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹10L Acc</span> <span className="font-mono text-white">5 Lots</span></div>
-                                            <div className="flex justify-between border-b border-white/5 pb-2"><span>₹20L Acc</span> <span className="font-mono text-white">8 Lots</span></div>
-                                            <div className="flex justify-between"><span>₹50L Acc</span> <span className="font-mono text-white">12 Lots</span></div>
+                                        <h3 className="text-3xl font-display font-bold text-white mb-6 uppercase tracking-tighter">2. Drawdown Rules</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <RuleBlock 
+                                                title="📉 Max Daily Drawdown" 
+                                                value="4%" 
+                                                desc="Of starting balance. (e.g., ₹1,00,000 account → daily max loss = ₹4,000)" 
+                                                accent 
+                                            />
+                                            <RuleBlock 
+                                                title="📉 Max Overall Drawdown" 
+                                                value="8% / 10%" 
+                                                desc="8% for challenge | 10% for funded. If hit → violation → fail." 
+                                            />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Section>
+                            </Section>
 
-                        {/* 2. Risk Rules */}
-                        <Section id="risk" title="Risk Parameters" icon={Shield}>
-                            <div className="space-y-6">
-                                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
-                                    <h3 className="text-lg font-bold text-red-400 mb-2">Rule 1: Max Daily Loss</h3>
-                                    <p className="text-gray-300">You cannot lose more than <span className="font-bold text-white">2% of account balance</span> in a single trading day.</p>
-                                    <p className="text-xs text-gray-500 mt-2">Violations result in account failure.</p>
+                            {/* 2. RISK RULES */}
+                            <Section id="risk" number="02" title="Risk Rules" icon={Shield}>
+                                <div className="space-y-12">
+                                    <FeatureBox 
+                                        icon={<AlertTriangle size={24} />} 
+                                        title="Rule 1: Max Risk Per Trade" 
+                                        desc="Trader cannot risk more than 2% of account on a single position. System checks Stop loss placement, Lot size, and Distance to SL. Violation = trade blocked or account failed." 
+                                    />
+                                    <FeatureBox 
+                                        icon={<Clock size={24} />} 
+                                        title="Rule 2: Overnight Holding" 
+                                        desc="❌ NO overnight positions allowed. All trades auto-close at 3:25 PM." 
+                                    />
+                                    <FeatureBox 
+                                        icon={<Activity size={24} />} 
+                                        title="Rule 3: No averaging down after 2nd entry" 
+                                        desc="To avoid martingale behaviour: 1st entry → allowed, 2nd entry → allowed, 3rd entry → ❌ NOT allowed unless it reduces risk." 
+                                    />
+                                    <FeatureBox 
+                                        icon={<Globe size={24} />} 
+                                        title="Rule 4: Trade Only From 9:15 AM – 3:25 PM" 
+                                        desc="This prevents premarket or closing-price manipulation." 
+                                    />
                                 </div>
+                            </Section>
 
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="bg-[#1F1F35] rounded-2xl p-6 border border-white/5">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <Clock className="text-brand-lime" size={20} />
-                                            <h3 className="font-bold">Overnight Policy</h3>
-                                        </div>
-                                        <p className="text-sm text-gray-400 mb-2">NO overnight positions allowed.</p>
-                                        <div className="inline-block bg-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded">Auto-close at 3:25 PM</div>
-                                    </div>
-
-                                    <div className="bg-[#1F1F35] rounded-2xl p-6 border border-white/5">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <Activity className="text-brand-lime" size={20} />
-                                            <h3 className="font-bold">Averaging</h3>
-                                        </div>
-                                        <p className="text-sm text-gray-400 mb-2">No averaging down after 2nd entry.</p>
-                                        <ul className="text-xs text-gray-500 space-y-1">
-                                            <li className="flex items-center gap-2"><CheckCircle2 size={12} className="text-green-500" /> 1st & 2nd Entry Allowed</li>
-                                            <li className="flex items-center gap-2"><Ban size={12} className="text-red-500" /> 3rd Entry Blocked (Martingale Protection)</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </Section>
-
-                        {/* 3. Trading Behavior */}
-                        <Section id="behavior" title="Trading Behavior" icon={Activity}>
-                            <div className="grid md:grid-cols-2 gap-8">
-                                <div>
-                                    <h3 className="font-bold text-green-400 mb-4 flex items-center gap-2"><CheckCircle2 /> Allowed Strategies</h3>
-                                    <ul className="space-y-3">
-                                        {['Intraday Trading', 'Trend Trading', 'Scalping', 'Breakout Trading', 'Options Buying', 'Hedged Options Selling', 'Algo Trading (Approved Only)'].map((item, i) => (
-                                            <li key={i} className="flex items-center gap-3 text-sm text-gray-300 p-3 bg-white/5 rounded-lg border border-white/5">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                                {item}
+                            {/* 3. TRADING BEHAVIOR RULES */}
+                            <Section id="behavior" number="03" title="Trading Behavior" icon={Ban}>
+                                <div className="p-12 border-l-4 border-accent bg-accent/5">
+                                    <h4 className="text-[12px] font-bold uppercase tracking-[0.3em] text-accent mb-8">Strictly Prohibited</h4>
+                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {[
+                                            'Martingale strategy (infinite averaging)',
+                                            'Grid trading',
+                                            'Price manipulation',
+                                            'High-frequency API botting',
+                                            'Latency arbitrage',
+                                            'Copy trading from other prop firm accounts',
+                                            'Multi-account duplication',
+                                            'Using insider news to execute trades',
+                                            'Placing 50+ trades in 1 second'
+                                        ].map(item => (
+                                            <li key={item} className="flex items-center gap-4 text-white font-medium">
+                                                <Ban size={18} className="text-accent shrink-0" />
+                                                <span className="leading-relaxed">{item}</span>
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-red-400 mb-4 flex items-center gap-2"><Ban /> Prohibited Strategies</h3>
-                                    <ul className="space-y-3">
-                                        {['Martingale (Infinite Averaging)', 'Grid Trading', 'High-Frequency API Botting', 'Latency Arbitrage', 'Copy Trading (3rd Party)', 'Insider News Trading', 'Account Churning'].map((item, i) => (
-                                            <li key={i} className="flex items-center gap-3 text-sm text-gray-300 p-3 bg-red-500/5 rounded-lg border border-red-500/10">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </Section>
+                            </Section>
 
-                        {/* 4. Execution Rules */}
-                        <Section id="execution" title="Execution Rules" icon={Gavel}>
-                            <div className="space-y-4">
-                                <div className="p-6 bg-[#1F1F35] rounded-2xl border border-white/5">
-                                    <h3 className="font-bold text-lg mb-2">Realistic Fill Simulation</h3>
-                                    <p className="text-gray-400 text-sm">We simulate real market conditions. Expect slight slippage during high volatility. Market orders fill at best bid/ask. Limit orders follow FIFO logic. <span className="text-brand-lime">Zero "fake instant fills".</span></p>
-                                </div>
-                                <div className="p-6 bg-[#1F1F35] rounded-2xl border border-white/5">
-                                    <h3 className="font-bold text-lg mb-2">Spread Protection</h3>
-                                    <p className="text-gray-400 text-sm mb-3">If spread exceeds threshold, trade is rejected to protect you from bad fills.</p>
-                                    <div className="flex gap-4">
-                                        <Badge label="BankNifty > ₹6 Blocked" color="red" />
-                                        <Badge label="Nifty > ₹3 Blocked" color="red" />
+                            {/* 4. EXECUTION RULES */}
+                            <Section id="execution" number="04" title="Execution Rules" icon={Zap}>
+                                <div className="space-y-12">
+                                    <div className="border border-white/10 p-10 bg-surface">
+                                        <h4 className="text-2xl font-display font-black text-white mb-4 uppercase">Rule 1: Realistic Fill Simulation</h4>
+                                        <ul className="list-disc list-inside text-secondary space-y-2 font-medium">
+                                            <li>Slight slippage during high volatility</li>
+                                            <li>Market orders fill at best bid/ask</li>
+                                            <li>Limit orders follow FIFO logic</li>
+                                            <li>Zero “fake instant fills”</li>
+                                        </ul>
                                     </div>
-                                </div>
-                            </div>
-                        </Section>
 
-                        {/* 5. Stages */}
-                        <Section id="stages" title="Challenge & Funded Stages" icon={TrendingUp}>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="border border-brand-lime/20 bg-brand-lime/5 rounded-2xl p-6">
-                                    <h3 className="text-xl font-bold text-brand-lime mb-4">Challenge Phase</h3>
-                                    <ul className="space-y-2 text-sm text-gray-300">
-                                        <li className="flex gap-2"><CheckCircle2 size={16} className="text-brand-lime" /> Achieve target without DD Violation</li>
-                                        <li className="flex gap-2"><CheckCircle2 size={16} className="text-brand-lime" /> No minimum trading days</li>
-                                        <li className="flex gap-2"><CheckCircle2 size={16} className="text-brand-lime" /> Min 2 trades required</li>
-                                        <li className="flex gap-2"><CheckCircle2 size={16} className="text-brand-lime" /> All positions closed by 3:25 PM</li>
-                                    </ul>
-                                </div>
-                                <div className="border border-brand-blue/20 bg-brand-blue/5 rounded-2xl p-6">
-                                    <h3 className="text-xl font-bold text-brand-blue mb-4">Funded Phase</h3>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <div className="text-xs uppercase tracking-widest text-gray-500">Profit Split</div>
-                                            <div className="text-2xl font-black text-white">80% Trader <span className="text-gray-600 text-lg">/ 20% Firm</span></div>
-                                        </div>
-                                        <div>
-                                            <div className="text-xs uppercase tracking-widest text-gray-500">Payouts</div>
-                                            <div className="text-white font-medium">1st Payout: <span className="text-brand-blue">14 Days</span></div>
-                                            <div className="text-white font-medium">Next: <span className="text-brand-blue">Bi-Weekly</span></div>
-                                        </div>
+                                    <div className="border border-white/10 p-10 bg-surface">
+                                        <h4 className="text-2xl font-display font-black text-white mb-4 uppercase">Rule 2: Order Rejection Conditions</h4>
+                                        <p className="text-secondary mb-4 font-medium">Order gets blocked if:</p>
+                                        <ul className="list-disc list-inside text-secondary space-y-2 font-medium">
+                                            <li>Lot size greater than allowed</li>
+                                            <li>Margin insufficient (after leverage)</li>
+                                            <li>Chop/volatility too extreme</li>
+                                            <li>DD violation detection</li>
+                                            <li>Trader attempted a banned strategy</li>
+                                        </ul>
                                     </div>
-                                </div>
-                            </div>
-                        </Section>
 
-                        {/* 6. Disqualification & Integrity */}
-                        <div id="disqualification" className="space-y-12">
-                            <Section id="disqualification" title="Termination Policy" icon={AlertTriangle}>
-                                <div className="bg-red-500/10 border border-red-500/20 p-8 rounded-3xl text-center">
-                                    <h3 className="text-2xl font-bold text-white mb-6">Automatic Disqualification</h3>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {['Daily DD Violated', 'Max DD Violated', 'Lot Limit Broken', 'Banned Instrument', 'Overnight Trade', 'Risk Exceeded', 'Price Manipulation'].map((reason, i) => (
-                                            <div key={i} className="bg-red-500/10 p-3 rounded-lg text-xs font-bold text-red-200 uppercase tracking-wide">
-                                                {reason}
+                                    <div className="border border-white/10 p-10 bg-surface">
+                                        <h4 className="text-2xl font-display font-black text-white mb-4 uppercase">Rule 3: Spread Protection</h4>
+                                        <p className="text-secondary mb-4 font-medium leading-relaxed">
+                                            If spread {'>'} allowed threshold, system rejects the trade. Prevents manipulation.
+                                        </p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                            <div className="bg-black p-4 border border-white/5 text-sm text-secondary">
+                                                <span className="text-white font-bold">BankNifty CE</span> spread {'>'} ₹6 → no fill
                                             </div>
+                                            <div className="bg-black p-4 border border-white/5 text-sm text-secondary">
+                                                <span className="text-white font-bold">Nifty CE</span> spread {'>'} ₹3 → no fill
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Section>
+
+                            {/* 5. CHALLENGE STAGE RULES */}
+                            <Section id="stages" number="05" title="Challenge Stage" icon={TrendingUp}>
+                                <div className="p-12 bg-white/5 border border-white/10">
+                                    <h4 className="text-[12px] font-bold uppercase tracking-[0.3em] text-white/50 mb-8">Requirements for Funded Upgrade</h4>
+                                    <ul className="space-y-6">
+                                        {[
+                                            'Achieve target without violating DD',
+                                            'No minimum trading days',
+                                            'Must place a minimum of 2 trades',
+                                            'Maintain risk discipline',
+                                            'All positions close by 3:25 PM',
+                                            'Must follow lot limit rules',
+                                            'Only approved instruments allowed'
+                                        ].map(item => (
+                                            <li key={item} className="flex items-center gap-4 text-white font-bold text-lg">
+                                                <CheckCircle2 size={24} className="text-accent shrink-0" />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className="mt-12 text-accent font-bold uppercase tracking-widest text-sm">
+                                        Passing triggers review → funded account upgrade.
+                                    </div>
+                                </div>
+                            </Section>
+
+                            {/* 6. FUNDED STAGE RULES */}
+                            <Section id="funded" number="06" title="Funded Stage" icon={CheckCircle2}>
+                                <p className="text-secondary font-medium tracking-widest uppercase text-xs mb-8">This is where payouts happen.</p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <RuleBlock title="Profit Split" value="80 / 20" desc="80% to trader, 20% to firm" accent />
+                                    <RuleBlock title="Payout Timing" value="14 Days" desc="First payout after 14 days trading. Subsequent payouts weekly/bi-weekly." />
+                                    <RuleBlock title="Funded DD" value="4% / 10%" desc="Max daily loss: 4%. Max overall DD: 10%." />
+                                </div>
+                            </Section>
+
+                            {/* 7. DISQUALIFICATION RULES */}
+                            <Section id="disqualification" number="07" title="Disqualification" icon={Gavel}>
+                                <div className="p-12 border border-accent/30 bg-accent/5">
+                                    <h3 className="text-3xl font-display font-black mb-8 uppercase tracking-tighter text-white hover:text-accent transition-colors">Account is TERMINATED if:</h3>
+                                    <div className="flex flex-wrap gap-4">
+                                        {['Daily DD violated', 'Max DD violated', 'Lot limit broken', 'Banned instrument traded', 'Trade held overnight', 'Risk-per-trade exceeded', 'Profit artificially spiked (manipulation)'].map(item => (
+                                            <span key={item} className="px-6 py-4 bg-black border border-accent/20 text-sm font-bold uppercase tracking-widest text-white">
+                                                {item}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
                             </Section>
 
-                            <Section id="integrity" title="Zero Tolerance Integrity" icon={Shield}>
-                                <div className="grid md:grid-cols-3 gap-6">
-                                    <IntegrityCard title="Multi-Account Passing" desc="Using same IP/Device for multiple accounts." />
-                                    <IntegrityCard title="Arbitrage Exploits" desc="Exploiting feed latency or slippage bugs." />
-                                    <IntegrityCard title="Group Hedging" desc="Hedging positions between two opposite accounts." />
+                            {/* 8. ANTI-CHEATING RULES */}
+                            <Section id="anticheat" number="08" title="Anti-Cheating Rules" icon={Scale}>
+                                <p className="text-secondary font-medium tracking-widest uppercase text-xs mb-12">These protect you from losses and fraud.</p>
+                                
+                                <div className="space-y-8">
+                                    <RiskCard 
+                                        title="❌ Multi-Account Passing" 
+                                        desc="If trader passes challenges from Same IP, Same device, or Same browser → Automatic failure."
+                                        warning
+                                    />
+                                    <RiskCard 
+                                        title="❌ Passing Using Arbitrage Glitches" 
+                                        desc="If trader exploits Wrong price feed, Slippage bugs, Latency issues, or Fill logic errors → Account closed, No payout."
+                                        warning
+                                    />
+                                    <RiskCard 
+                                        title="❌ Toxic Order Flow" 
+                                        desc="If trader uses Large orders to spoof, Constant order spam, or Ladder filling → Immediate ban."
+                                        warning
+                                    />
+                                    <RiskCard 
+                                        title="❌ Hedging Between Two Accounts" 
+                                        desc="Example: Account A buys 10 lots, Account B sells 10 lots → Both banned."
+                                        warning
+                                    />
                                 </div>
                             </Section>
+
                         </div>
-
                     </div>
-                </div>
 
-                {/* Footer CTA */}
-                <div className="mt-32 text-center">
-                    <h2 className="text-4xl font-black font-display mb-6">Ready to execute?</h2>
-                    <Link to="/" className="inline-flex items-center gap-2 bg-brand-lime text-brand-dark px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:scale-105 transition-transform">
-                        Start Evaluation
-                    </Link>
-                </div>
+                    {/* Final CTA */}
+                    <div className="mt-64 py-32 border-t border-white/[0.05] text-center bg-surface">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.5em] text-secondary mb-8">EXECUTION</div>
+                        <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase mb-12 text-white">
+                            VALIDATED?
+                        </h2>
+                        <Link to="/" className="group inline-flex items-center gap-6 px-16 py-6 bg-white text-black font-bold uppercase tracking-[0.3em] text-[14px] hover:bg-accent hover:text-white transition-colors border border-white/10">
+                            PROVE YOUR EDGE
+                            <MoveRight className="group-hover:translate-x-2 transition-transform" />
+                        </Link>
+                    </div>
 
+                </div>
             </main>
+
+            <Footer />
         </div>
     );
 }
 
-// --- Components ---
-
 function NavAnchor({ href, label }) {
     return (
-        <a href={href} className="block px-4 py-3 text-sm text-gray-500 hover:text-brand-lime hover:bg-white/5 rounded-lg transition-colors border-l-2 border-transparent hover:border-brand-lime">
+        <a 
+            href={href} 
+            className="block py-4 px-6 border-l-2 border-white/10 text-[11px] font-bold uppercase tracking-[0.2em] text-secondary hover:text-white hover:border-accent hover:bg-white/5 transition-all"
+        >
             {label}
         </a>
     );
 }
 
-function Section({ id, title, icon: Icon, children }) {
+function Section({ id, number, title, icon: Icon, children }) {
     return (
-        <section id={id} className="scroll-mt-32">
-            <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 text-brand-lime">
-                    <Icon size={24} />
+        <section id={id} className="scroll-mt-48 transition-all">
+            <div className="flex flex-col gap-8 mb-16">
+                <div className="text-accent font-bold text-[14px] uppercase tracking-[0.3em] font-display">
+                    [{number}]
                 </div>
-                <h2 className="text-4xl font-black font-display tracking-tight text-white">{title}</h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase text-white">{title}</h2>
+                    <Icon size={48} className="text-white/5" />
+                </div>
+                <div className="h-px w-full bg-white/[0.1]" />
             </div>
             {children}
         </section>
     );
 }
 
-function RuleCard({ title, value, children }) {
+function RuleBlock({ title, value, desc, accent }) {
     return (
-        <div className="bg-[#1F1F35] p-6 rounded-2xl border border-white/5">
-            <h4 className="text-gray-500 text-xs font-mono uppercase tracking-widest mb-2">{title}</h4>
-            <div className="text-2xl font-bold text-white mb-2">{value}</div>
-            {children}
+        <div className={`p-10 border ${accent ? 'bg-accent text-background border-accent' : 'bg-surface border-white/10'}`}>
+            <div className={`text-[11px] font-bold uppercase tracking-[0.2em] mb-4 ${accent ? 'text-black/80' : 'text-secondary'}`}>{title}</div>
+            <div className={`text-6xl font-display font-black mb-4 tracking-tighter ${accent ? 'text-white' : 'text-white'}`}>{value}</div>
+            <p className={`text-sm font-medium ${accent ? 'text-black' : 'text-secondary'}`}>{desc}</p>
         </div>
     );
 }
 
-function BadgeRow({ label, value }) {
+function StatItem({ label, value, highlight }) {
     return (
-        <li className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">{label}</span>
-            <span className="bg-white/10 px-2 py-1 rounded text-white font-mono text-xs">{value}</span>
-        </li>
-    );
-}
-
-function Badge({ label, color }) {
-    return (
-        <span className={`px-3 py-1.5 rounded bg-${color}-500/10 border border-${color}-500/20 text-${color}-400 text-xs font-bold uppercase tracking-wider`}>
-            {label}
-        </span>
-    );
-}
-
-function IntegrityCard({ title, desc }) {
-    return (
-        <div className="bg-[#1F1F35] p-6 rounded-2xl border border-white/5 hover:border-red-500/30 transition-colors group">
-            <Ban className="text-red-500 mb-4 group-hover:scale-110 transition-transform" size={24} />
-            <h4 className="font-bold text-white mb-2">{title}</h4>
-            <p className="text-sm text-gray-400">{desc}</p>
+        <div className={`p-8 border border-white/5 bg-surface ${highlight ? 'border-accent' : ''}`}>
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-secondary mb-2">{label}</div>
+            <div className={`text-3xl font-display font-black ${highlight ? 'text-accent' : 'text-white'}`}>{value}</div>
         </div>
     );
 }
 
+function RiskCard({ title, desc, warning }) {
+    return (
+        <div className={`p-10 border-l-4 ${warning ? 'border-accent bg-accent/5' : 'border-white/20 bg-surface'}`}>
+            <h4 className={`text-2xl font-display font-black mb-4 uppercase ${warning ? 'text-white' : 'text-white'}`}>{title}</h4>
+            <p className="text-secondary font-medium leading-relaxed max-w-2xl">{desc}</p>
+        </div>
+    );
+}
+
+function FeatureBox({ icon, title, desc }) {
+    return (
+        <div className="flex gap-8 p-10 bg-surface border border-white/5 group hover:border-accent transition-colors">
+            <div className="text-accent group-hover:scale-110 transition-transform">
+                {icon}
+            </div>
+            <div>
+                <h4 className="font-display font-black text-2xl text-white uppercase mb-4 tracking-tighter">{title}</h4>
+                <p className="text-sm text-secondary leading-relaxed font-medium">{desc}</p>
+            </div>
+        </div>
+    );
+}
