@@ -11,22 +11,22 @@ export default function Dashboard({ user, onLogout }) {
 
 // Reused & Adapted Pricing Component
 const PricingCard = ({ title, price, subtitle, features, isPopular, onSelect }) => (
-    <div className={`relative flex-1 bg-surface border ${isPopular ? 'border-accent shadow-[0_0_20px_rgba(197,0,34,0.15)]' : 'border-white/10'} p-8 rounded-none flex flex-col items-start w-full hover:border-accent/80 transition-all duration-300 group overflow-hidden ${isPopular ? 'bg-accent/5' : ''}`}>
+    <div className={`relative flex-1 bg-surface border ${isPopular ? 'border-accent shadow-[0_0_20px_rgba(197,0,34,0.15)]' : 'border-black/15'} p-8 rounded-none flex flex-col items-start w-full hover:border-accent/80 transition-all duration-300 group overflow-hidden ${isPopular ? 'bg-accent/5' : ''}`}>
         {isPopular && (
-            <div className="absolute top-0 right-0 bg-accent text-white px-4 py-1.5 rounded-none text-[10px] font-bold uppercase tracking-widest font-display">
+            <div className="absolute top-0 right-0 bg-accent text-primary px-4 py-1.5 rounded-none text-[10px] font-bold uppercase tracking-widest font-display">
                 Most Popular
             </div>
         )}
 
-        <h3 className="text-4xl font-display font-black mb-2 text-white uppercase tracking-tighter">{title}</h3>
+        <h3 className="text-4xl font-display font-black mb-2 text-primary uppercase tracking-tighter">{title}</h3>
         <div className="text-3xl font-black text-accent mb-1 font-mono tracking-tighter">{price} <span className="text-xs font-bold text-secondary tracking-widest uppercase">/ one-time</span></div>
         <p className="text-secondary text-xs mb-8 font-medium font-display uppercase tracking-widest">{subtitle}</p>
 
         <button
             onClick={onSelect}
             className={`w-full py-4 rounded-none font-bold uppercase tracking-widest text-[11px] transition-transform hover:scale-[1.02] active:scale-[0.98] ${isPopular
-                ? 'bg-accent text-white shadow-lg shadow-accent/20'
-                : 'bg-white text-black group-hover:bg-accent group-hover:text-white'
+                ? 'bg-accent text-primary shadow-lg shadow-accent/20'
+                : 'bg-white text-black group-hover:bg-accent group-hover:text-primary'
                 }`}
         >
             Select Protocol
@@ -148,14 +148,14 @@ function DashboardContent({ user, onLogout }) {
     return (
         <div className="flex flex-col h-screen bg-background text-primary font-sans overflow-hidden transition-colors duration-300">
             {/* TOP BAR */}
-            <header className="h-16 border-b border-white/10 bg-surface/80 backdrop-blur-md flex items-center justify-between px-6 z-20 shrink-0">
+            <header className="h-16 border-b border-black/15 bg-surface/80 backdrop-blur-md flex items-center justify-between px-6 z-20 shrink-0">
                 <div className="flex items-center gap-8">
-                    <h1 className="text-xl font-display font-black tracking-tighter text-white uppercase">OPTIVON <span className="text-accent">COMMAND</span></h1>
+                    <h1 className="text-xl font-display font-black tracking-tighter text-primary uppercase">OPTIVON <span className="text-accent">COMMAND</span></h1>
 
                     {/* Account Switcher */}
                     {accounts.length > 0 && (
-                        <div className="flex items-center gap-3 bg-background px-3 py-1.5 border border-white/10 group hover:border-accent/50 transition-colors">
-                            <span className="text-[9px] text-muted font-bold tracking-widest uppercase group-hover:text-white transition-colors">Active Link</span>
+                        <div className="flex items-center gap-3 bg-background px-3 py-1.5 border border-black/15 group hover:border-accent/50 transition-colors">
+                            <span className="text-[9px] text-muted font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Active Link</span>
                             <div className="h-4 w-px bg-white/10"></div>
                             <select
                                 value={selectedAccountId || ''}
@@ -174,7 +174,7 @@ function DashboardContent({ user, onLogout }) {
 
                 {/* Nav Tabs & Logout */}
                 <div className="flex items-center gap-4">
-                    <div className="flex bg-background p-1 border border-white/10">
+                    <div className="flex bg-background p-1 border border-black/15">
                         {[
                             { id: 'overview', label: 'Dashboard' },
                             { id: 'terminal', label: 'Terminal' },
@@ -183,7 +183,7 @@ function DashboardContent({ user, onLogout }) {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-5 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-accent text-white shadow-soft' : 'text-muted hover:text-white'}`}
+                                className={`px-5 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-accent text-primary shadow-soft' : 'text-muted hover:text-primary'}`}
                             >
                                 {tab.label}
                             </button>
@@ -191,7 +191,7 @@ function DashboardContent({ user, onLogout }) {
                     </div>
                     <button
                         onClick={onLogout}
-                        className="px-5 py-3 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest"
+                        className="px-5 py-3 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-primary transition-all text-[10px] font-bold uppercase tracking-widest"
                     >
                         Disconnect
                     </button>
@@ -207,37 +207,37 @@ function DashboardContent({ user, onLogout }) {
                         <div className="h-full overflow-y-auto p-8 max-w-[1600px] mx-auto w-full relative z-10">
                             {accounts.length === 0 ? (
                                 <div className="text-center py-32 flex flex-col items-center">
-                                    <div className="w-20 h-20 bg-surface border border-white/10 flex items-center justify-center mb-6 text-accent">
+                                    <div className="w-20 h-20 bg-surface border border-black/15 flex items-center justify-center mb-6 text-accent">
                                         <Activity className="w-10 h-10" />
                                     </div>
-                                    <h2 className="text-4xl font-display font-black text-white mb-2 uppercase tracking-tighter">No Active Protocols</h2>
+                                    <h2 className="text-4xl font-display font-black text-primary mb-2 uppercase tracking-tighter">No Active Protocols</h2>
                                     <p className="text-secondary max-w-sm mb-8 font-medium">Initialize your first evaluation challenge to access the trading terminal.</p>
-                                    <button onClick={() => setActiveTab('challenges')} className="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-accent hover:text-white transition-colors">
+                                    <button onClick={() => setActiveTab('challenges')} className="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-accent hover:text-primary transition-colors">
                                         Start Evaluation
                                     </button>
                                 </div>
                             ) : (
                                 <div className="space-y-8">
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-6">
+                                    <div className="flex items-center justify-between border-b border-black/15 pb-6">
                                         <div>
-                                            <h2 className="text-4xl font-display font-black text-white tracking-tighter uppercase">Active Sessions</h2>
+                                            <h2 className="text-4xl font-display font-black text-primary tracking-tighter uppercase">Active Sessions</h2>
                                             <p className="text-secondary text-sm font-medium mt-1">Monitor all your accounts in real-time.</p>
                                         </div>
-                                        <button onClick={() => setActiveTab('challenges')} className="flex items-center gap-2 px-6 py-3 bg-surface text-white border border-white/10 font-bold text-xs uppercase hover:border-accent hover:text-accent transition-all">
+                                        <button onClick={() => setActiveTab('challenges')} className="flex items-center gap-2 px-6 py-3 bg-surface text-primary border border-black/15 font-bold text-xs uppercase hover:border-accent hover:text-accent transition-all">
                                             <Plus className="w-4 h-4" /> New Account
                                         </button>
                                     </div>
 
                                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                         {accounts.map(acc => (
-                                            <div key={acc.id} className="bg-surface border border-white/10 p-8 flex flex-col justify-between hover:border-accent/40 transition-all group relative overflow-hidden h-[300px]">
+                                            <div key={acc.id} className="bg-surface border border-black/15 p-8 flex flex-col justify-between hover:border-accent/40 transition-all group relative overflow-hidden h-[300px]">
                                                 {/* Background Accent */}
                                                 <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] rounded-full opacity-10 pointer-events-none transition-colors ${acc.equity >= acc.balance ? 'bg-green-500' : 'bg-red-500'}`}></div>
 
                                                 <div className="flex justify-between items-start z-10">
                                                     <div>
                                                         <div className="flex items-center gap-3 mb-2">
-                                                            <span className="text-4xl font-black font-display text-white tracking-tighter">#{acc.id}</span>
+                                                            <span className="text-4xl font-black font-display text-primary tracking-tighter">#{acc.id}</span>
                                                             <span className={`text-[9px] font-bold px-2 py-1 uppercase tracking-wider ${acc.status === 'active' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
                                                                 acc.status === 'failed' || acc.status === 'expired' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
                                                                     'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
@@ -247,7 +247,7 @@ function DashboardContent({ user, onLogout }) {
                                                         </div>
                                                         <span className="text-[10px] font-bold text-muted uppercase tracking-widest font-display">{acc.type} Protocol</span>
                                                     </div>
-                                                    <div className="w-10 h-10 border border-white/10 flex items-center justify-center text-white bg-background shadow-sm">
+                                                    <div className="w-10 h-10 border border-black/15 flex items-center justify-center text-primary bg-background shadow-sm">
                                                         <Terminal className="w-5 h-5" />
                                                     </div>
                                                 </div>
@@ -259,7 +259,7 @@ function DashboardContent({ user, onLogout }) {
                                                     </div>
                                                     <div>
                                                         <p className="text-[10px] font-bold text-muted uppercase tracking-widest font-display mb-1">Balance</p>
-                                                        <p className="text-3xl font-black font-mono tracking-tighter text-white">${acc.balance.toLocaleString()}</p>
+                                                        <p className="text-3xl font-black font-mono tracking-tighter text-primary">${acc.balance.toLocaleString()}</p>
                                                     </div>
                                                 </div>
 
@@ -267,7 +267,7 @@ function DashboardContent({ user, onLogout }) {
                                                     {acc.status === 'active' && (
                                                         <button
                                                             onClick={() => { setSelectedAccountId(acc.id); setActiveTab('terminal'); }}
-                                                            className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-accent hover:text-white transition-colors"
+                                                            className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-accent hover:text-primary transition-colors"
                                                         >
                                                             Enter Terminal <ArrowRight className="w-4 h-4" />
                                                         </button>
@@ -275,13 +275,13 @@ function DashboardContent({ user, onLogout }) {
                                                     {acc.status === 'pending' && (
                                                         <button
                                                             onClick={() => handleLaunch(acc.id)}
-                                                            className="w-full py-4 bg-accent text-white font-bold uppercase tracking-widest text-xs shadow-[0_0_15px_rgba(197,0,34,0.3)] hover:bg-accent/90 transition-all"
+                                                            className="w-full py-4 bg-accent text-primary font-bold uppercase tracking-widest text-xs shadow-[0_0_15px_rgba(197,0,34,0.3)] hover:bg-accent/90 transition-all"
                                                         >
                                                             Launch Session
                                                         </button>
                                                     )}
                                                     {(acc.status === 'failed' || acc.status === 'expired') && (
-                                                        <button className="w-full py-4 bg-surface border border-white/10 text-red-500 font-bold uppercase tracking-widest text-xs cursor-not-allowed opacity-50">
+                                                        <button className="w-full py-4 bg-surface border border-black/15 text-red-500 font-bold uppercase tracking-widest text-xs cursor-not-allowed opacity-50">
                                                             Account Closed
                                                         </button>
                                                     )}

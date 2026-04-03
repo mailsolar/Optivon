@@ -84,7 +84,7 @@ const ChartInstance = ({ symbol, color, title, data, forcedTheme }) => {
     }, [theme, color, data]);
 
     return (
-        <div className="relative w-full h-[320px] border border-white/5 rounded-premium bg-surface shadow-2xl overflow-hidden group">
+        <div className="relative w-full h-[320px] border border-black/15 rounded-premium bg-surface shadow-2xl overflow-hidden group">
             <div className="absolute top-6 left-8 z-10 flex flex-col pointer-events-none">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-1">{title}</span>
                 <span className="text-2xl font-bold text-primary tracking-tighter">

@@ -184,7 +184,7 @@ export default function UnifiedRightPanel({
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 flex items-center justify-center text-[10px] font-black uppercase tracking-[1px] relative transition-all ${activeTab === tab ? 'text-brand-dark bg-accent' : 'text-secondary hover:text-white'
+                        className={`flex-1 flex items-center justify-center text-[10px] font-black uppercase tracking-[1px] relative transition-all ${activeTab === tab ? 'text-brand-dark bg-accent' : 'text-secondary hover:text-primary'
                             }`}
                     >
                         {tab}
@@ -279,8 +279,8 @@ export default function UnifiedRightPanel({
                                     <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
                                         {/* Order Side and Type Selection */}
                                         <div className="grid grid-cols-2 gap-2 bg-background p-1.5 rounded-2xl border border-border">
-                                            <button onClick={() => { setOrderType('market'); setSide('buy'); }} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>MARKET</button>
-                                            <button onClick={() => { setOrderType('limit'); setSide('buy'); setLimitPrice(currentPrice); }} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'limit' ? 'bg-surface text-white shadow-sm border border-border' : 'text-secondary hover:text-white'}`}>LIMIT</button>
+                                            <button onClick={() => { setOrderType('market'); setSide('buy'); }} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'market' ? 'bg-surface text-primary shadow-sm border border-border' : 'text-secondary hover:text-primary'}`}>MARKET</button>
+                                            <button onClick={() => { setOrderType('limit'); setSide('buy'); setLimitPrice(currentPrice); }} className={`py-3 text-[10px] font-black tracking-[2px] rounded-xl transition-all ${orderType === 'limit' ? 'bg-surface text-primary shadow-sm border border-border' : 'text-secondary hover:text-primary'}`}>LIMIT</button>
                                         </div>
 
                                         {/* Side Selector (Visual Only since button determines action) */}
@@ -411,37 +411,37 @@ export default function UnifiedRightPanel({
                                     <button
                                         disabled={orderExecuting || account?.status === 'failed'}
                                         onClick={() => handlePlaceOrder('sell')}
-                                        className="relative group bg-red-500 hover:bg-red-500/90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl flex flex-col items-center shadow-lg shadow-red-900/20 transition-all active:scale-95 overflow-hidden"
+                                        className="relative group bg-red-500 hover:bg-red-500/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary py-4 rounded-2xl flex flex-col items-center shadow-lg shadow-red-900/20 transition-all active:scale-95 overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingDown className="w-12 h-12" /></div>
                                         <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">{account?.status === 'failed' ? 'LOCKED' : 'DIRECT SELL'}</span>
                                         <span className="text-sm font-mono font-black">{quote.bid?.toFixed(2) || currentPrice.toFixed(2)}</span>
 
                                         <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '65U' : '15U'}</span>
-                                        {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
+                                        {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-black/15 border-t-white rounded-full animate-spin"></div></div>}
                                     </button>
                                     <button
                                         disabled={orderExecuting || account?.status === 'failed'}
                                         onClick={() => handlePlaceOrder('buy')}
-                                        className="relative group bg-green-500 hover:bg-green-500/90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl flex flex-col items-center shadow-lg shadow-green-900/20 transition-all active:scale-95 overflow-hidden"
+                                        className="relative group bg-green-500 hover:bg-green-500/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary py-4 rounded-2xl flex flex-col items-center shadow-lg shadow-green-900/20 transition-all active:scale-95 overflow-hidden"
                                     >
                                         <div className="absolute top-0 right-0 p-2 opacity-10"><TrendingUp className="w-12 h-12" /></div>
                                         <span className="text-[9px] font-black tracking-[3px] uppercase mb-1 drop-shadow-md">{account?.status === 'failed' ? 'LOCKED' : 'DIRECT BUY'}</span>
                                         <span className="text-sm font-mono font-black">{quote.ask?.toFixed(2) || currentPrice.toFixed(2)}</span>
                                         <span className="text-[8px] font-black opacity-40 mt-1">{lots} LOT • {selectedSymbol.includes('NIFTY') ? '65U' : '15U'}</span>
-                                        {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></div>}
+                                        {orderExecuting && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><div className="w-5 h-5 border-2 border-black/15 border-t-white rounded-full animate-spin"></div></div>}
                                     </button>
                                 </div>
                             ) : (
                                 <button
                                     disabled={orderExecuting || account?.status === 'failed'}
                                     onClick={() => handlePlaceOrder()}
-                                    className={`w-full py-4 rounded-[24px] font-black text-sm uppercase tracking-[5px] shadow-lg transition-all active:scale-90 relative overflow-hidden group mt-3 ${side === 'buy' ? 'bg-green-500 hover:bg-green-500/90 text-white' : 'bg-red-500 hover:bg-red-500/90 text-white'
+                                    className={`w-full py-4 rounded-[24px] font-black text-sm uppercase tracking-[5px] shadow-lg transition-all active:scale-90 relative overflow-hidden group mt-3 ${side === 'buy' ? 'bg-green-500 hover:bg-green-500/90 text-primary' : 'bg-red-500 hover:bg-red-500/90 text-primary'
                                         } ${(orderExecuting || account?.status === 'failed') ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {orderExecuting ? (
                                         <div className="flex items-center justify-center gap-3">
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            <div className="w-4 h-4 border-2 border-black/15 border-t-white rounded-full animate-spin"></div>
                                             <span>ROUTING...</span>
                                         </div>
                                     ) : (

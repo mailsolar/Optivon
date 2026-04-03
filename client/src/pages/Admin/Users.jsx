@@ -124,7 +124,7 @@ export default function Users() {
                                         ) : (
                                             <button
                                                 onClick={() => handleRoleUpdate(user.id, true)}
-                                                className="text-xs text-accent hover:text-white font-medium"
+                                                className="text-xs text-accent hover:text-primary font-medium"
                                             >
                                                 Promote
                                             </button>

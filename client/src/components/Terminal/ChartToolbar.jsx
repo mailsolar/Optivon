@@ -47,7 +47,7 @@ export default function ChartToolbar({
     onOpenAlerts,
 }) {
     return (
-        <div className="w-12 bg-background border-r border-white/10 flex flex-col items-center py-3 shrink-0 z-30">
+        <div className="w-12 bg-background border-r border-black/15 flex flex-col items-center py-3 shrink-0 z-30">
             {/* Drawing Tools */}
             <div className="flex flex-col gap-1.5 w-full px-1.5">
                 {DRAWING_TOOLS.map(tool => {
@@ -69,13 +69,13 @@ export default function ChartToolbar({
                             <Icon className="w-[16px] h-[16px]" strokeWidth={active ? 2.5 : 1.8} />
                             {/* Tooltip */}
                             <span className="
-                                absolute left-11 px-2 py-1 bg-surface border border-white/10
-                                text-white text-[9px] font-bold uppercase tracking-widest rounded-lg
+                                absolute left-11 px-2 py-1 bg-surface border border-black/15
+                                text-primary text-[9px] font-bold uppercase tracking-widest rounded-lg
                                 opacity-0 invisible group-hover:opacity-100 group-hover:visible
                                 transition-all whitespace-nowrap shadow-xl pointer-events-none z-50
                             ">
                                 {tool.label}
-                                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-surface rotate-45 border-l border-b border-white/10" />
+                                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-surface rotate-45 border-l border-b border-black/15" />
                             </span>
                         </button>
                     );
@@ -98,7 +98,7 @@ export default function ChartToolbar({
                             className={`
                                 group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-150 active:scale-90
                                 ${active
-                                    ? 'text-white border'
+                                    ? 'text-primary border'
                                     : 'text-gray-600 hover:text-gray-300 hover:bg-white/5 border border-transparent'
                                 }
                             `}
@@ -106,13 +106,13 @@ export default function ChartToolbar({
                         >
                             <Icon className="w-[15px] h-[15px]" strokeWidth={2} />
                             <span className="
-                                absolute left-11 px-2 py-1 bg-surface border border-white/10
-                                text-white text-[9px] font-bold uppercase tracking-widest rounded-lg
+                                absolute left-11 px-2 py-1 bg-surface border border-black/15
+                                text-primary text-[9px] font-bold uppercase tracking-widest rounded-lg
                                 opacity-0 invisible group-hover:opacity-100 group-hover:visible
                                 transition-all whitespace-nowrap shadow-xl pointer-events-none z-50
                             ">
                                 {ind.label}
-                                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-surface rotate-45 border-l border-b border-white/10" />
+                                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-surface rotate-45 border-l border-b border-black/15" />
                             </span>
                         </button>
                     );

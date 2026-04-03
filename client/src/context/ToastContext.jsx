@@ -39,9 +39,9 @@ export const ToastProvider = ({ children }) => {
                         key={toast.id}
                         className={`
                             pointer-events-auto min-w-[200px] max-w-sm p-4 rounded-lg shadow-xl border-l-4 text-sm font-medium animate-slide-in
-                            ${toast.type === 'success' ? 'bg-[#1e1e24] border-green-500 text-white' : ''}
-                            ${toast.type === 'sell' || toast.type === 'error' ? 'bg-[#1e1e24] border-red-500 text-white' : ''}
-                            ${toast.type === 'info' ? 'bg-[#1e1e24] border-accent text-white' : ''}
+                            ${toast.type === 'success' ? 'bg-[#1e1e24] border-green-500 text-primary' : ''}
+                            ${toast.type === 'sell' || toast.type === 'error' ? 'bg-[#1e1e24] border-red-500 text-primary' : ''}
+                            ${toast.type === 'info' ? 'bg-[#1e1e24] border-accent text-primary' : ''}
                         `}
                     >
                         {toast.message}

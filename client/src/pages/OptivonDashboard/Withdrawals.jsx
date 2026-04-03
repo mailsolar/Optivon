@@ -10,7 +10,7 @@ export default function Withdrawals() {
             <div className="flex-1 min-w-0 flex flex-col gap-10">
 
                 {/* Stats Card */}
-                <div className="bg-surface rounded-premium p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="bg-surface rounded-premium p-10 border border-black/15 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
                     <div className="relative z-10 flex flex-col gap-2">
                         <div className="text-[10px] font-bold text-accent uppercase tracking-[0.4em]">Liquid Equity</div>
@@ -19,7 +19,7 @@ export default function Withdrawals() {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-surface/50 p-2 rounded-instrument border border-white/5 inline-flex self-start">
+                <div className="bg-surface/50 p-2 rounded-instrument border border-black/15 inline-flex self-start">
                     {['All', 'Submitted', 'Approved', 'Rejected'].map(filter => (
                         <button
                             key={filter}
@@ -35,7 +35,7 @@ export default function Withdrawals() {
                 </div>
 
                 {/* Empty State */}
-                <div className="flex-1 bg-surface rounded-premium shadow-2xl border border-white/5 flex flex-col items-center justify-center p-20 text-center min-h-[400px]">
+                <div className="flex-1 bg-surface rounded-premium shadow-2xl border border-black/15 flex flex-col items-center justify-center p-20 text-center min-h-[400px]">
                     <div className="w-24 h-24 bg-accent/5 border border-accent/20 rounded-instrument flex items-center justify-center text-accent mb-10 shadow-soft">
                         <CreditCard size={40} />
                     </div>
@@ -48,7 +48,7 @@ export default function Withdrawals() {
 
             {/* Sidebar Widget */}
             <div className="lg:w-96 flex-shrink-0">
-                <div className="bg-surface rounded-premium p-10 shadow-2xl border border-white/5 h-fit flex flex-col gap-10 sticky top-10">
+                <div className="bg-surface rounded-premium p-10 shadow-2xl border border-black/15 h-fit flex flex-col gap-10 sticky top-10">
                     <div className="flex flex-col gap-4">
                         <div className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Direct Link</div>
                         <h3 className="text-2xl font-bold text-primary uppercase tracking-tight">Institutional Support</h3>
@@ -56,7 +56,7 @@ export default function Withdrawals() {
                     </div>
 
                     <div className="space-y-4">
-                        <button className="w-full py-5 px-6 bg-background border border-white/10 hover:border-accent/30 text-primary font-bold text-[10px] uppercase tracking-[0.3em] rounded-instrument transition-all flex items-center justify-center gap-3">
+                        <button className="w-full py-5 px-6 bg-background border border-black/15 hover:border-accent/30 text-primary font-bold text-[10px] uppercase tracking-[0.3em] rounded-instrument transition-all flex items-center justify-center gap-3">
                             <HelpCircle size={16} /> Knowledge Base
                         </button>
                         <button className="w-full py-5 px-6 bg-accent text-background font-bold text-[10px] uppercase tracking-[0.3em] rounded-instrument shadow-soft hover:bg-primary transition-all flex items-center justify-center gap-3 group">

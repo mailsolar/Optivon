@@ -10,7 +10,7 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
     return (
         <div className="flex flex-col h-full bg-background font-sans">
             {/* Header */}
-            <div className="p-6 border-b border-white/[0.03]">
+            <div className="p-6 border-b border-black/15/[0.03]">
                 <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-accent mb-2">Neural Strategy Engine</h3>
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-black text-primary tracking-tighter uppercase text-shadow-glow">Protocol Execution</h2>
@@ -40,11 +40,11 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="bg-background/40 p-3 rounded-instrument border border-white/[0.02]">
+                                <div className="bg-background/40 p-3 rounded-instrument border border-black/15/[0.02]">
                                     <span className="text-[8px] text-muted uppercase font-black tracking-widest block mb-1">Cycles</span>
                                     <span className="text-sm font-mono font-black text-primary tracking-tighter">{bot.totalTrades}</span>
                                 </div>
-                                <div className="bg-background/40 p-3 rounded-instrument border border-white/[0.02]">
+                                <div className="bg-background/40 p-3 rounded-instrument border border-black/15/[0.02]">
                                     <span className="text-[8px] text-muted uppercase font-black tracking-widest block mb-1">Uptime</span>
                                     <span className="text-sm font-mono font-black text-primary tracking-tighter">
                                         {Math.floor((Date.now() - new Date(bot.startedAt).getTime()) / 60000)}m
@@ -65,7 +65,7 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
             </div>
 
             {/* Launch New Bot Section */}
-            <div className="p-8 border-t border-white/[0.03] bg-surface relative overflow-hidden group">
+            <div className="p-8 border-t border-black/15/[0.03] bg-surface relative overflow-hidden group">
                 <div className="absolute inset-0 bg-accent/[0.01] pointer-events-none" />
                 <h4 className="text-[9px] font-black text-muted uppercase tracking-[0.4em] mb-4 relative z-10">Deploy New Node</h4>
 
@@ -75,7 +75,7 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
                         <select
                             value={selectedStrategy}
                             onChange={(e) => setSelectedStrategy(e.target.value)}
-                            className="w-full bg-background/50 border border-white/[0.05] rounded-instrument px-4 py-3 text-[10px] font-bold text-primary uppercase tracking-widest outline-none focus:border-accent/40 shadow-inner appearance-none text-right"
+                            className="w-full bg-background/50 border border-black/15/[0.05] rounded-instrument px-4 py-3 text-[10px] font-bold text-primary uppercase tracking-widest outline-none focus:border-accent/40 shadow-inner appearance-none text-right"
                         >
                             {availableStrategies.map(s => (
                                 <option key={s.id} value={s.id} className="bg-surface">{s.name} ({s.risk})</option>
@@ -83,7 +83,7 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
                         </select>
                     </div>
 
-                    <div className="p-4 bg-background/30 border border-white/[0.02] rounded-instrument shadow-inner">
+                    <div className="p-4 bg-background/30 border border-black/15/[0.02] rounded-instrument shadow-inner">
                         <p className="text-[10px] text-secondary font-medium leading-relaxed tracking-tight italic opacity-80">
                             {availableStrategies.find(s => s.id === selectedStrategy)?.description}
                         </p>
@@ -91,7 +91,7 @@ export default function AlgoManager({ selectedSymbol, quotes, account }) {
 
                     <button
                         onClick={() => startBot(selectedStrategy, selectedSymbol, {}, account?.id)}
-                        className="w-full py-5 bg-accent text-background rounded-instrument text-[10px] font-black uppercase tracking-[0.3em] transition-all shadow-premium hover:bg-primary active:scale-95 flex items-center justify-center gap-3 group/init"
+                        className="w-full py-5 bg-accent text-background rounded-instrument text-[10px] font-black uppercase tracking-[0.3em] transition-all  hover:bg-primary active:scale-95 flex items-center justify-center gap-3 group/init"
                     >
                         <Play size={12} className="fill-current group-hover:scale-110 transition-transform" /> 
                         Initialize Sequence <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />

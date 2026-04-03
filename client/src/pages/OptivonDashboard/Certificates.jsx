@@ -18,14 +18,14 @@ export default function Certificates() {
                     </h1>
                     <p className="text-secondary font-medium text-sm">Official synchronization of your success and performance levels.</p>
                 </div>
-                <button className="flex items-center gap-3 bg-accent text-background px-8 py-3.5 rounded-instrument font-black text-[10px] uppercase tracking-[0.2em] shadow-premium hover:bg-primary transition-all group">
+                <button className="flex items-center gap-3 bg-accent text-background px-8 py-3.5 rounded-instrument font-black text-[10px] uppercase tracking-[0.2em]  hover:bg-primary transition-all group">
                     <ShieldCheck size={18} />
                     Generate New Node Certificate
                 </button>
             </div>
 
             {/* Filter Bar */}
-            <div className="flex p-1 bg-surface border border-white/5 rounded-instrument self-start">
+            <div className="flex p-1 bg-surface border border-black/15 rounded-instrument self-start">
                 {['All', 'Funded', 'Payout'].map((tab) => (
                     <button
                         key={tab}
@@ -38,7 +38,7 @@ export default function Certificates() {
             </div>
 
             {/* EMPTY STATE / CONTENT AREA */}
-            <div className="flex-1 bg-surface rounded-premium border border-white/5 flex flex-col items-center justify-center p-20 text-center relative overflow-hidden shadow-2xl min-h-[500px]">
+            <div className="flex-1 bg-surface rounded-premium border border-black/15 flex flex-col items-center justify-center p-20 text-center relative overflow-hidden shadow-2xl min-h-[500px]">
                 <div className="absolute top-0 left-0 w-full h-1 bg-accent/20" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.03),transparent)] pointer-events-none" />
 

@@ -18,7 +18,7 @@ export default function HelpCenter() {
             </div>
 
             {/* About Section */}
-            <div className="bg-surface rounded-premium p-12 border border-white/5 relative overflow-hidden shadow-2xl">
+            <div className="bg-surface rounded-premium p-12 border border-black/15 relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] -mr-16 -mt-16 pointer-events-none" />
 
                 <div className="flex flex-col gap-8 relative z-10">
@@ -46,8 +46,8 @@ export default function HelpCenter() {
             {/* Contact Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
                 {contacts.map((contact, i) => (
-                    <div key={i} className="bg-surface p-8 rounded-premium border border-white/5 hover:border-accent/30 transition-all group shadow-xl">
-                        <div className="w-14 h-14 bg-background border border-white/5 rounded-full flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-background transition-all shadow-soft">
+                    <div key={i} className="bg-surface p-8 rounded-premium border border-black/15 hover:border-accent/30 transition-all group shadow-xl">
+                        <div className="w-14 h-14 bg-background border border-black/15 rounded-full flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-background transition-all shadow-soft">
                             <span className="font-bold text-xl">{contact.name.charAt(0)}</span>
                         </div>
 
@@ -67,7 +67,7 @@ export default function HelpCenter() {
 
 function CapabilityCard({ label, sub }) {
     return (
-        <div className="px-6 py-4 bg-background/50 rounded-instrument border border-white/5 backdrop-blur-sm min-w-[160px] shadow-inner">
+        <div className="px-6 py-4 bg-background/50 rounded-instrument border border-black/15 backdrop-blur-sm min-w-[160px] shadow-inner">
             <h4 className="text-accent font-bold text-lg tracking-tighter">{label}</h4>
             <p className="text-[9px] text-muted font-bold uppercase tracking-[0.2em] mt-1">{sub}</p>
         </div>

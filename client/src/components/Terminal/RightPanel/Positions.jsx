@@ -5,10 +5,10 @@ export default function Positions({ positions, quotes, onClosePosition }) {
     if (!positions || positions.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-secondary bg-surface p-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-white/[0.02] flex items-center justify-center mb-4 border border-white/5">
+                <div className="w-16 h-16 rounded-full bg-white/[0.02] flex items-center justify-center mb-4 border border-black/15">
                     <Clock className="w-8 h-8 opacity-20" />
                 </div>
-                <h3 className="text-[10px] font-black uppercase tracking-[3px] mb-2 text-white/30">No Active Pipeline</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[3px] mb-2 text-secondary">No Active Pipeline</h3>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-gray-700">Open a trade to start protocol tracking</p>
             </div>
         );
@@ -18,8 +18,8 @@ export default function Positions({ positions, quotes, onClosePosition }) {
 
     return (
         <div className="flex flex-col h-full bg-surface font-sans">
-            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                <span className="text-[10px] font-black text-white uppercase tracking-widest">Active Positions</span>
+            <div className="px-5 py-4 border-b border-black/15 flex items-center justify-between bg-white/[0.02]">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest">Active Positions</span>
                 <span className="text-[9px] font-black text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded uppercase">{positions.length} Live</span>
             </div>
 
@@ -37,11 +37,11 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                     const isProfit = pnl >= 0;
 
                     return (
-                        <div key={pos.id} className="p-5 border-b border-white/[0.03] group hover:bg-white/[0.02] transition-colors">
+                        <div key={pos.id} className="p-5 border-b border-black/15/[0.03] group hover:bg-white/[0.02] transition-colors">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-sm font-black text-white tracking-tighter uppercase">{pos.symbol}</span>
+                                        <span className="text-sm font-black text-primary tracking-tighter uppercase">{pos.symbol}</span>
                                         <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border ${pos.side === 'buy'
                                             ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10'
                                             : 'text-red-400 border-red-500/20 bg-red-500/10'
@@ -50,9 +50,9 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-mono font-bold text-white/40">ENTRY: {entry.toFixed(2)}</span>
+                                        <span className="text-[10px] font-mono font-bold text-secondary">ENTRY: {entry.toFixed(2)}</span>
                                         <div className="w-1 h-1 rounded-full bg-white/10"></div>
-                                        <span className="text-[10px] font-mono font-bold text-white/40">LOTS: {pos.lots}</span>
+                                        <span className="text-[10px] font-mono font-bold text-secondary">LOTS: {pos.lots}</span>
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -68,13 +68,13 @@ export default function Positions({ positions, quotes, onClosePosition }) {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => onClosePosition(pos.id)}
-                                    className="flex-1 py-2.5 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-lg text-[9px] font-black uppercase tracking-[2px] transition-all flex items-center justify-center gap-2"
+                                    className="flex-1 py-2.5 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-primary border border-red-500/20 rounded-lg text-[9px] font-black uppercase tracking-[2px] transition-all flex items-center justify-center gap-2"
                                 >
                                     <XCircle className="w-3 h-3" />
                                     Close Pipeline
                                 </button>
 
-                                <div className="flex items-center gap-3 px-3 bg-white/5 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-3 px-3 bg-white/5 rounded-lg border border-black/15">
                                     {isProfit ? <TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> : <TrendingDown className="w-3.5 h-3.5 text-red-500" />}
                                 </div>
                             </div>
@@ -84,7 +84,7 @@ export default function Positions({ positions, quotes, onClosePosition }) {
             </div>
 
             {/* Total Footer */}
-            <div className="p-6 bg-white/[0.02] border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+            <div className="p-6 bg-white/[0.02] border-t border-black/15 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                 <div className="flex justify-between items-center mb-1">
                     <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Aggregate Exposure</span>
                     <span className={`text-xl font-mono font-black ${totalPnL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>

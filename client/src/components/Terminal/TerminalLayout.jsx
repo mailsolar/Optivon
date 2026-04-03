@@ -358,7 +358,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
     };
 
     return (
-        <div className="h-screen flex flex-col bg-background overflow-hidden text-secondary font-sans selection:bg-accent/30">
+        <div className="terminal-theme h-screen flex flex-col bg-background overflow-hidden text-secondary font-sans selection:bg-accent/30">
             <RiskStatusBanner />
 
             <TerminalHeader
@@ -379,7 +379,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             />
 
             <div className="flex-1 flex overflow-hidden min-h-0 relative">
-                <div className="w-14 border-r border-white/[0.02] flex flex-col items-center py-6 bg-surface shrink-0 z-30 shadow-2xl">
+                <div className="w-14 border-r border-border flex flex-col items-center py-6 bg-surface shrink-0 z-30 shadow-2xl">
                     <ChartToolbar
                         activeTool={activeTool}
                         onToolChange={setActiveTool}
@@ -388,9 +388,8 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                         onOpenAlerts={() => setShowAlertModal(true)}
                     />
                 </div>
-
                 <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-background">
-                    <div className="h-10 border-b border-white/[0.02] flex items-center justify-between px-4 bg-surface/50 backdrop-blur-md shrink-0 z-20">
+                    <div className="h-10 border-b border-border flex items-center justify-between px-4 bg-surface/50 backdrop-blur-md shrink-0 z-20">
                         <TimeframeSelector timeframe={timeframe} setTimeframe={setTimeframe} />
 
                         <div className="flex items-center gap-6 pr-4">
@@ -430,7 +429,7 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                 </div>
 
                 {isRightPanelOpen && (
-                    <div className="w-[320px] shrink-0 border-l border-white/[0.02] bg-surface z-30 shadow-2xl">
+                    <div className="w-[320px] shrink-0 border-l border-border bg-surface z-30 shadow-2xl">
                         <UnifiedRightPanel
                             isOpen={true}
                             selectedSymbol={selectedSymbol}

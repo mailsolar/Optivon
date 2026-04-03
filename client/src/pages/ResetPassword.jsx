@@ -61,7 +61,7 @@ export default function ResetPassword() {
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans">
-            <div className="w-full max-w-sm bg-surface rounded-premium shadow-2xl border border-white/5 overflow-hidden p-10">
+            <div className="w-full max-w-sm bg-surface rounded-premium shadow-2xl border border-black/15 overflow-hidden p-10">
 
                 {success ? (
                     <div className="text-center space-y-8 py-10">
@@ -98,7 +98,7 @@ export default function ResetPassword() {
                                         type="password"
                                         value={newPassword}
                                         onChange={e => setNewPassword(e.target.value)}
-                                        className="w-full bg-background border border-white/5 rounded-instrument py-4 pl-14 pr-6 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20"
+                                        className="w-full bg-background border border-black/15 rounded-instrument py-4 pl-14 pr-6 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20"
                                         placeholder="••••••••"
                                         required
                                     />
@@ -112,7 +112,7 @@ export default function ResetPassword() {
                                         type="password"
                                         value={confirmPassword}
                                         onChange={e => setConfirmPassword(e.target.value)}
-                                        className="w-full bg-background border border-white/5 rounded-instrument py-4 pl-14 pr-6 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20"
+                                        className="w-full bg-background border border-black/15 rounded-instrument py-4 pl-14 pr-6 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20"
                                         placeholder="••••••••"
                                         required
                                     />

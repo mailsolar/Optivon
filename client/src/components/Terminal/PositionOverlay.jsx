@@ -41,7 +41,7 @@ export default function PositionOverlay({ position, currentPrice }) {
                         <div className="w-1 h-1 rounded-full bg-white/10"></div>
                         <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{position.lots} Lots</span>
                         <div className="w-1 h-1 rounded-full bg-white/10"></div>
-                        <span className="text-[10px] font-mono font-bold text-white/40">
+                        <span className="text-[10px] font-mono font-bold text-secondary">
                             @ {(parseFloat(position.entry_price || position.price || 0)).toFixed(2)}
                         </span>
                     </div>
@@ -55,7 +55,7 @@ export default function PositionOverlay({ position, currentPrice }) {
                 </div>
 
                 {/* Current Price Label */}
-                <div className={`px-3 py-2 text-[11px] font-mono font-black text-white shadow-xl ${position.side === 'buy' ? 'bg-[#00c853]' : 'bg-[#ff1744]'}`}>
+                <div className={`px-3 py-2 text-[11px] font-mono font-black text-primary shadow-xl ${position.side === 'buy' ? 'bg-[#00c853]' : 'bg-[#ff1744]'}`}>
                     {(parseFloat(position.entry_price || position.price || 0)).toFixed(2)}
                 </div>
             </div>

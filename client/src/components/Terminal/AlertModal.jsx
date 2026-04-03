@@ -30,9 +30,9 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
     const ask = quote.ask || currentPrice;
 
     return (
-        <div className="absolute inset-y-0 right-0 w-80 bg-background border-l border-white/[0.05] z-[60] shadow-premium flex flex-col animate-in slide-in-from-right duration-300 font-sans">
+        <div className="absolute inset-y-0 right-0 w-80 bg-background border-l border-black/15/[0.05] z-[60]  flex flex-col animate-in slide-in-from-right duration-300 font-sans">
             {/* Header */}
-            <div className="p-6 border-b border-white/[0.03] flex items-center justify-between bg-surface/30">
+            <div className="p-6 border-b border-black/15/[0.03] flex items-center justify-between bg-surface/30">
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-instrument bg-accent/5 flex items-center justify-center border border-accent/10 shadow-inner">
                         <Bell size={18} className="text-accent" />
@@ -48,7 +48,7 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-white/[0.03] bg-surface/20">
+            <div className="flex border-b border-black/15/[0.03] bg-surface/20">
                 <button
                     onClick={() => setActiveTab('create')}
                     className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.4em] transition-all relative ${activeTab === 'create' ? 'text-accent' : 'text-muted hover:text-secondary'}`}
@@ -74,7 +74,7 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                         <div className="grid grid-cols-2 gap-3">
                             <button
                                 onClick={() => setDirection('sell')}
-                                className={`p-4 rounded-premium border transition-all flex flex-col items-center gap-2 group ${direction === 'sell' ? 'bg-red-400/5 border-red-400/20 text-primary shadow-inner' : 'bg-surface/30 border-white/[0.03] text-muted'}`}
+                                className={`p-4 rounded-premium border transition-all flex flex-col items-center gap-2 group ${direction === 'sell' ? 'bg-red-400/5 border-red-400/20 text-primary shadow-inner' : 'bg-surface/30 border-black/15/[0.03] text-muted'}`}
                             >
                                 <TrendingDown size={14} className={`${direction === 'sell' ? 'text-red-400' : 'text-muted opacity-30'}`} />
                                 <span className="text-[8px] font-black uppercase tracking-widest">Wait Below</span>
@@ -82,7 +82,7 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                             </button>
                             <button
                                 onClick={() => setDirection('buy')}
-                                className={`p-4 rounded-premium border transition-all flex flex-col items-center gap-2 group ${direction === 'buy' ? 'bg-accent/5 border-accent/20 text-primary shadow-inner' : 'bg-surface/30 border-white/[0.03] text-muted'}`}
+                                className={`p-4 rounded-premium border transition-all flex flex-col items-center gap-2 group ${direction === 'buy' ? 'bg-accent/5 border-accent/20 text-primary shadow-inner' : 'bg-surface/30 border-black/15/[0.03] text-muted'}`}
                             >
                                 <TrendingUp size={14} className={`${direction === 'buy' ? 'text-accent' : 'text-muted opacity-30'}`} />
                                 <span className="text-[8px] font-black uppercase tracking-widest">Wait Above</span>
@@ -102,7 +102,7 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                             
                             <div className="relative group/input">
                                 <div className="absolute inset-0 bg-accent/[0.02] rounded-premium pointer-events-none group-focus-within/input:bg-accent/[0.05] transition-all" />
-                                <div className="flex items-center bg-background/50 rounded-premium border border-white/[0.05] overflow-hidden focus-within:border-accent/30 transition-all shadow-inner relative z-10">
+                                <div className="flex items-center bg-background/50 rounded-premium border border-black/15/[0.05] overflow-hidden focus-within:border-accent/30 transition-all shadow-inner relative z-10">
                                     <button onClick={() => setTargetPrice(targetPrice - 1)} className="p-4 text-muted hover:text-primary transition-colors"><Minus size={14} /></button>
                                     <input
                                         type="number"
@@ -125,20 +125,20 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                         </div>
 
                         {/* Options */}
-                        <div className="p-6 bg-surface/30 border border-white/[0.03] rounded-premium space-y-5 shadow-inner">
+                        <div className="p-6 bg-surface/30 border border-black/15/[0.03] rounded-premium space-y-5 shadow-inner">
                             <div className="flex items-center justify-between">
                                 <span className="text-[9px] font-black text-secondary uppercase tracking-[0.3em]">Audio Signal</span>
-                                <div className="w-8 h-4 bg-accent rounded-full flex items-center justify-end px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-background rounded-full transition-all shadow-premium"></div></div>
+                                <div className="w-8 h-4 bg-accent rounded-full flex items-center justify-end px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-background rounded-full transition-all "></div></div>
                             </div>
                             <div className="flex items-center justify-between opacity-40">
                                 <span className="text-[9px] font-black text-secondary uppercase tracking-[0.3em]">Persistent Link</span>
-                                <div className="w-8 h-4 bg-background border border-white/10 rounded-full flex items-center justify-start px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-muted rounded-full"></div></div>
+                                <div className="w-8 h-4 bg-background border border-black/15 rounded-full flex items-center justify-start px-1 cursor-pointer"><div className="w-2.5 h-2.5 bg-muted rounded-full"></div></div>
                             </div>
                         </div>
 
                         <button
                             onClick={handleCreate}
-                            className="w-full py-5 bg-accent text-background font-black text-[10px] uppercase tracking-[0.4em] rounded-instrument shadow-premium hover:bg-primary transition-all active:scale-95 flex items-center justify-center gap-3 group"
+                            className="w-full py-5 bg-accent text-background font-black text-[10px] uppercase tracking-[0.4em] rounded-instrument  hover:bg-primary transition-all active:scale-95 flex items-center justify-center gap-3 group"
                         >
                             Establish Node <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </button>
@@ -152,7 +152,7 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                             </div>
                         ) : (
                             symbolAlerts.map(alert => (
-                                <div key={alert.id} className={`p-5 rounded-premium border transition-all relative overflow-hidden group ${alert.triggered ? 'bg-red-400/5 border-red-400/20 opacity-60 shadow-inner' : 'bg-surface/30 border-white/[0.03] hover:border-accent/10 shadow-sm'}`}>
+                                <div key={alert.id} className={`p-5 rounded-premium border transition-all relative overflow-hidden group ${alert.triggered ? 'bg-red-400/5 border-red-400/20 opacity-60 shadow-inner' : 'bg-surface/30 border-black/15/[0.03] hover:border-accent/10 shadow-sm'}`}>
                                     <div className="flex justify-between items-start mb-3 relative z-10">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-1.5 h-1.5 rounded-full ${alert.triggered ? 'bg-red-400 animate-pulse shadow-[0_0_5px_#ff1744]' : 'bg-accent shadow-[0_0_8px_#C50022]'}`}></div>
@@ -172,7 +172,7 @@ export default function AlertModal({ isOpen, onClose, symbol, currentPrice, quot
                         {symbolAlerts.some(a => a.triggered) && (
                             <button
                                 onClick={clearTriggered}
-                                className="w-full py-4 mt-6 text-[9px] font-black text-muted hover:text-primary uppercase tracking-[0.4em] border border-dashed border-white/10 rounded-premium transition-all hover:bg-white/[0.02]"
+                                className="w-full py-4 mt-6 text-[9px] font-black text-muted hover:text-primary uppercase tracking-[0.4em] border border-dashed border-black/15 rounded-premium transition-all hover:bg-white/[0.02]"
                             >
                                 Clear Node History
                             </button>

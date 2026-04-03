@@ -38,7 +38,7 @@ export default function OptivonLayout() {
                 <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/[0.02] rounded-full blur-[150px] pointer-events-none -mr-96 -mt-96" />
 
                 {/* HEADER */}
-                <header className="h-20 bg-background/80 backdrop-blur-xl border-b border-white/[0.02] flex items-center justify-between px-10 flex-shrink-0 z-50 relative">
+                <header className="h-20 bg-background/80 backdrop-blur-xl border-b border-black/15/[0.02] flex items-center justify-between px-10 flex-shrink-0 z-50 relative">
                     <div className="flex flex-col gap-1">
                         <h2 className="text-xl font-bold text-primary tracking-tight uppercase text-shadow-glow">
                             {getPageTitle()}
@@ -63,7 +63,7 @@ export default function OptivonLayout() {
                             onMouseEnter={() => setIsDropdownOpen(true)}
                             onMouseLeave={() => setIsDropdownOpen(false)}
                         >
-                            <div className="flex items-center gap-4 pl-8 border-l border-white/[0.05] cursor-pointer group">
+                            <div className="flex items-center gap-4 pl-8 border-l border-black/15/[0.05] cursor-pointer group">
                                 <div className="text-right hidden sm:block">
                                     <p className="text-sm font-bold text-primary leading-none mb-1 group-hover:text-accent transition-colors">{user?.name || 'Authorized User'}</p>
                                     <p className="text-[9px] font-black text-muted uppercase tracking-[0.2em]">Tier 01 // Node</p>
@@ -71,8 +71,8 @@ export default function OptivonLayout() {
                                 <div className={`
                                     w-11 h-11 rounded-instrument border flex items-center justify-center font-bold text-sm transition-all duration-500
                                     ${isDropdownOpen
-                                        ? 'bg-accent text-background border-accent shadow-premium'
-                                        : 'bg-surface border-white/5 text-accent hover:border-accent/30'}
+                                        ? 'bg-accent text-background border-accent '
+                                        : 'bg-surface border-black/15 text-accent hover:border-accent/30'}
                                 `}>
                                     {user?.name ? user.name.charAt(0) : <User size={18} />}
                                 </div>
@@ -88,9 +88,9 @@ export default function OptivonLayout() {
                                         transition={{ duration: 0.2, ease: "easeOut" }}
                                         className="absolute top-full right-0 pt-4 w-64 z-50"
                                     >
-                                        <div className="bg-surface/95 backdrop-blur-2xl border border-white/5 rounded-premium shadow-premium overflow-hidden">
+                                        <div className="bg-surface/95 backdrop-blur-2xl border border-black/15 rounded-premium  overflow-hidden">
                                             {/* Header Section */}
-                                            <div className="px-6 py-5 border-b border-white/[0.03] bg-background/30">
+                                            <div className="px-6 py-5 border-b border-black/15/[0.03] bg-background/30">
                                                 <p className="text-[9px] text-muted font-bold uppercase tracking-widest mb-1">Identity Verified</p>
                                                 <p className="text-sm font-bold text-primary truncate tracking-tight">{user?.email || 'trader@optivon.com'}</p>
                                             </div>

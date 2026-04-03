@@ -1,240 +1,195 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import {
-    ArrowRight,
-    CheckCircle2,
-    Activity,
-    ArrowUpRight,
-    Target,
-    Zap,
-    Shield,
-    Globe,
-    ChevronRight,
-    Layers,
-    MoveRight
-} from 'lucide-react';
-import CrystalMarket from '../components/Landing/CrystalMarket';
+import React, { useRef, useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import ChallengeSelector from '../components/Landing/ChallengeSelector';
 import Footer from '../components/Global/Footer';
 
-export default function Landing({ onAuthRequest }) {
-    return (
-        <div className="min-h-screen bg-background text-primary font-sans selection:bg-accent selection:text-background overflow-x-hidden">
+const EASE = [0.16, 1, 0.3, 1];
 
-            {/* NAV */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-8 flex justify-between items-center transition-all duration-500">
-                <div className="flex flex-col">
-                    <div className="font-bold text-xl tracking-[-0.04em] text-primary">OPTIVON</div>
-                    <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-accent">Institutional</div>
+export default function Landing({ onAuthRequest }) {
+    const containerRef = useRef(null);
+    const { scrollY, scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
+    const [navHidden, setNavHidden] = useState(false);
+
+    useEffect(() => {
+        return scrollY.onChange((latest) => {
+            if (latest > 100 && latest > scrollY.getPrevious()) {
+                setNavHidden(true);
+            } else {
+                setNavHidden(false);
+            }
+        });
+    }, [scrollY]);
+
+    // Smooth scroll for parallax
+    const smoothY = useSpring(scrollYProgress, { stiffness: 80, damping: 20, restDelta: 0.001 });
+
+    const heroTitleY = useTransform(scrollY, [0, 800], [0, 200]);
+    const archImageY = useTransform(smoothY, [0, 0.5], [0, 300]);
+
+    return (
+        <div ref={containerRef} className="bg-background text-primary font-sans selection:bg-accent selection:text-background min-h-screen relative font-smoothing-antialiased">
+            
+            {/* MINIMAL NAVBAR */}
+            <motion.nav 
+                variants={{ visible: { y: 0 }, hidden: { y: "-100%" } }}
+                animate={navHidden ? "hidden" : "visible"}
+                transition={{ duration: 0.6, ease: EASE }}
+                className="fixed top-0 left-0 right-0 z-50 px-6 py-6 md:px-12 flex justify-between items-center bg-background/90 backdrop-blur-md border-b border-black/5"
+            >
+                <div className="flex flex-col cursor-pointer transition-opacity hover:opacity-70">
+                    <div className="font-display text-xl tracking-tighter text-primary">Optivon.</div>
+                    <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-secondary">Institutional Capital</div>
                 </div>
                 <div className="flex items-center gap-8">
-                    <button 
-                        onClick={() => window.location.href = '/rules'}
-                        className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary hover:text-primary transition-colors hidden md:block"
-                    >
-                        Protocol
-                    </button>
-                    <button
-                        onClick={onAuthRequest}
-                        className="px-8 py-3 bg-white text-black font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-accent hover:text-white transition-colors border border-white/10"
-                    >
+                    <button onClick={() => window.location.href = '/rules'} className="hidden md:block text-caption text-primary hover:text-secondary transition-colors">Protocol</button>
+                    <button onClick={onAuthRequest} className="px-6 py-3 bg-primary text-white text-caption hover:bg-black/80 transition-colors">
                         Initialize
                     </button>
                 </div>
-            </nav>
+            </motion.nav>
 
-            {/* HERO SECTION */}
-            <header className="relative min-h-screen flex flex-col justify-center px-8 md:px-24 bg-background overflow-hidden">
-                {/* Background Text Overlay */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[35vw] font-bold text-white/[0.01] pointer-events-none select-none tracking-tighter">
-                    CAPITAL
-                </div>
+            {/* 00 // HERO SCENE */}
+            <section className="relative w-full min-h-[90vh] pt-32 px-6 md:px-12 flex flex-col justify-end pb-12 overflow-hidden border-b border-black/15">
+                <div className="text-caption text-secondary mb-12">Proprietary Trading Framework v2.4</div>
+                
+                <motion.div style={{ y: heroTitleY }} className="flex flex-col z-10 w-full mb-12">
+                    <h1 className="text-display-huge text-primary relative">
+                        Precision
+                    </h1>
+                    <h1 className="text-display-huge text-primary italic text-right relative -mt-4 md:-mt-8 lg:-mt-16">
+                        Execution.
+                    </h1>
+                </motion.div>
 
-                <div className="relative z-10 pt-20 max-w-[1400px] mx-auto w-full">
-                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-16 items-center">
-                        <div className="xl:col-span-8">
-                            <motion.div 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mb-12 flex items-center gap-4"
-                            >
-                                <div className="h-px w-12 bg-accent opacity-50" />
-                                <span className="text-accent font-bold text-[10px] uppercase tracking-[0.3em]">
-                                    Proprietary Trading Framework v2.4
-                                </span>
-                            </motion.div>
-
-                            <h1 className="text-[14vw] sm:text-[12vw] md:text-[9vw] lg:text-[8vw] xl:text-[7.5vw] font-display font-black leading-[0.85] tracking-tighter uppercase mb-8 text-white">
-                                PRECISION<br />
-                                <span className="text-accent">EXECUTION.</span>
-                            </h1>
-
-                            <div className="max-w-xl flex flex-col gap-10">
-                                <p className="text-lg md:text-xl text-secondary font-medium leading-relaxed">
-                                    Access institutional-grade capital and technology. 
-                                    Trade NIFTY & BANKNIFTY with the industry's most aggressive risk architecture.
-                                </p>
-                                
-                                <div className="flex flex-wrap gap-6">
-                                    <button
-                                        onClick={onAuthRequest}
-                                        className="group flex items-center gap-4 px-12 py-5 bg-accent text-white font-bold uppercase tracking-[0.2em] text-[12px] hover:bg-white hover:text-black transition-colors"
-                                    >
-                                        Start Evaluation
-                                        <MoveRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                                    </button>
-                                    <button
-                                        onClick={() => window.location.href = '/rules'}
-                                        className="flex items-center gap-2 px-12 py-5 border border-white/20 text-white hover:bg-white/10 transition-colors font-bold uppercase tracking-[0.2em] text-[12px]"
-                                    >
-                                        View Parameters
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div className="xl:col-span-4 hidden xl:block relative h-[60vh]">
-                            <div className="absolute inset-0 opacity-40">
-                                <CrystalMarket />
-                            </div>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+                    <div className="md:col-span-8 lg:col-span-6">
+                        <p className="text-sm md:text-lg leading-relaxed text-secondary pr-12 max-w-xl">
+                            Access institutional-grade capital and technology. Trade NIFTY & BANKNIFTY with the industry's most refined risk architecture.
+                        </p>
                     </div>
-                </div>
-            </header>
-
-            {/* SECTION 1: ARCHITECTURE (Red Block) */}
-            <section className="bg-accent text-white py-32 px-8 md:px-24">
-                <div className="max-w-[1400px] mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
-                        <div className="lg:col-span-7">
-                            <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-white/80 mb-8">/ 01 Architecture</div>
-                            <h2 className="text-6xl md:text-7xl lg:text-[6vw] xl:text-[6.5vw] font-display font-black leading-[0.9] tracking-tighter uppercase mb-12 max-w-2xl">
-                                BUILT FOR<br />PERFORMANCE.
-                            </h2>
-                            <p className="text-xl font-medium leading-relaxed opacity-90 mb-16 max-w-xl">
-                                Optimized for high-frequency execution and institutional-grade risk management. Our system is a pinnacle of stability in volatile markets.
-                            </p>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8">
-                                <FeatureItem title="8% Drawdown" desc="Max Trailing Drawdown" />
-                                <FeatureItem title="4% Daily" desc="Hard Loss Stop" />
-                                <FeatureItem title="Zero Latency" desc="Direct Market Access" />
-                                <FeatureItem title="80% Split" desc="Institutional Payouts" />
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-5 relative group">
-                            <div className="aspect-square max-w-[500px] mx-auto bg-background rounded-premium p-12 border border-black/10 overflow-hidden shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]">
-                                <div className="absolute inset-0 bg-gentle-grid opacity-20 pointer-events-none" />
-                                <div className="h-full flex flex-col justify-between relative z-10">
-                                    <div className="w-16 h-16 rounded-instrument bg-accent/20 flex items-center justify-center">
-                                        <Layers className="text-accent w-8 h-8" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-4xl font-display font-black text-black mb-4 uppercase tracking-tighter">OPTIVON // COMMAND</h3>
-                                        <p className="text-black/80 text-sm font-medium leading-relaxed max-w-xs">
-                                            A proprietary terminal designed for professional scale. Mirroring institutional order flows with 0.0 spreads.
-                                        </p>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <div className="px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest leading-none flex items-center">
-                                            STABLE v2.4
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="md:col-span-4 lg:col-span-6 flex justify-start md:justify-end gap-6 items-center">
+                        <button onClick={onAuthRequest} className="text-caption hover:opacity-50 transition-opacity border-b border-primary pb-1">Start Evaluation</button>
+                        <button onClick={() => window.location.href = '/rules'} className="text-caption text-secondary hover:text-primary transition-opacity border-b border-transparent hover:border-black/15 pb-1">View Parameters</button>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 2: PROTOCOLS */}
-            <section className="py-32 px-8 md:px-24 border-t border-white/[0.05]">
-                <div className="max-w-[1400px] mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-end mb-24">
-                        <div className="lg:col-span-8">
-                            <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-accent mb-6">/ 02 Engine</div>
-                            <h2 className="text-6xl md:text-[8vw] font-display font-black tracking-tighter uppercase leading-none text-white">
-                                SELECTION.
+            {/* 01 // ARCHITECTURE */}
+            <section className="relative w-full pb-32">
+                
+                <div className="grid grid-cols-1 md:grid-cols-12">
+                    {/* Left Sticky Column */}
+                    <div className="md:col-span-5 lg:col-span-4 border-r border-black/15 px-6 md:px-12 py-24 md:py-32 md:sticky md:top-0 md:h-screen flex flex-col justify-between">
+                        <div>
+                            <div className="text-caption text-secondary mb-16">01 Architecture</div>
+                            <h2 className="font-display text-5xl lg:text-7xl leading-tight text-primary mb-8 tracking-tight">
+                                Built for <br/><span className="italic text-secondary">Performance.</span>
                             </h2>
-                        </div>
-                        <div className="lg:col-span-4">
-                            <p className="text-secondary font-medium leading-relaxed md:text-right">
-                                Transcend traditional funding. Choose the capital engine that aligns with your execution strategy.
+                            <p className="text-secondary text-base leading-relaxed">
+                                Optimized for high-frequency execution and institutional-grade risk management. Our system is a pinnacle of stability in volatile markets.
                             </p>
                         </div>
+                        <div className="hidden md:block">
+                            <span className="text-[10px] uppercase tracking-widest text-muted" style={{ writingMode: 'vertical-rl' }}>Scroll</span>
+                            <div className="w-[1px] h-24 bg-black/10 mt-4" />
+                        </div>
+                    </div>
+
+                    {/* Right Scrolling Column */}
+                    <div className="md:col-span-7 lg:col-span-8 flex flex-col">
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2">
+                            <StatBlock value="8%" label="Max Trailing Drawdown" />
+                            <StatBlock value="4%" label="Hard Loss Stop" />
+                            <StatBlock value="0" label="Zero Latency" subtitle="Direct Market Access" />
+                            <StatBlock value="80%" label="Institutional Payouts" />
+                        </div>
+
+                        {/* Terminal Manifesto (FWA Editorial style substitution for "terminal graphic") */}
+                        <div className="p-12 md:p-24 border-t border-black/15 flex flex-col justify-center min-h-[50vh] bg-black/5">
+                            <div className="text-caption text-secondary mb-8">System Access</div>
+                            <h3 className="font-display text-4xl lg:text-5xl text-primary mb-12 tracking-tight">
+                                Optivon Command.
+                            </h3>
+                            <p className="text-lg text-secondary leading-relaxed max-w-md font-sans">
+                                A proprietary terminal designed for professional scale. Mirroring institutional order flows with absolute 0.0 latency spreads.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+
+            {/* 02 // ENGINE */}
+            <section className="relative w-full border-t border-black/15 py-32 px-6 md:px-12">
+                <div className="max-w-[1400px] mx-auto">
+                    
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-32 gap-12">
+                        <div className="max-w-2xl">
+                            <div className="text-caption text-secondary mb-12">02 Engine</div>
+                            <h2 className="text-[clamp(4rem,9vw,9rem)] font-display text-primary leading-none tracking-[-0.02em]">
+                                Selection.
+                            </h2>
+                        </div>
+                        <p className="text-lg text-secondary max-w-sm leading-relaxed mb-4">
+                            Transcend traditional funding. Choose the capital engine that aligns with your execution strategy.
+                        </p>
                     </div>
 
                     <ChallengeSelector />
+
                 </div>
             </section>
 
-            {/* SECTION 3: PAYOUTS */}
-            <section className="bg-[#151516] py-32 px-8 md:px-24">
-                <div className="max-w-[1400px] mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                        <PayoutCard 
-                            icon={<Target />} 
-                            title="Targets" 
-                            value="10%" 
-                            desc="Phase 1 Growth Target" 
-                        />
-                        <PayoutCard 
-                            icon={<Zap />} 
-                            title="Velocity" 
-                            value="14D" 
-                            desc="Bi-Weekly Payout Cycle" 
-                        />
-                        <PayoutCard 
-                            icon={<Shield />} 
-                            title="Security" 
-                            value="SSL" 
-                            desc="Encrypted Transactions" 
-                        />
-                    </div>
+            {/* 03 // FINALIZATION */}
+            <section className="relative w-full border-t border-black/15 pt-32 pb-48 px-6 md:px-12 overflow-hidden">
+                <div className="text-caption text-secondary mb-24 max-w-[1400px] mx-auto">03 Finalization</div>
 
-                    {/* CTA Section */}
-                    <div className="mt-32 p-12 md:p-32 bg-accent text-white flex flex-col items-center">
-                        <div className="text-[12px] font-bold uppercase tracking-[0.5em] text-white/80 mb-12">FINALIZATION</div>
-                        <h2 className="text-5xl md:text-[5vw] font-display font-black tracking-tighter uppercase mb-12 max-w-4xl text-center leading-[1]">
-                            THE STANDARD FOR SERIOUS CAPITAL SEEKERS.
-                        </h2>
-                        <button
-                            onClick={onAuthRequest}
-                            className="px-16 py-6 bg-white text-black font-bold uppercase tracking-[0.3em] text-[13px] hover:bg-black hover:text-white transition-colors"
-                        >
-                            Get Funded
-                        </button>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 border-t border-black/15 max-w-[1400px] mx-auto mb-48">
+                    <FinalPayoutCell value="10%" label="Targets" desc="Phase 1 Growth Target" />
+                    <FinalPayoutCell value="14D" label="Velocity" desc="Bi-Weekly Payout Cycle" />
+                    <FinalPayoutCell value="SSL" label="Security" desc="Encrypted Transactions" />
+                </div>
+
+                <div className="text-center max-w-4xl mx-auto flex flex-col items-center">
+                    <h2 className="text-[clamp(3.5rem,7vw,8rem)] font-display text-primary leading-[0.9] tracking-[-0.02em] mb-16">
+                        The Standard for <br/><span className="italic text-secondary">Serious Capital Seekers.</span>
+                    </h2>
+                    <button onClick={onAuthRequest} className="px-12 py-6 bg-primary text-white text-caption hover:bg-black/80 transition-colors">
+                        Get Funded Now
+                    </button>
                 </div>
             </section>
 
             <Footer />
+
         </div>
     );
 }
 
-function FeatureItem({ title, desc }) {
+function StatBlock({ value, label, subtitle }) {
     return (
-        <div className="border-l-4 border-black/20 pl-8 transition-colors hover:border-black group">
-            <h4 className="text-3xl font-display font-black mb-2 text-white group-hover:text-black transition-colors">{title}</h4>
-            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">{desc}</div>
-        </div>
-    );
-}
-
-function PayoutCard({ icon, title, value, desc }) {
-    return (
-        <div className="p-12 border border-white/5 rounded-premium bg-surface hover:border-accent/30 transition-all group">
-            <div className="mb-8 text-accent opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-                {React.cloneElement(icon, { size: 32 })}
+        <div className="p-12 md:p-16 flex flex-col justify-between border-b sm:border-r border-black/15 min-h-[40vh] bg-background hover:bg-black/[0.02] transition-colors duration-500">
+            <span className="text-caption text-secondary">{label}</span>
+            <div className="mt-16">
+                <h3 className="font-display text-7xl md:text-[clamp(6rem,10vw,12rem)] tracking-[-0.05em] leading-none text-primary">
+                    {value}
+                </h3>
+                {subtitle && <p className="text-sm font-sans text-secondary mt-4">{subtitle}</p>}
             </div>
-            <div className="text-5xl font-bold mb-4 tracking-tighter text-primary">{value}</div>
-            <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary mb-4">{title}</h5>
-            <p className="text-sm text-secondary/60 leading-relaxed font-medium">
-                {desc}
-            </p>
+        </div>
+    );
+}
+
+function FinalPayoutCell({ value, label, desc }) {
+    return (
+        <div className="p-12 border-b md:border-b-0 md:border-r border-black/15 last:border-r-0 flex flex-col justify-between min-h-[35vh]">
+            <span className="text-caption text-secondary mb-16">{label}</span>
+            <div>
+                <h4 className="font-display text-6xl tracking-[-0.02em] text-primary mb-4 italic">{value}</h4>
+                <p className="text-sm text-secondary font-sans">{desc}</p>
+            </div>
         </div>
     );
 }

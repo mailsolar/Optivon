@@ -702,7 +702,7 @@ export default function TerminalChart({
                             {/* Main Order Line Badge (Qty | PnL | X) */}
                             <div className={`flex items-stretch shadow-[0_2px_8px_rgba(0,0,0,0.3)] rounded-[3px] overflow-hidden border ${qtyBorder} bg-[#131722]`}>
                                 {/* LOTS */}
-                                <div className={`flex items-center justify-center px-2 py-0.5 ${qtyBg} text-white font-mono font-bold text-[11px] select-none`}>
+                                <div className={`flex items-center justify-center px-2 py-0.5 ${qtyBg} text-primary font-mono font-bold text-[11px] select-none`}>
                                     {pos.lots}
                                 </div>
 
@@ -721,7 +721,7 @@ export default function TerminalChart({
                                         if (onClosePosition) onClosePosition(pos.id);
                                     }}
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    className="flex items-center justify-center px-1.5 hover:bg-[#2a2e39] active:bg-[#363a45] transition-colors text-slate-400 hover:text-white"
+                                    className="flex items-center justify-center px-1.5 hover:bg-[#2a2e39] active:bg-[#363a45] transition-colors text-slate-400 hover:text-primary"
                                     title="Close Position"
                                 >
                                     <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -756,7 +756,7 @@ export default function TerminalChart({
                                     >
                                         TP
                                         <button
-                                            className="text-white/60 hover:text-white font-normal"
+                                            className="text-secondary hover:text-primary font-normal"
                                             onMouseDown={e => e.stopPropagation()}
                                             onClick={async (e) => {
                                                 e.preventDefault(); e.stopPropagation();
@@ -792,7 +792,7 @@ export default function TerminalChart({
                                     >
                                         SL
                                         <button
-                                            className="text-white/60 hover:text-white font-normal"
+                                            className="text-secondary hover:text-primary font-normal"
                                             onMouseDown={e => e.stopPropagation()}
                                             onClick={async (e) => {
                                                 e.preventDefault(); e.stopPropagation();

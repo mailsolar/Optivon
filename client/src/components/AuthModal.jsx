@@ -205,7 +205,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="relative w-full max-w-sm bg-surface rounded-premium shadow-2xl border border-white/5 overflow-hidden"
+                    className="relative w-full max-w-sm bg-surface rounded-premium shadow-2xl border border-black/15 overflow-hidden"
                 >
                     {/* Header */}
                     <div className="px-10 pt-10 pb-4 flex justify-between items-start">
@@ -221,7 +221,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-3 bg-background border border-white/5 text-muted hover:text-accent rounded-full transition-all shadow-soft"
+                            className="p-3 bg-background border border-black/15 text-muted hover:text-accent rounded-full transition-all shadow-soft"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -264,7 +264,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
                             <form onSubmit={handleSendOtp} className="space-y-6">
                                 <Input label="Identifier" icon={Mail} type="email" value={email} onChange={setEmail} placeholder="trader@optivon.pro" />
                                 <Input label="Set Key" icon={Lock} type="password" value={password} onChange={setPassword} placeholder="••••••••" />
-                                <div className="text-[9px] text-muted font-bold uppercase tracking-[0.2em] bg-background/50 p-3 rounded-instrument border border-white/5">
+                                <div className="text-[9px] text-muted font-bold uppercase tracking-[0.2em] bg-background/50 p-3 rounded-instrument border border-black/15">
                                     Protocol will dispatch a verification sequence to this node.
                                 </div>
                                 <SubmitButton loading={loading}>Initiate Sync</SubmitButton>
@@ -303,7 +303,7 @@ export default function AuthModal({ onClose, onLoginSuccess }) {
                         )}
 
                         {mode !== 'FORGOT' && step === 1 && (
-                            <div className="pt-8 border-t border-white/5 text-center">
+                            <div className="pt-8 border-t border-black/15 text-center">
                                 <button
                                     onClick={() => { setMode(mode === 'LOGIN' ? 'REGISTER' : 'LOGIN'); resetState(); }}
                                     className="text-[10px] font-bold text-muted hover:text-accent uppercase tracking-[0.3em] transition-all"
@@ -333,7 +333,7 @@ function Input({ label, icon: Icon, type, value, onChange, placeholder, maxLengt
                     type={inputType}
                     value={value}
                     onChange={e => onChange(e.target.value)}
-                    className={`w-full bg-background border border-white/5 rounded-instrument py-4 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20 ${center ? 'text-center px-4 tracking-[0.8em] font-mono' : 'pl-14 pr-12'}`}
+                    className={`w-full bg-background border border-black/15 rounded-instrument py-4 text-sm font-bold text-primary outline-none focus:border-accent/40 transition-all placeholder:text-muted/20 ${center ? 'text-center px-4 tracking-[0.8em] font-mono' : 'pl-14 pr-12'}`}
                     placeholder={placeholder}
                     required
                     maxLength={maxLength}

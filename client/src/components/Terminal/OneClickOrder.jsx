@@ -27,9 +27,9 @@ export default function OneClickOrderToggle({ enabled, onToggle }) {
           flex items-center gap-2 px-3 py-2 rounded-lg transition-all
           ${enabled
                         ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                        : 'bg-surface text-gray-400 border-white/5'
+                        : 'bg-surface text-gray-400 border-black/15'
                     }
-          border hover:border-white/10
+          border hover:border-black/15
         `}
             >
                 {enabled ? <Zap className="w-4 h-4" /> : <ZapOff className="w-4 h-4" />}
@@ -46,7 +46,7 @@ export default function OneClickOrderToggle({ enabled, onToggle }) {
                                 <Zap className="w-6 h-6 text-yellow-500" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white mb-2">Enable One-Click Orders?</h3>
+                                <h3 className="text-lg font-bold text-primary mb-2">Enable One-Click Orders?</h3>
                                 <p className="text-sm text-gray-400 mb-4 leading-relaxed">
                                     One-click orders will <strong className="text-yellow-500">execute instantly without confirmation</strong>.
                                     Make sure you understand the risks before enabling this feature.
@@ -60,7 +60,7 @@ export default function OneClickOrderToggle({ enabled, onToggle }) {
                                     </button>
                                     <button
                                         onClick={() => setShowWarning(false)}
-                                        className="flex-1 bg-white/5 hover:bg-white/10 text-white py-2 px-4 rounded-lg transition-colors"
+                                        className="flex-1 bg-white/5 hover:bg-white/10 text-primary py-2 px-4 rounded-lg transition-colors"
                                     >
                                         Cancel
                                     </button>

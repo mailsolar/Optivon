@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function DashboardLayout({ user, onLogout, children }) {
     return (
-        <div className="min-h-screen bg-brand-dark text-white font-sans flex overflow-hidden selection:bg-brand-lime selection:text-brand-dark">
+        <div className="min-h-screen bg-brand-dark text-primary font-sans flex overflow-hidden selection:bg-brand-lime selection:text-brand-dark">
             {/* Main Content */}
             <main className="flex-1 relative overflow-y-auto bg-brand-dark overflow-hidden">
                 {/* Satoshi Grid Background (Subtle) */}

@@ -35,14 +35,14 @@ export default function DummyTerminal() {
         <div className="w-full h-full bg-[#0a0a0f] text-xs font-mono p-4 flex flex-col gap-4 overflow-hidden select-none">
 
             {/* Header / Stats */}
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <div className="flex justify-between items-center border-b border-black/15 pb-4">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-brand-lime">
                         <Activity size={14} className="animate-pulse" />
                         <span className="font-bold tracking-widest">LIVE SIMULATION</span>
                     </div>
                     <div className="h-4 w-px bg-white/10" />
-                    <div className="text-gray-400">LATENCY: <span className="text-white">12ms</span></div>
+                    <div className="text-gray-400">LATENCY: <span className="text-primary">12ms</span></div>
                 </div>
                 <div className="text-right">
                     <div className="text-gray-500 text-[10px] uppercase">Net P&L</div>
@@ -56,10 +56,10 @@ export default function DummyTerminal() {
             <div className="flex-1 grid grid-cols-3 gap-4 min-h-0">
 
                 {/* Simulated Chart Area */}
-                <div className="col-span-2 bg-[#12121a] rounded-xl border border-white/5 relative overflow-hidden flex items-center justify-center">
+                <div className="col-span-2 bg-[#12121a] rounded-xl border border-black/15 relative overflow-hidden flex items-center justify-center">
                     {/* Grid Lines */}
                     <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 opacity-10 pointer-events-none">
-                        {[...Array(20)].map((_, i) => <div key={i} className="border-r border-b border-white" />)}
+                        {[...Array(20)].map((_, i) => <div key={i} className="border-r border-b border-black/15" />)}
                     </div>
 
                     {/* Abstract Price Line */}
@@ -83,7 +83,7 @@ export default function DummyTerminal() {
                     </svg>
 
                     <div className="absolute top-4 left-4">
-                        <div className="text-2xl font-bold text-white">{price.toFixed(2)}</div>
+                        <div className="text-2xl font-bold text-primary">{price.toFixed(2)}</div>
                         <div className="text-xs text-brand-lime flex items-center gap-1">
                             <ArrowUpRight size={10} /> +0.45%
                         </div>
@@ -99,7 +99,7 @@ export default function DummyTerminal() {
                                 key={trade.id}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="flex justify-between items-center text-[10px] p-2 rounded bg-white/5 border border-white/5"
+                                className="flex justify-between items-center text-[10px] p-2 rounded bg-white/5 border border-black/15"
                             >
                                 <div className="flex items-center gap-2">
                                     <span className={trade.sub === 'BUY' ? 'text-brand-lime' : 'text-red-500'}>{trade.sub}</span>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function TabSwitcher({ tabs, activeTab, onTabChange }) {
     return (
-        <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-instrument border border-white/5 backdrop-blur-md w-fit shadow-2xl">
+        <div className="flex items-center gap-1.5 bg-surface p-1.5 rounded-instrument border border-black/15 backdrop-blur-md w-fit shadow-2xl">
             {tabs.map((tab) => {
                 const isActive = activeTab === tab;
                 return (

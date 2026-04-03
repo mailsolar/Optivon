@@ -72,11 +72,11 @@ export default function TerminalHeader({
     };
 
     return (
-        <div className="h-14 bg-surface border-b border-white/[0.02] flex items-center px-4 justify-between font-sans shrink-0 z-40 relative transition-colors duration-300">
+        <div className="h-14 bg-surface flex items-center px-4 justify-between font-sans shrink-0 z-40 relative transition-colors duration-300 border-b border-border">
             {/* Left Section: Branding & Metrics */}
             <div className="flex items-center gap-10">
                 <button
-                    className="flex items-center gap-3 group px-4 py-2 border-r border-white/[0.02] hover:bg-white/5 transition-colors"
+                    className="flex items-center gap-3 group px-4 py-2 border-r border-black/15/[0.02] hover:bg-white/5 transition-colors"
                     onClick={() => navigate('/dashboard')}
                     title="Back to Dashboard"
                 >
@@ -86,20 +86,20 @@ export default function TerminalHeader({
 
                 {/* Account Selector & Metrics */}
                 {account ? (
-                    <div className="flex items-center gap-8 border-l border-white/[0.02] pl-10 hidden sm:flex">
+                    <div className="flex items-center gap-8 border-l border-black/15/[0.02] pl-10 hidden sm:flex">
                         {/* Account Selector */}
                         <div className="relative group/acc">
                             <button className="flex flex-col items-start gap-1 group-hover/acc:opacity-80 transition-opacity">
                                 <span className="text-[8px] font-black text-secondary uppercase tracking-widest flex items-center gap-1">
                                     Account #{account.id} <ChevronDown className="w-3 h-3" />
                                 </span>
-                                <span className="text-xs font-mono font-black text-white bg-white/5 px-2 py-0.5 rounded border border-white/[0.02]">
+                                <span className="text-xs font-mono font-black text-primary bg-white/5 px-2 py-0.5 rounded border border-black/15/[0.02]">
                                     {account.type}
                                 </span>
                             </button>
 
                             {/* Dropdown */}
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-background border border-white/10 rounded-none shadow-xl overflow-hidden hidden group-hover/acc:block z-50">
+                            <div className="absolute top-full left-0 mt-2 w-48 bg-background border border-black/15 rounded-none shadow-xl overflow-hidden hidden group-hover/acc:block z-50">
                                 <div className="py-1">
                                     {(allAccounts || []).map(acc => (
                                         <button
@@ -117,7 +117,7 @@ export default function TerminalHeader({
 
                         <div className="flex flex-col">
                             <span className="text-[8px] font-black text-secondary uppercase tracking-widest mb-0.5">Live Balance</span>
-                            <span className="text-xs font-mono font-black text-white">
+                            <span className="text-xs font-mono font-black text-primary">
                                 ₹{parseFloat(account?.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
                         </div>
@@ -139,26 +139,20 @@ export default function TerminalHeader({
             {/* Right Section: Tooling */}
             <div className="flex items-center gap-3">
                 {/* Time Display (IST) */}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-background/50 border border-white/[0.02] rounded-lg hidden xl:flex min-w-[100px] justify-center">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-background/50 border border-black/15/[0.02] rounded-lg hidden xl:flex min-w-[100px] justify-center">
                     <Clock className="w-3.5 h-3.5 text-accent" />
                     <span className="text-[11px] font-mono font-bold text-secondary">{currentTime}</span>
                 </div>
 
-                {/* Upstox Login Button */}
-                <a 
-                    href="http://localhost:5000/api/upstox/login"
-                    className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/20 text-accent rounded-lg hover:bg-accent hover:text-background transition-all font-bold text-[11px] uppercase tracking-wider"
-                >
-                    Login Upstox
-                </a>
+
 
                 {/* Symbol Toggle Tabs (NIFTY / BANKNIFTY) */}
-                <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-white/[0.02]">
+                <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-black/15/[0.02]">
                     <button
                         onClick={() => onSelectSymbol('NIFTY')}
                         className={`px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${selectedSymbol === 'NIFTY'
                             ? 'bg-accent text-brand-dark shadow-lg shadow-accent/20'
-                            : 'text-secondary hover:text-white hover:bg-white/5'
+                            : 'text-secondary hover:text-primary hover:bg-white/5'
                             }`}
                     >
                         NIFTY
@@ -167,7 +161,7 @@ export default function TerminalHeader({
                         onClick={() => onSelectSymbol('BANKNIFTY')}
                         className={`px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${selectedSymbol === 'BANKNIFTY'
                             ? 'bg-accent text-brand-dark shadow-lg shadow-accent/20'
-                            : 'text-secondary hover:text-white hover:bg-white/5'
+                            : 'text-secondary hover:text-primary hover:bg-white/5'
                             }`}
                     >
                         BANKNIFTY
@@ -191,7 +185,7 @@ export default function TerminalHeader({
                     >
                         <Bell className="w-5 h-5" />
                         {activeAlertsCount > 0 && (
-                            <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-surface">
+                            <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-primary text-[9px] font-black flex items-center justify-center rounded-full border-2 border-surface">
                                 {activeAlertsCount}
                             </span>
                         )}

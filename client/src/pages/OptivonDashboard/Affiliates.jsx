@@ -18,7 +18,7 @@ export default function Affiliates() {
         <div className="flex flex-col gap-10 max-w-6xl mx-auto h-full font-sans">
 
             {/* Hero Section */}
-            <div className="relative rounded-premium p-12 overflow-hidden bg-surface border border-white/5 shadow-2xl">
+            <div className="relative rounded-premium p-12 overflow-hidden bg-surface border border-black/15 shadow-2xl">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
 
                 <div className="relative z-10 flex flex-col items-start gap-6 max-w-2xl">
@@ -37,7 +37,7 @@ export default function Affiliates() {
                     </p>
 
                     <div className="mt-6 flex flex-col sm:flex-row items-center gap-4 w-full max-w-lg">
-                        <div className="flex-1 bg-background/50 border border-white/10 rounded-instrument px-6 py-4 flex items-center justify-between w-full">
+                        <div className="flex-1 bg-background/50 border border-black/15 rounded-instrument px-6 py-4 flex items-center justify-between w-full">
                             <span className="font-mono text-xs text-secondary truncate">{referralLink}</span>
                             <button
                                 onClick={handleCopy}
@@ -65,7 +65,7 @@ export default function Affiliates() {
 
             {/* Content Blocks */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl">
+                <div className="bg-surface p-10 rounded-premium border border-black/15 shadow-2xl">
                     <h3 className="text-xl font-bold text-primary mb-8 flex items-center gap-4 uppercase tracking-tight">
                         <div className="w-10 h-10 bg-accent/10 rounded-instrument flex items-center justify-center text-accent">
                             <Gift size={20} />
@@ -92,7 +92,7 @@ export default function Affiliates() {
                     </div>
                 </div>
 
-                <div className="group relative rounded-premium overflow-hidden min-h-[350px] shadow-2xl border border-white/5">
+                <div className="group relative rounded-premium overflow-hidden min-h-[350px] shadow-2xl border border-black/15">
                     <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-surface" />
                     <div className="absolute inset-0 flex flex-col justify-end p-10 z-10 bg-gradient-to-t from-surface to-transparent">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/10 backdrop-blur rounded-full mb-6 w-fit border border-accent/20">
@@ -114,7 +114,7 @@ export default function Affiliates() {
 
 function StatCard({ label, value, color }) {
     return (
-        <div className="bg-surface p-8 rounded-premium border border-white/5 shadow-2xl hover:border-accent/30 transition-all">
+        <div className="bg-surface p-8 rounded-premium border border-black/15 shadow-2xl hover:border-accent/30 transition-all">
             <p className="text-[10px] text-muted font-bold uppercase tracking-[0.3em] mb-3">{label}</p>
             <h3 className={`text-4xl font-bold tracking-tighter text-primary`}>{value}</h3>
         </div>

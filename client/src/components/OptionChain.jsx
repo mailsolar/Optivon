@@ -37,18 +37,18 @@ export default function OptionChain({ symbol, spotPrice, onOrder }) {
     }, [spotPrice, symbol]);
 
     return (
-        <div className="bg-surface border-l border-white/5 h-full flex flex-col font-sans">
-            <div className="p-4 border-b border-white/5 bg-background/50 flex justify-between items-center shadow-soft">
+        <div className="bg-surface border-l border-black/15 h-full flex flex-col font-sans">
+            <div className="p-4 border-b border-black/15 bg-background/50 flex justify-between items-center shadow-soft">
                 <span className="text-[11px] font-bold text-accent uppercase tracking-[0.3em] font-display">Module Chain</span>
                 <span className="text-[10px] font-bold text-muted uppercase tracking-widest font-display">{symbol} EXP: JAN 26</span>
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <table className="w-full text-center border-collapse">
-                    <thead className="bg-[#121214] sticky top-0 z-10 text-[10px] text-muted font-bold uppercase tracking-widest border-b border-white/5 font-display">
+                    <thead className="bg-[#121214] sticky top-0 z-10 text-[10px] text-muted font-bold uppercase tracking-widest border-b border-black/15 font-display">
                         <tr>
                             <th className="p-3">CALLS</th>
-                            <th className="p-3 border-x border-white/5 text-white">STRIKE</th>
+                            <th className="p-3 border-x border-black/15 text-primary">STRIKE</th>
                             <th className="p-3">PUTS</th>
                         </tr>
                     </thead>
@@ -67,7 +67,7 @@ export default function OptionChain({ symbol, spotPrice, onOrder }) {
                                 </td>
 
                                 {/* Strike */}
-                                <td className="p-3 bg-background/30 font-display font-black text-white text-[13px] border-x border-white/5 tracking-tighter">{row.strike}</td>
+                                <td className="p-3 bg-background/30 font-display font-black text-primary text-[13px] border-x border-black/15 tracking-tighter">{row.strike}</td>
 
                                 {/* Put Side */}
                                 <td

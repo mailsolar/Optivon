@@ -77,12 +77,12 @@ export default function SettingsPanel({ isOpen, onClose }) {
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center z-[200] animate-in fade-in duration-300 p-6 sm:p-12">
-            <div className="bg-background border border-white/[0.05] rounded-premium w-full max-w-6xl h-full max-h-[900px] shadow-premium flex overflow-hidden relative">
+            <div className="bg-background rounded-premium w-full max-w-6xl h-full max-h-[900px] flex overflow-hidden relative shadow-2xl">
                 
                 {/* Sidebar */}
-                <div className="w-80 bg-surface border-r border-white/5 flex flex-col shrink-0">
-                    <div className="p-10 border-b border-white/[0.03]">
-                        <h2 className="text-xl font-black text-primary tracking-tighter uppercase flex items-center gap-4 text-shadow-glow">
+                <div className="w-80 bg-surface flex flex-col shrink-0">
+                    <div className="p-10">
+                        <h2 className="text-xl font-black text-primary tracking-tighter uppercase flex items-center gap-4">
                             <Settings className="w-6 h-6 text-accent animate-[spin_12s_linear_infinite]" />
                             System Config
                         </h2>
@@ -99,17 +99,17 @@ export default function SettingsPanel({ isOpen, onClose }) {
                                 key={category}
                                 onClick={() => setActiveTab(category)}
                                 className={`w-full text-left px-5 py-3.5 rounded-instrument text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-4 relative overflow-hidden group ${activeTab === category
-                                    ? 'bg-accent/5 text-accent border border-accent/20 shadow-inner'
-                                    : 'text-secondary hover:bg-white/[0.02] hover:text-primary border border-transparent'
+                                    ? 'bg-primary text-surface shadow-md'
+                                    : 'text-secondary hover:bg-white/[0.04] hover:text-primary'
                                     }`}
                             >
-                                {activeTab === category && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-accent rounded-r-full" />}
+
                                 {category.replace(/_/g, ' ')}
                             </button>
                         ))}
                     </div>
 
-                    <div className="p-8 border-t border-white/[0.03]">
+                    <div className="p-8">
                         <button
                             onClick={() => {
                                 if (window.confirm("Initialize complete system reset? All local node configurations will be purged.")) {
@@ -129,14 +129,14 @@ export default function SettingsPanel({ isOpen, onClose }) {
                     <div className="absolute inset-0 bg-gentle-grid opacity-20 pointer-events-none" />
 
                     {/* Header */}
-                    <div className="flex items-center justify-between p-10 border-b border-white/[0.03] relative z-10">
+                    <div className="flex items-center justify-between p-10 relative z-10">
                         <div>
                             <div className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-2">Protocol Segment</div>
                             <h3 className="text-3xl font-black text-primary uppercase tracking-tight">{activeTab.replace(/_/g, ' ')}</h3>
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-12 h-12 rounded-full bg-surface border border-white/5 flex items-center justify-center text-muted hover:text-primary hover:border-accent/30 hover:bg-background transition-all"
+                            className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-muted hover:text-primary hover:bg-background transition-all"
                         >
                             <X size={20} />
                         </button>
@@ -164,9 +164,9 @@ export default function SettingsPanel({ isOpen, onClose }) {
                             const isActive = settings[setting.id] ?? setting.default;
 
                             return (
-                                <div key={setting.id} className="flex items-center justify-between p-8 bg-surface/30 border border-white/[0.03] rounded-premium hover:border-accent/20 transition-all group shadow-sm">
+                                <div key={setting.id} className="flex items-center justify-between p-8 bg-surface/30 rounded-premium hover:bg-surface/60 transition-all group">
                                     <div className="flex items-center gap-6">
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-500 ${isActive ? 'bg-accent/10 text-accent border-accent/20 shadow-inner' : 'bg-background/40 text-muted border-white/5'}`}>
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${isActive ? 'bg-primary text-background' : 'bg-background text-muted'}`}>
                                             {setting.icon && <setting.icon size={20} />}
                                         </div>
                                         <div>
@@ -177,7 +177,7 @@ export default function SettingsPanel({ isOpen, onClose }) {
 
                                     <div className="w-56 flex justify-end">
                                         {setting.type === 'info' && (
-                                            <div className="px-5 py-2 rounded-instrument bg-background/60 border border-white/10 text-primary font-mono font-black text-sm tracking-tighter shadow-inner">
+                                            <div className="px-5 py-2 rounded-instrument bg-background/60 border border-black/15 text-primary font-mono font-black text-sm tracking-tighter shadow-inner">
                                                 {setting.value}
                                             </div>
                                         )}
@@ -190,7 +190,7 @@ export default function SettingsPanel({ isOpen, onClose }) {
                                                     onChange={(e) => handleChange(setting.id, e.target.checked)}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-14 h-7 bg-background border border-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-accent after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent peer-checked:shadow-[0_0_15px_rgba(197,160,89,0.4)]"></div>
+                                                <div className="w-14 h-7 bg-background peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-secondary after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:after:bg-surface border border-transparent shadow-inner"></div>
                                             </label>
                                         )}
 
@@ -202,7 +202,7 @@ export default function SettingsPanel({ isOpen, onClose }) {
                                                 min={setting.min}
                                                 max={setting.max}
                                                 step={setting.step || 1}
-                                                className="w-24 bg-background/60 border border-white/10 rounded-instrument px-4 py-2.5 text-right font-mono font-black text-primary text-sm focus:border-accent outline-none transition-all shadow-inner"
+                                                className="w-24 bg-background/60 border border-black/15 rounded-instrument px-4 py-2.5 text-right font-mono font-black text-primary text-sm focus:border-accent outline-none transition-all shadow-inner"
                                             />
                                         )}
 
@@ -210,7 +210,7 @@ export default function SettingsPanel({ isOpen, onClose }) {
                                             <select
                                                 value={isActive}
                                                 onChange={(e) => handleChange(setting.id, e.target.value)}
-                                                className="w-full bg-background/60 border border-white/10 rounded-instrument px-5 py-2.5 text-primary font-bold text-[10px] uppercase tracking-widest focus:border-accent outline-none appearance-none transition-all shadow-inner text-right"
+                                                className="w-full bg-background/60 border border-black/15 rounded-instrument px-5 py-2.5 text-primary font-bold text-[10px] uppercase tracking-widest focus:border-accent outline-none appearance-none transition-all shadow-inner text-right"
                                             >
                                                 {setting.options.map(opt => (
                                                     <option key={opt} value={opt} className="bg-surface">{opt}</option>
@@ -224,7 +224,7 @@ export default function SettingsPanel({ isOpen, onClose }) {
                                                     type="color"
                                                     value={isActive}
                                                     onChange={(e) => handleChange(setting.id, e.target.value)}
-                                                    className="w-12 h-12 bg-transparent cursor-pointer rounded-instrument p-0 overflow-hidden border-2 border-white/10 hover:border-accent transition-all"
+                                                    className="w-12 h-12 bg-transparent cursor-pointer rounded-instrument p-0 overflow-hidden border-2 border-black/15 hover:border-accent transition-all"
                                                 />
                                             </div>
                                         )}
@@ -235,14 +235,14 @@ export default function SettingsPanel({ isOpen, onClose }) {
                     </div>
 
                     {/* Footer */}
-                    <div className="p-10 border-t border-white/[0.03] flex justify-between items-center bg-background/50 backdrop-blur-md relative z-10">
+                    <div className="p-10 flex justify-between items-center bg-background/50 backdrop-blur-md relative z-10">
                         <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-accent animate-pulse shadow-[0_0_8px_#C50022]" />
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                             <span className="text-[10px] text-muted font-black uppercase tracking-[0.3em]">Synapse Auto-Save Active</span>
                         </div>
                         <button
                             onClick={onClose}
-                            className="px-10 py-4 bg-primary text-background font-black rounded-instrument text-[10px] uppercase tracking-[0.2em] shadow-premium hover:bg-accent transition-all flex items-center gap-3 group"
+                            className="px-10 py-4 bg-primary text-background font-black rounded-instrument text-[10px] uppercase tracking-[0.2em]  hover:bg-accent transition-all flex items-center gap-3 group"
                         >
                             Commit Changes <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </button>

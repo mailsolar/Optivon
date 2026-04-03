@@ -85,7 +85,7 @@ const StockDetail = () => {
         <div className="min-h-screen bg-background text-primary p-8 font-sans">
             <div className="max-w-7xl mx-auto space-y-10">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-surface rounded-premium p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-surface rounded-premium p-10 border border-black/15 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
                     
                     <div className="relative z-10 flex flex-col gap-4">
@@ -118,10 +118,10 @@ const StockDetail = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                     
                     {/* Primary Chart Area */}
-                    <div className="lg:col-span-8 bg-surface rounded-premium p-10 border border-white/5 shadow-2xl flex flex-col h-[700px]">
+                    <div className="lg:col-span-8 bg-surface rounded-premium p-10 border border-black/15 shadow-2xl flex flex-col h-[700px]">
                         <div className="flex justify-between items-center mb-10">
                             <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">Chronological Performance</h3>
-                            <div className="flex gap-4 p-1 bg-background rounded-instrument border border-white/5">
+                            <div className="flex gap-4 p-1 bg-background rounded-instrument border border-black/15">
                                 {['1H', '4H', '1D', '1W'].map(tf => (
                                     <button key={tf} className={`px-6 py-2 rounded-instrument text-[10px] font-bold uppercase tracking-widest transition-all ${tf === '1D' ? 'bg-accent text-background shadow-soft' : 'text-muted hover:text-primary'}`}>
                                         {tf}
@@ -136,7 +136,7 @@ const StockDetail = () => {
                     <div className="lg:col-span-4 flex flex-col gap-10">
                         
                         {/* Fundamentals */}
-                        <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl">
+                        <div className="bg-surface p-10 rounded-premium border border-black/15 shadow-2xl">
                             <h3 className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-8">Base Metrics</h3>
                             <div className="space-y-6">
                                 <MetricLine label="Market Cap" value="1.2T" />
@@ -147,7 +147,7 @@ const StockDetail = () => {
                         </div>
 
                         {/* Network Intel */}
-                        <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl flex-1">
+                        <div className="bg-surface p-10 rounded-premium border border-black/15 shadow-2xl flex-1">
                             <h3 className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-8">Node Intel</h3>
                             <div className="space-y-6">
                                 {[
@@ -177,7 +177,7 @@ const StockDetail = () => {
 
 function MetricLine({ label, value }) {
     return (
-        <div className="flex justify-between items-center py-2 border-b border-white/[0.03]">
+        <div className="flex justify-between items-center py-2 border-b border-black/15/[0.03]">
             <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{label}</span>
             <span className="text-sm font-bold text-primary tracking-tight">{value}</span>
         </div>

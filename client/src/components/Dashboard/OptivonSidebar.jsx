@@ -58,9 +58,9 @@ export default function OptivonSidebar() {
     }
 
     return (
-        <div className="w-64 h-full bg-surface flex flex-col text-primary flex-shrink-0 border-r border-white/5 font-sans relative z-[60]">
+        <div className="w-64 h-full bg-surface flex flex-col text-primary flex-shrink-0 border-r border-black/15 font-sans relative z-[60]">
             {/* Logo */}
-            <div className="h-20 flex items-center px-10 border-b border-white/[0.03]">
+            <div className="h-20 flex items-center px-10 border-b border-black/15/[0.03]">
                 <div className="flex flex-col gap-0.5">
                     <div className="font-bold text-xl tracking-[-0.05em] text-primary uppercase text-shadow-glow">OPTIVON</div>
                     <div className="text-[8px] font-black uppercase tracking-[0.4em] text-accent leading-none">Institutional</div>
@@ -85,8 +85,8 @@ export default function OptivonSidebar() {
                                     className={({ isActive }) => `
                                         flex items-center gap-4 px-5 py-3.5 rounded-instrument text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-500 group relative
                                         ${isActive
-                                            ? 'bg-accent text-background shadow-premium'
-                                            : 'text-secondary hover:text-primary hover:bg-white/[0.02]'}
+                                            ? 'bg-primary text-white '
+                                            : 'text-secondary hover:text-primary hover:bg-black/5'}
                                     `}
                                 >
                                     {({ isActive }) => (
@@ -107,7 +107,7 @@ export default function OptivonSidebar() {
 
             {/* Server Status */}
             <div className="p-8">
-                <div className="bg-background/30 rounded-premium p-6 border border-white/[0.03] shadow-inner relative overflow-hidden group">
+                <div className="bg-background/30 rounded-premium p-6 border border-black/15/[0.03] shadow-inner relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-0.5 bg-accent/20" />
                     <div className="text-[9px] font-black text-muted uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                         <Shield size={10} className="text-accent" />

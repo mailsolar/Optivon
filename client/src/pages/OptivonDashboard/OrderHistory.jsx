@@ -32,7 +32,7 @@ export default function OrderHistory() {
                     <p className="text-secondary font-medium text-sm">Full transparency of your billing and trade executions.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex p-1 bg-surface border border-white/5 rounded-instrument">
+                    <div className="flex p-1 bg-surface border border-black/15 rounded-instrument">
                         <button 
                             onClick={() => setActiveTab('Billing')}
                             className={`px-6 py-2 rounded-instrument text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'Billing' ? 'bg-accent text-background shadow-soft' : 'text-muted hover:text-primary'}`}
@@ -49,23 +49,23 @@ export default function OrderHistory() {
                 </div>
             </div>
 
-            <div className="bg-surface rounded-premium border border-white/5 shadow-2xl flex flex-col overflow-hidden">
+            <div className="bg-surface rounded-premium border border-black/15 shadow-2xl flex flex-col overflow-hidden">
                 
                 {/* Search / Filter Bar */}
-                <div className="px-10 py-6 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 bg-surface/50">
+                <div className="px-10 py-6 border-b border-black/15 flex flex-col md:flex-row justify-between items-center gap-6 bg-surface/50">
                     <div className="relative w-full md:w-96 group">
                         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
                         <input 
                             type="text" 
                             placeholder="Filter by ticket or date..." 
-                            className="w-full bg-background/50 border border-white/5 rounded-instrument py-2.5 pl-12 pr-4 text-xs font-bold text-primary placeholder:text-muted focus:outline-none focus:border-accent/30 transition-all uppercase tracking-widest"
+                            className="w-full bg-background/50 border border-black/15 rounded-instrument py-2.5 pl-12 pr-4 text-xs font-bold text-primary placeholder:text-muted focus:outline-none focus:border-accent/30 transition-all uppercase tracking-widest"
                         />
                     </div>
                     <div className="flex gap-4">
-                        <button className="flex items-center gap-2 px-4 py-2.5 bg-background border border-white/5 rounded-instrument text-[10px] font-bold text-muted uppercase tracking-widest hover:text-primary hover:border-white/10 transition-all">
+                        <button className="flex items-center gap-2 px-4 py-2.5 bg-background border border-black/15 rounded-instrument text-[10px] font-bold text-muted uppercase tracking-widest hover:text-primary hover:border-black/15 transition-all">
                             <Filter size={14} /> Filter
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2.5 bg-background border border-white/5 rounded-instrument text-[10px] font-bold text-muted uppercase tracking-widest hover:text-primary hover:border-white/10 transition-all">
+                        <button className="flex items-center gap-2 px-4 py-2.5 bg-background border border-black/15 rounded-instrument text-[10px] font-bold text-muted uppercase tracking-widest hover:text-primary hover:border-black/15 transition-all">
                             <Download size={14} /> Export
                         </button>
                     </div>
@@ -145,12 +145,12 @@ export default function OrderHistory() {
                 )}
 
                 {/* Pagination Footer */}
-                <div className="px-10 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 bg-surface/50">
+                <div className="px-10 py-8 border-t border-black/15 flex flex-col md:flex-row justify-between items-center gap-6 bg-surface/50">
                     <span className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">Displaying Sector 01-05 / Total Nodes: 05</span>
                     <div className="flex items-center gap-3">
-                        <button className="w-10 h-10 flex items-center justify-center rounded-instrument bg-background border border-white/5 text-muted hover:text-primary hover:border-white/10 transition-all font-bold">{'<'}</button>
+                        <button className="w-10 h-10 flex items-center justify-center rounded-instrument bg-background border border-black/15 text-muted hover:text-primary hover:border-black/15 transition-all font-bold">{'<'}</button>
                         <button className="w-10 h-10 flex items-center justify-center rounded-instrument bg-accent text-background font-black shadow-soft text-xs">1</button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-instrument bg-background border border-white/5 text-muted hover:text-primary hover:border-white/10 transition-all font-bold">{'>'}</button>
+                        <button className="w-10 h-10 flex items-center justify-center rounded-instrument bg-background border border-black/15 text-muted hover:text-primary hover:border-black/15 transition-all font-bold">{'>'}</button>
                     </div>
                 </div>
             </div>

@@ -56,7 +56,7 @@ export default function Orders({ accountId }) {
         }
 
         return data.map(item => (
-            <div key={item.id} className="p-3 border-b border-white/5 hover:bg-white/5">
+            <div key={item.id} className="p-3 border-b border-black/15 hover:bg-white/5">
                 <div className="flex justify-between mb-1">
                     <span className="font-semibold text-gray-200">{item.symbol}</span>
                     <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded ${item.status === 'filled' ? 'bg-green-500/20 text-green-400' :
@@ -74,7 +74,7 @@ export default function Orders({ accountId }) {
                     <span>@ ₹{parseFloat(item.entry_price || item.limit_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 {item.status === 'closed' && (
-                    <div className="flex justify-between text-[10px] mt-2 pt-2 border-t border-white/5">
+                    <div className="flex justify-between text-[10px] mt-2 pt-2 border-t border-black/15">
                         <span className="text-secondary/50 uppercase tracking-wider">Realized PnL</span>
                         <span className={`font-mono font-bold ${item.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {item.pnl >= 0 ? '+' : ''}₹{Math.abs(item.pnl || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -98,16 +98,16 @@ export default function Orders({ accountId }) {
     return (
         <div className="flex flex-col h-full bg-surface text-sm overflow-hidden">
             {/* Tabs */}
-            <div className="flex border-b border-white/5">
+            <div className="flex border-b border-black/15">
                 <button
                     onClick={() => setActiveTab('ACTIVE')}
-                    className={`flex-1 py-3 text-[11px] font-bold font-display uppercase tracking-widest ${activeTab === 'ACTIVE' ? 'text-accent border-b-2 border-accent bg-white/5 shadow-[0_0_15px_rgba(197,0,34,0.15)]' : 'text-secondary hover:text-white hover:bg-white/[0.02]'}`}
+                    className={`flex-1 py-3 text-[11px] font-bold font-display uppercase tracking-widest ${activeTab === 'ACTIVE' ? 'text-accent border-b-2 border-accent bg-white/5 shadow-[0_0_15px_rgba(197,0,34,0.15)]' : 'text-secondary hover:text-primary hover:bg-white/[0.02]'}`}
                 >
                     ACTIVE
                 </button>
                 <button
                     onClick={() => setActiveTab('HISTORY')}
-                    className={`flex-1 py-3 text-[11px] font-bold font-display uppercase tracking-widest ${activeTab === 'HISTORY' ? 'text-accent border-b-2 border-accent bg-white/5 shadow-[0_0_15px_rgba(197,0,34,0.15)]' : 'text-secondary hover:text-white hover:bg-white/[0.02]'}`}
+                    className={`flex-1 py-3 text-[11px] font-bold font-display uppercase tracking-widest ${activeTab === 'HISTORY' ? 'text-accent border-b-2 border-accent bg-white/5 shadow-[0_0_15px_rgba(197,0,34,0.15)]' : 'text-secondary hover:text-primary hover:bg-white/[0.02]'}`}
                 >
                     HISTORY
                 </button>

@@ -15,16 +15,16 @@ export default function TerminalSidebar({ quotes, positions, account, onClosePos
     ];
 
     return (
-        <div className="w-80 bg-surface border-l border-white/10 flex flex-col h-full shrink-0">
+        <div className="w-80 bg-surface border-l border-black/15 flex flex-col h-full shrink-0">
             {/* Tabs */}
-            <div className="flex border-b border-white/10 bg-surface">
+            <div className="flex border-b border-black/15 bg-surface">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex-1 py-4 text-[11px] font-bold font-display tracking-[0.2em] transition-all uppercase relative ${activeTab === tab.id
-                            ? 'text-white bg-accent'
-                            : 'text-secondary hover:text-white hover:bg-white/5'
+                            ? 'text-primary bg-accent'
+                            : 'text-secondary hover:text-primary hover:bg-white/5'
                             }`}
                     >
                         {tab.label}

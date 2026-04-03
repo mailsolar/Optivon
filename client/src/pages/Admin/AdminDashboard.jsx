@@ -61,7 +61,7 @@ export default function AdminDashboard() {
                             <span className="w-1 h-1 bg-white/20 rounded-full" />
                             <span className="text-[10px] text-muted font-bold tracking-[0.1em] uppercase font-mono">Protocol // Admin_Node</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-display font-black text-white uppercase tracking-tighter flex items-center gap-4">
+                        <h1 className="text-5xl md:text-7xl font-display font-black text-primary uppercase tracking-tighter flex items-center gap-4">
                             <Box className="text-accent" size={48} />
                             Master Control
                         </h1>
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
 
                     <button 
                         onClick={() => navigate('/dashboard')}
-                        className="flex items-center gap-3 bg-surface border border-white/5 px-8 py-4 rounded-instrument text-[10px] font-black uppercase tracking-[0.2em] text-muted hover:text-accent hover:border-accent/30 hover:bg-background transition-all shadow-premium group"
+                        className="flex items-center gap-3 bg-surface border border-black/15 px-8 py-4 rounded-instrument text-[10px] font-black uppercase tracking-[0.2em] text-muted hover:text-accent hover:border-accent/30 hover:bg-background transition-all  group"
                     >
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Return to Intelligence Hub
@@ -88,8 +88,8 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                     
                     {/* Activity Feed */}
-                    <div className="xl:col-span-2 bg-surface rounded-premium border border-white/[0.03] shadow-premium overflow-hidden">
-                        <div className="p-8 border-b border-white/[0.03] flex justify-between items-center bg-background/30 px-10">
+                    <div className="xl:col-span-2 bg-surface rounded-premium border border-black/15/[0.03]  overflow-hidden">
+                        <div className="p-8 border-b border-black/15/[0.03] flex justify-between items-center bg-background/30 px-10">
                             <div>
                                 <h2 className="text-lg font-black text-primary uppercase tracking-tight">Node Synchronizations</h2>
                                 <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-1">Real-time Registration Feed</p>
@@ -103,9 +103,9 @@ export default function AdminDashboard() {
                         <div className="p-4 sm:p-8 space-y-3">
                             {stats.recentUsers && stats.recentUsers.length > 0 ? (
                                 stats.recentUsers.map((user, i) => (
-                                    <div key={i} className="flex items-center justify-between p-6 bg-background/40 hover:bg-background/60 rounded-instrument border border-white/[0.02] hover:border-accent/10 transition-all group">
+                                    <div key={i} className="flex items-center justify-between p-6 bg-background/40 hover:bg-background/60 rounded-instrument border border-black/15/[0.02] hover:border-accent/10 transition-all group">
                                         <div className="flex items-center gap-6">
-                                            <div className="w-10 h-10 rounded-full bg-surface border border-white/5 flex items-center justify-center text-accent/40 group-hover:text-accent transition-colors">
+                                            <div className="w-10 h-10 rounded-full bg-surface border border-black/15 flex items-center justify-center text-accent/40 group-hover:text-accent transition-colors">
                                                 <Globe size={18} />
                                             </div>
                                             <div>
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
                                                 <div className="text-[9px] text-muted font-black uppercase tracking-[0.2em]">Node Link Identified</div>
                                             </div>
                                         </div>
-                                        <span className="text-[10px] text-muted font-mono font-bold uppercase tracking-tighter bg-surface px-3 py-1 rounded-full border border-white/5">
+                                        <span className="text-[10px] text-muted font-mono font-bold uppercase tracking-tighter bg-surface px-3 py-1 rounded-full border border-black/15">
                                             {new Date(user.created_at).toLocaleString()}
                                         </span>
                                     </div>
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
 
                     {/* Quick Actions / System Health */}
                     <div className="space-y-8">
-                        <div className="bg-surface rounded-premium border border-white/[0.03] p-10 shadow-premium group">
+                        <div className="bg-surface rounded-premium border border-black/15/[0.03] p-10  group">
                             <h3 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
                                 <Shield size={16} className="text-accent" />
                                 Infrastructure Health
@@ -144,33 +144,33 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        <div className="bg-accent/5 border border-accent/20 p-10 shadow-premium relative overflow-hidden group">
+                        <div className="bg-accent/5 border border-accent/20 p-10  relative overflow-hidden group">
                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                                <TrendingUp size={64} className="text-accent" />
                            </div>
                            <h3 className="text-[12px] font-display font-black text-accent uppercase tracking-[0.2em] mb-4">Protocol Pulse</h3>
                            <p className="text-xs text-secondary font-medium leading-relaxed mb-6">Aggregate node performance is currently tracking <span className="text-accent font-bold">+12.4%</span> above baseline expectations.</p>
-                           <div className="w-full h-2 bg-black overflow-hidden border border-white/10">
+                           <div className="w-full h-2 bg-black overflow-hidden border border-black/15">
                                <div className="h-full bg-accent w-[85%] shadow-[0_0_15px_#C50022]" />
                            </div>
                         </div>
 
                         {/* MASTER CONTROLS */}
                         <div className="p-10 border border-accent/30 bg-accent/5">
-                            <h3 className="text-2xl font-display font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-3">
+                            <h3 className="text-2xl font-display font-black text-primary uppercase tracking-tighter mb-6 flex items-center gap-3">
                                 <AlertTriangle size={24} className="text-accent" />
                                 System Overrides
                             </h3>
                             <div className="space-y-4">
                                 <button 
                                     onClick={() => handleOverride('halt_market')}
-                                    className="w-full py-4 bg-black border border-white/10 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-white hover:text-black transition-colors"
+                                    className="w-full py-4 bg-primary text-white border border-black/15 font-bold uppercase tracking-widest text-[10px] hover:bg-black/80 transition-colors"
                                 >
                                     Halt Market Data Feed
                                 </button>
                                 <button 
                                     onClick={() => handleOverride('liquidate_all')}
-                                    className="w-full py-4 bg-accent text-white font-bold uppercase tracking-widest text-[10px] hover:bg-white hover:text-black transition-colors"
+                                    className="w-full py-4 bg-primary text-white font-bold uppercase tracking-widest text-[10px] hover:bg-black/80 transition-colors"
                                 >
                                     Force Liquidate All Nodes
                                 </button>
@@ -204,13 +204,13 @@ async function handleOverride(action) {
 function StatCard({ label, value, change, icon: Icon, type }) {
     const typeStyles = {
         primary: {
-            iconBg: 'bg-surface border-white/5 text-muted',
-            changeText: 'text-muted',
+            iconBg: 'bg-surface border-black/15 text-muted',
+            changeText: 'text-white',
             valueText: 'text-primary'
         },
         accent: {
             iconBg: 'bg-accent/5 border-accent/20 text-accent',
-            changeText: 'text-accent',
+            changeText: 'text-white',
             valueText: 'text-primary'
         },
         danger: {
@@ -223,17 +223,17 @@ function StatCard({ label, value, change, icon: Icon, type }) {
     const style = typeStyles[type];
 
     return (
-        <div className="bg-surface p-8 border border-white/10 hover:border-accent transition-colors group overflow-hidden relative">
+        <div className="bg-surface p-8 border border-black/15 hover:border-accent transition-colors group overflow-hidden relative">
             <div className="flex justify-between items-start mb-6 relative z-10">
                 <div className={`p-4 border transition-all duration-500 group-hover:scale-110 ${style.iconBg}`}>
                     <Icon size={24} />
                 </div>
-                <div className={`px-4 py-2 bg-black border border-white/10 text-[10px] font-bold uppercase tracking-widest ${style.changeText}`}>
+                <div className={`px-4 py-2 bg-black border border-black/15 text-[10px] font-bold uppercase tracking-widest ${style.changeText}`}>
                     {change}
                 </div>
             </div>
             <div className={`text-5xl font-display font-black mb-2 tracking-tighter relative z-10 ${style.valueText}`}>{value}</div>
-            <div className="text-[11px] text-white/50 font-bold uppercase tracking-[0.2em] relative z-10">{label}</div>
+            <div className="text-[11px] text-secondary font-bold uppercase tracking-[0.2em] relative z-10">{label}</div>
         </div>
     );
 }

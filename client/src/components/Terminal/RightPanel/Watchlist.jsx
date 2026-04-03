@@ -11,7 +11,7 @@ export default function Watchlist({ quotes = {}, onSelectSymbol, selectedSymbol,
     return (
         <div className="flex flex-col h-full bg-background font-sans overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-white/[0.03] bg-surface/30">
+            <div className="p-6 border-b border-black/15/[0.03] bg-surface/30">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-instrument bg-accent/5 flex items-center justify-center border border-accent/10 shadow-inner">
@@ -40,8 +40,8 @@ export default function Watchlist({ quotes = {}, onSelectSymbol, selectedSymbol,
                                 className={`
                                     w-full rounded-premium p-5 transition-all relative overflow-hidden group border
                                     ${isSelected
-                                        ? 'bg-accent/5 border-accent/20 shadow-premium'
-                                        : 'bg-surface/30 border-white/[0.03] hover:border-accent/10 hover:bg-surface/50'
+                                        ? 'bg-accent/5 border-accent/20 '
+                                        : 'bg-surface/30 border-black/15/[0.03] hover:border-accent/10 hover:bg-surface/50'
                                     }
                                 `}
                             >
@@ -94,7 +94,7 @@ export default function Watchlist({ quotes = {}, onSelectSymbol, selectedSymbol,
             </div>
 
             {/* Footer */}
-            <div className="px-8 py-5 bg-surface/50 border-t border-white/[0.03]">
+            <div className="px-8 py-5 bg-surface/50 border-t border-black/15/[0.03]">
                 <div className="flex justify-between items-center">
                     <span className="text-[8px] font-black text-muted uppercase tracking-[0.4em]">Node Watch v5.2</span>
                     <div className="flex items-center gap-3">

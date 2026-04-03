@@ -66,7 +66,7 @@ export default function AccountMetrics() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-6">
-                    <button onClick={() => navigate(-1)} className="p-4 bg-surface border border-white/5 rounded-full hover:border-accent/50 transition-all group">
+                    <button onClick={() => navigate(-1)} className="p-4 bg-surface border border-black/15 rounded-full hover:border-accent/50 transition-all group">
                         <ArrowLeft size={20} className="text-secondary group-hover:text-accent transition-colors" />
                     </button>
                     <div>
@@ -81,7 +81,7 @@ export default function AccountMetrics() {
                     </div>
                 </div>
                 <div className="flex gap-4">
-                    <button className="flex items-center gap-3 px-6 py-3 bg-surface border border-white/5 text-primary rounded-instrument font-bold text-[10px] uppercase tracking-[0.2em] hover:border-accent/30 transition-all"><Share2 size={16} className="text-accent" /> Share Matrix</button>
+                    <button className="flex items-center gap-3 px-6 py-3 bg-surface border border-black/15 text-primary rounded-instrument font-bold text-[10px] uppercase tracking-[0.2em] hover:border-accent/30 transition-all"><Share2 size={16} className="text-accent" /> Share Matrix</button>
                     <button className="flex items-center gap-3 px-6 py-3 bg-accent text-background rounded-instrument font-bold text-[10px] uppercase tracking-[0.2em] shadow-soft hover:bg-primary transition-all"><Key size={16} /> Access Keys</button>
                 </div>
             </div>
@@ -92,7 +92,7 @@ export default function AccountMetrics() {
                 <div className="xl:col-span-8 flex flex-col gap-10 min-w-0">
 
                     {/* Chart Card */}
-                    <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl h-[450px] relative overflow-hidden">
+                    <div className="bg-surface p-10 rounded-premium border border-black/15 shadow-2xl h-[450px] relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
                         <div className="flex justify-between items-center mb-10 relative z-10">
                             <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">Equity Projection</h3>
@@ -114,7 +114,7 @@ export default function AccountMetrics() {
                                     <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#646466', fontWeight: 700 }} />
                                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#646466', fontWeight: 700 }} domain={['auto', 'auto']} />
                                     <Tooltip 
-                                        contentStyle={{ backgroundColor: '#1C1C1E', borderRadius: '12px', border: '1px border-white/10', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', padding: '12px' }}
+                                        contentStyle={{ backgroundColor: '#1C1C1E', borderRadius: '12px', border: '1px border-black/15', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', padding: '12px' }}
                                         itemStyle={{ color: '#C5A059', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}
                                         labelStyle={{ color: '#F5F5F7', marginBottom: '4px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase' }}
                                     />
@@ -125,8 +125,8 @@ export default function AccountMetrics() {
                     </div>
 
                     {/* Table Card */}
-                    <div className="bg-surface rounded-premium border border-white/5 shadow-2xl overflow-hidden flex flex-col">
-                        <div className="px-10 py-8 border-b border-white/5 bg-surface/50 backdrop-blur-md">
+                    <div className="bg-surface rounded-premium border border-black/15 shadow-2xl overflow-hidden flex flex-col">
+                        <div className="px-10 py-8 border-b border-black/15 bg-surface/50 backdrop-blur-md">
                             <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">Temporal Summary</h3>
                         </div>
                         <div className="overflow-x-auto">
@@ -163,20 +163,20 @@ export default function AccountMetrics() {
                 <div className="xl:col-span-4 flex flex-col gap-10">
 
                     {/* Info Card */}
-                    <div className="bg-surface p-10 rounded-premium border border-white/5 shadow-2xl space-y-8">
+                    <div className="bg-surface p-10 rounded-premium border border-black/15 shadow-2xl space-y-8">
                         <div className="flex flex-col gap-1">
                             <div className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Module Configuration</div>
                         </div>
                         <div className="space-y-6">
-                            <div className="flex justify-between items-center py-4 border-b border-white/5">
+                            <div className="flex justify-between items-center py-4 border-b border-black/15">
                                 <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Protocol Type</span>
                                 <span className="text-[10px] font-bold bg-accent/5 text-accent px-3 py-1 rounded-full border border-accent/20 uppercase tracking-widest">{account.type}</span>
                             </div>
-                            <div className="flex justify-between items-center py-4 border-b border-white/5">
+                            <div className="flex justify-between items-center py-4 border-b border-black/15">
                                 <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Base Allocation</span>
                                 <span className="text-xl font-bold text-primary tracking-tighter">₹{account.size.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between items-center py-4 border-b border-white/5">
+                            <div className="flex justify-between items-center py-4 border-b border-black/15">
                                 <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Current Equity</span>
                                 <span className="text-xl font-bold text-primary tracking-tighter">₹{account.equity.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>
@@ -204,13 +204,13 @@ export default function AccountMetrics() {
                                     <span className="text-2xl font-bold text-primary tracking-tighter">₹{profitTarget.toLocaleString()}</span>
                                 </div>
                                 <div className="text-right">
-                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border ${currentProfit >= profitTarget ? 'bg-accent text-background border-accent' : 'bg-white/5 text-muted border-white/10'}`}>
+                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border ${currentProfit >= profitTarget ? 'bg-accent text-background border-accent' : 'bg-white/5 text-muted border-black/15'}`}>
                                         {currentProfit >= profitTarget ? 'Cleared' : 'Syncing'}
                                     </span>
                                     <div className="text-[10px] font-bold text-accent mt-1 uppercase tracking-widest">+{Math.min((currentProfit / profitTarget) * 100, 100).toFixed(1)}%</div>
                                 </div>
                             </div>
-                            <div className="h-1.5 bg-background rounded-full overflow-hidden border border-white/5">
+                            <div className="h-1.5 bg-background rounded-full overflow-hidden border border-black/15">
                                 <div className="h-full bg-accent transition-all duration-1000" style={{ width: `${profitProgress}%` }} />
                             </div>
                         </div>
@@ -229,7 +229,7 @@ export default function AccountMetrics() {
                                     <div className="text-[10px] font-bold text-red-500 mt-1 uppercase tracking-widest">-{dailyProgress.toFixed(1)}%</div>
                                 </div>
                             </div>
-                            <div className="h-1.5 bg-background rounded-full overflow-hidden border border-white/5">
+                            <div className="h-1.5 bg-background rounded-full overflow-hidden border border-black/15">
                                 <div className={`h-full transition-all duration-1000 ${currentDailyLoss > dailyLossLimit ? 'bg-red-500' : 'bg-red-400/30'}`} style={{ width: `${dailyProgress}%` }} />
                             </div>
                         </div>
@@ -248,7 +248,7 @@ export default function AccountMetrics() {
                                     <div className="text-[10px] font-bold text-muted mt-1 uppercase tracking-widest">{maxLossProgress.toFixed(1)}% Usage</div>
                                 </div>
                             </div>
-                            <div className="h-1.5 bg-background rounded-full overflow-hidden border border-white/5">
+                            <div className="h-1.5 bg-background rounded-full overflow-hidden border border-black/15">
                                 <div className={`h-full transition-all duration-1000 ${currentMaxLoss > maxLossLimit ? 'bg-red-500' : 'bg-white/10'}`} style={{ width: `${maxLossProgress}%` }} />
                             </div>
                         </div>

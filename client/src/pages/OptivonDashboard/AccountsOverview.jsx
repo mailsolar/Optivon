@@ -34,7 +34,7 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md p-4">
-            <div className="bg-surface rounded-premium border border-white/10 w-full max-w-md overflow-hidden shadow-2xl relative">
+            <div className="bg-surface rounded-premium border border-black/15 w-full max-w-md overflow-hidden shadow-2xl relative">
                 <button onClick={onClose} className="absolute top-6 right-6 text-muted hover:text-primary transition-colors"><X size={20} /></button>
 
                 <div className="p-10">
@@ -50,7 +50,7 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                                 onClick={() => setSelectedLevel(level.id)}
                                 className={`p-5 rounded-instrument border flex justify-between items-center transition-all ${selectedLevel === level.id
                                     ? 'bg-accent/5 border-accent'
-                                    : 'bg-background/50 border-white/5 hover:border-white/20'
+                                    : 'bg-background/50 border-black/15 hover:border-black/15'
                                     }`}
                             >
                                 <div>
@@ -58,7 +58,7 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                                     <p className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1">Allocation: ₹{level.size.toLocaleString('en-IN')}</p>
                                     <p className="text-sm font-bold text-primary mt-2">₹{level.price.toLocaleString('en-IN')}</p>
                                 </div>
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${selectedLevel === level.id ? 'border-accent bg-accent' : 'border-white/10'
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${selectedLevel === level.id ? 'border-accent bg-accent' : 'border-black/15'
                                     }`}>
                                     {selectedLevel === level.id && <div className="w-2.5 h-2.5 bg-background rounded-full" />}
                                 </div>
@@ -69,7 +69,7 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                     <button
                         onClick={handleBuy}
                         disabled={loading}
-                        className="w-full bg-accent text-background font-bold py-4 rounded-instrument uppercase tracking-[0.3em] text-[11px] hover:bg-primary transition-all disabled:opacity-50 shadow-soft"
+                        className="w-full bg-primary text-white font-bold py-4 rounded-instrument uppercase tracking-[0.3em] text-[11px] hover:bg-black/80 transition-all disabled:opacity-50 shadow-soft"
                     >
                         {loading ? 'Processing...' : 'Initialize Allocation'}
                     </button>
@@ -160,7 +160,7 @@ export default function AccountsOverview() {
             <div className="flex-1 min-w-0 flex flex-col gap-10">
 
                 {/* Hero Card */}
-                <div className="relative rounded-premium p-12 overflow-hidden bg-surface border border-white/5 shadow-2xl">
+                <div className="relative rounded-premium p-12 overflow-hidden bg-surface border border-black/15 shadow-2xl">
                     <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none" />
 
                     <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
@@ -173,7 +173,7 @@ export default function AccountsOverview() {
                             </p>
                             <div className="flex gap-4">
                                 {['Zero Commision', 'Direct Execution', 'Smart Payouts'].map((tag, i) => (
-                                    <div key={i} className="px-4 py-2 bg-background/50 rounded-full border border-white/5 text-[9px] font-bold uppercase tracking-widest text-muted">
+                                    <div key={i} className="px-4 py-2 bg-background/50 rounded-full border border-black/15 text-[9px] font-bold uppercase tracking-widest text-muted">
                                         {tag}
                                     </div>
                                 ))}
@@ -181,7 +181,7 @@ export default function AccountsOverview() {
                         </div>
                         <button
                             onClick={() => setShowPurchase(true)}
-                            className="flex items-center gap-4 bg-accent text-background px-8 py-4 rounded-instrument font-bold text-[11px] uppercase tracking-[0.3em] transition-all hover:bg-primary shadow-soft group"
+                            className="flex items-center gap-4 bg-primary text-white px-8 py-4 rounded-instrument font-bold text-[11px] uppercase tracking-[0.3em] transition-all hover:bg-black/80 shadow-soft group"
                         >
                             Start Evaluation
                             <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
@@ -190,8 +190,8 @@ export default function AccountsOverview() {
                 </div>
 
                 {/* Table Section */}
-                <div className="bg-surface rounded-premium border border-white/5 flex flex-col flex-1 min-h-[400px] overflow-hidden shadow-2xl">
-                    <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-surface/50 backdrop-blur-md">
+                <div className="bg-surface rounded-premium border border-black/15 flex flex-col flex-1 min-h-[400px] overflow-hidden shadow-2xl">
+                    <div className="px-10 py-8 border-b border-black/15 flex justify-between items-center bg-surface/50 backdrop-blur-md">
                         <div className="flex flex-col gap-1">
                             <div className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">Historical Log</div>
                             <h3 className="text-xl font-bold text-primary uppercase tracking-tight flex items-center gap-3">
@@ -211,7 +211,7 @@ export default function AccountsOverview() {
                         ) : (
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="text-[10px] text-muted uppercase tracking-[0.3em] border-b border-white/5">
+                                    <tr className="text-[10px] text-muted uppercase tracking-[0.3em] border-b border-black/15">
                                         <th className="px-6 py-6 font-bold">Protocol ID / Program</th>
                                         <th className="px-6 py-6 font-bold">Net Balance</th>
                                         <th className="px-6 py-6 font-bold">Temporal Sync</th>
@@ -251,7 +251,7 @@ export default function AccountsOverview() {
                                                 <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest border
                                                     ${(acc.status === 'failed' || acc.status === 'expired') ? 'bg-red-400/5 text-red-400 border-red-400/20' :
                                                         acc.status === 'active' ? 'bg-accent/5 text-accent border-accent/20' :
-                                                            'bg-white/5 text-muted border-white/10'}
+                                                            'bg-white/5 text-muted border-black/15'}
                                                 `}>
                                                     {acc.status === 'active' && <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />}
                                                     {acc.status}
@@ -261,7 +261,7 @@ export default function AccountsOverview() {
                                                 {(acc.status === 'pending' || acc.status === 'active') ? (
                                                     <button
                                                         onClick={() => handleLaunch(acc)}
-                                                        className="px-6 py-3 bg-background border border-white/10 text-primary hover:border-accent hover:text-accent rounded-instrument font-bold text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-3 ml-auto"
+                                                        className="px-6 py-3 bg-background border border-black/15 text-primary hover:border-accent hover:text-accent rounded-instrument font-bold text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-3 ml-auto"
                                                     >
                                                         {acc.status === 'pending' ? 'Initiate' : 'Terminal'} <ArrowRight size={14} />
                                                     </button>

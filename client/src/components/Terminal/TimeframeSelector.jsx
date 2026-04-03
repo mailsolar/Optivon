@@ -12,7 +12,7 @@ const TIMEFRAMES = [
 
 export default function TimeframeSelector({ timeframe, setTimeframe, onZoomIn, onZoomOut, onReset }) {
     return (
-        <div className="flex items-center gap-6 px-6 py-3 border-t border-white/[0.03] bg-background shrink-0 font-sans">
+        <div className="flex items-center gap-6 px-6 py-3 border-t border-black/15/[0.03] bg-background shrink-0 font-sans">
             {/* Timeframe Buttons */}
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth">
                 {TIMEFRAMES.map((tf) => (
@@ -22,8 +22,8 @@ export default function TimeframeSelector({ timeframe, setTimeframe, onZoomIn, o
                         className={`
                             text-[10px] font-black font-mono px-4 py-2 rounded-instrument transition-all whitespace-nowrap uppercase tracking-widest border
                             ${timeframe === tf.id
-                                ? 'text-background bg-accent border-accent shadow-premium'
-                                : 'text-muted border-transparent hover:text-primary hover:bg-white/[0.02] hover:border-white/5'
+                                ? 'text-background bg-accent border-accent '
+                                : 'text-muted border-transparent hover:text-primary hover:bg-white/[0.02] hover:border-black/15'
                             }
                         `}
                     >
@@ -38,10 +38,10 @@ export default function TimeframeSelector({ timeframe, setTimeframe, onZoomIn, o
 
                 {/* Chart Controls */}
                 <div className="flex items-center gap-3 hidden sm:flex">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-instrument bg-surface/30 border border-white/5 text-[10px] font-black text-muted hover:text-accent hover:border-accent/20 transition-all shadow-sm">
+                    <button className="w-9 h-9 flex items-center justify-center rounded-instrument bg-surface/30 border border-black/15 text-[10px] font-black text-muted hover:text-accent hover:border-accent/20 transition-all shadow-sm">
                         %
                     </button>
-                    <button className="w-9 h-9 flex items-center justify-center rounded-instrument bg-surface/30 border border-white/5 text-[10px] font-black text-muted hover:text-accent hover:border-accent/20 transition-all shadow-sm font-mono uppercase">
+                    <button className="w-9 h-9 flex items-center justify-center rounded-instrument bg-surface/30 border border-black/15 text-[10px] font-black text-muted hover:text-accent hover:border-accent/20 transition-all shadow-sm font-mono uppercase">
                         log
                     </button>
                     <button 
@@ -77,7 +77,7 @@ function CurrentTime() {
     };
 
     return (
-        <div className="flex items-center gap-3 px-4 py-2 bg-surface/30 rounded-instrument border border-white/5 shadow-inner">
+        <div className="flex items-center gap-3 px-4 py-2 bg-surface/30 rounded-instrument border border-black/15 shadow-inner">
             <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_5px_#C50022]"></div>
             <span className="text-[10px] font-mono font-bold text-secondary tracking-tighter">
                 {formatTime()}

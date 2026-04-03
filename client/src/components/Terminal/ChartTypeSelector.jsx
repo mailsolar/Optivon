@@ -45,7 +45,7 @@ export default function ChartTypeSelector({ currentType, onChange }) {
             {/* Trigger Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 px-4 py-2.5 bg-surface/30 hover:bg-surface border border-white/10 hover:border-accent/30 rounded-instrument transition-all shadow-sm group"
+                className="flex items-center gap-3 px-4 py-2.5 bg-surface/30 hover:bg-surface border border-black/15 hover:border-accent/30 rounded-instrument transition-all shadow-sm group"
             >
                 <Icon size={16} className="text-accent group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] uppercase font-black tracking-[0.2em] text-primary hidden xl:block">{currentChartType.label}</span>
@@ -55,9 +55,9 @@ export default function ChartTypeSelector({ currentType, onChange }) {
             {/* Dropdown Menu */}
             {isOpen && (
                 <div
-                    className="absolute top-full right-0 mt-3 w-64 bg-background border border-white/[0.05] rounded-premium shadow-premium z-[200] py-3 animate-in fade-in zoom-in-95 duration-200"
+                    className="absolute top-full right-0 mt-3 w-64 bg-background border border-black/15/[0.05] rounded-premium  z-[200] py-3 animate-in fade-in zoom-in-95 duration-200"
                 >
-                    <div className="px-6 py-3 text-[9px] font-black text-accent uppercase tracking-[0.4em] mb-2 border-b border-white/[0.03] mx-2 pb-3">Projection Model</div>
+                    <div className="px-6 py-3 text-[9px] font-black text-accent uppercase tracking-[0.4em] mb-2 border-b border-black/15/[0.03] mx-2 pb-3">Projection Model</div>
                     {CHART_TYPES.map((type) => {
                         const TypeIcon = type.icon;
                         const isActive = type.id === currentType;

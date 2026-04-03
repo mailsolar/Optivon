@@ -124,7 +124,7 @@ export default function Checkout() {
         <div className="min-h-screen bg-background text-primary font-sans flex flex-col selection:bg-accent selection:text-background">
 
             {/* Header */}
-            <header className="h-20 border-b border-white/5 flex items-center px-8 md:px-12 bg-surface/80 backdrop-blur-md">
+            <header className="h-20 border-b border-black/15 flex items-center px-8 md:px-12 bg-surface/80 backdrop-blur-md">
                 <Link to="/" className="flex items-center gap-4 text-secondary hover:text-primary transition-all group">
                     <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em]">HUB</span>
@@ -140,7 +140,7 @@ export default function Checkout() {
                     <div>
                         <div className="flex flex-col gap-2 mb-10">
                             <div className="text-[12px] font-bold text-accent uppercase tracking-[0.3em] font-display">Protocol Selection</div>
-                            <h2 className="text-4xl font-display font-black tracking-tighter uppercase text-white">Active Matrix</h2>
+                            <h2 className="text-4xl font-display font-black tracking-tighter uppercase text-primary">Active Matrix</h2>
                         </div>
 
                         {/* Size Selector */}
@@ -150,16 +150,16 @@ export default function Checkout() {
                                     key={size.id}
                                     onClick={() => setSelectedSizeId(size.id)}
                                     className={`w-full flex items-center justify-between p-8 border transition-all ${selectedSizeId === size.id
-                                        ? 'bg-accent/10 border-accent text-white shadow-[0_0_15px_rgba(197,0,34,0.3)]'
-                                        : 'bg-surface border-white/10 text-secondary hover:border-white/30'
+                                        ? 'bg-accent/10 border-accent text-primary shadow-[0_0_15px_rgba(197,0,34,0.3)]'
+                                        : 'bg-surface border-black/15 text-secondary hover:border-black/15'
                                         }`}
                                 >
                                     <div className="flex flex-col items-start gap-1">
                                         <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${selectedSizeId === size.id ? 'text-accent' : 'text-muted'}`}>Allocation</span>
-                                        <span className="text-2xl font-display font-black text-white uppercase tracking-tighter">{size.label}</span>
+                                        <span className="text-2xl font-display font-black text-primary uppercase tracking-tighter">{size.label}</span>
                                     </div>
                                     <div className="text-right">
-                                        <span className="block font-display font-black text-2xl text-white">₹{size.price.toLocaleString()}</span>
+                                        <span className="block font-display font-black text-2xl text-primary">₹{size.price.toLocaleString()}</span>
                                         {selectedSizeId === size.id && <div className="text-[10px] font-bold text-accent uppercase tracking-[0.3em] mt-1">Selected</div>}
                                     </div>
                                 </button>
@@ -167,7 +167,7 @@ export default function Checkout() {
                         </div>
                     </div>
 
-                    <div className="p-8 bg-surface rounded-premium border border-white/5 shadow-soft">
+                    <div className="p-8 bg-surface rounded-premium border border-black/15 shadow-soft">
                         <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                             <Lock size={12} className="text-accent" /> Security Layer
                         </h3>
@@ -180,20 +180,20 @@ export default function Checkout() {
                 <div className="lg:col-span-8">
                     <div className="flex flex-col gap-2 mb-10">
                         <div className="text-[12px] font-bold text-accent uppercase tracking-[0.3em] font-display">Summary</div>
-                        <h2 className="text-4xl font-display font-black tracking-tighter uppercase text-white">Technical Overview</h2>
+                        <h2 className="text-4xl font-display font-black tracking-tighter uppercase text-primary">Technical Overview</h2>
                     </div>
 
-                    <div className="bg-surface border border-white/10 overflow-hidden relative mb-12 shadow-2xl">
+                    <div className="bg-surface border border-black/15 overflow-hidden relative mb-12 shadow-2xl">
                         <div className="absolute top-0 right-0 p-32 bg-accent/10 blur-[100px] rounded-full pointer-events-none" />
 
-                        <div className="p-12 border-b border-white/10 flex justify-between items-end">
+                        <div className="p-12 border-b border-black/15 flex justify-between items-end">
                             <div>
-                                <h1 className="text-6xl font-display font-black text-white tracking-tighter mb-2 uppercase">{activeSize.label}</h1>
+                                <h1 className="text-6xl font-display font-black text-primary tracking-tighter mb-2 uppercase">{activeSize.label}</h1>
                                 <div className="text-[12px] font-bold text-accent uppercase tracking-[0.4em] font-display">{activeModel.label}</div>
                             </div>
                             <div className="text-right">
                                 <span className="block text-[10px] text-muted font-bold uppercase tracking-[0.2em] mb-2">Protocol Fee</span>
-                                <span className="text-5xl font-display font-black text-white tracking-tighter">₹{activeSize.price.toLocaleString()}</span>
+                                <span className="text-5xl font-display font-black text-primary tracking-tighter">₹{activeSize.price.toLocaleString()}</span>
                             </div>
                         </div>
 
@@ -208,7 +208,7 @@ export default function Checkout() {
                     </div>
 
                     {/* Auth & Payment Section */}
-                    <div className="bg-surface rounded-premium border border-white/5 p-12 mb-16 shadow-2xl">
+                    <div className="bg-surface rounded-premium border border-black/15 p-12 mb-16 shadow-2xl">
 
                         {!user && authStep === 'input' && (
                             <div className="animate-in fade-in slide-in-from-bottom-4">
@@ -225,7 +225,7 @@ export default function Checkout() {
                                         <input
                                             type="email"
                                             placeholder="trader@optivon.com"
-                                            className="w-full bg-background/50 border border-white/10 rounded-instrument px-6 py-4 text-primary font-medium focus:outline-none focus:border-accent transition-all placeholder:text-muted/30"
+                                            className="w-full bg-background/50 border border-black/15 rounded-instrument px-6 py-4 text-primary font-medium focus:outline-none focus:border-accent transition-all placeholder:text-muted/30"
                                             value={email}
                                             onChange={(e) => { setEmail(e.target.value); setError(''); }}
                                         />
@@ -235,7 +235,7 @@ export default function Checkout() {
                                         <input
                                             type="password"
                                             placeholder="••••••••"
-                                            className="w-full bg-background/50 border border-white/10 rounded-instrument px-6 py-4 text-primary font-medium focus:outline-none focus:border-accent transition-all placeholder:text-muted/30"
+                                            className="w-full bg-background/50 border border-black/15 rounded-instrument px-6 py-4 text-primary font-medium focus:outline-none focus:border-accent transition-all placeholder:text-muted/30"
                                             value={password}
                                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
                                         />
@@ -245,7 +245,7 @@ export default function Checkout() {
                                 <button
                                     onClick={handleSendOTP}
                                     disabled={isLoading}
-                                    className="w-full py-5 bg-background border border-white/10 hover:border-accent/30 text-primary rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] transition-all"
+                                    className="w-full py-5 bg-background border border-black/15 hover:border-accent/30 text-primary rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] transition-all"
                                 >
                                     {isLoading ? 'Processing...' : 'Verify Node Connectivity'}
                                 </button>
@@ -325,7 +325,7 @@ function DetailItem({ label, value, sub }) {
     return (
         <div className="flex flex-col gap-2 border-l-2 border-accent/30 pl-6">
             <h4 className="text-[11px] font-bold text-muted uppercase tracking-[0.3em] font-display">{label}</h4>
-            <div className="font-display font-black text-3xl text-white tracking-tighter">{value}</div>
+            <div className="font-display font-black text-3xl text-primary tracking-tighter">{value}</div>
             {sub && <div className="text-[11px] text-accent font-bold uppercase tracking-[0.1em]">{sub}</div>}
         </div>
     );

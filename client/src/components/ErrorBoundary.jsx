@@ -29,7 +29,7 @@ class ErrorBoundary extends React.Component {
                     </div>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-8 px-6 py-3 bg-red-900/30 border border-red-600 text-red-500 hover:bg-red-600 hover:text-white rounded transition-all"
+                        className="mt-8 px-6 py-3 bg-red-900/30 border border-red-600 text-red-500 hover:bg-red-600 hover:text-primary rounded transition-all"
                     >
                         REBOOT SYSTEM
                     </button>

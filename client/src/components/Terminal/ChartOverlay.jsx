@@ -73,17 +73,17 @@ function CrosshairTooltip({ chartInstance, containerRef }) {
 
     return (
         <div
-            className="pointer-events-none absolute z-50 bg-background/90 backdrop-blur-md border border-white/10 rounded-none p-3 shadow-2xl flex flex-col gap-1.5 transition-all duration-75"
+            className="pointer-events-none absolute z-50 bg-background/90 backdrop-blur-md border border-black/15 rounded-none p-3 shadow-2xl flex flex-col gap-1.5 transition-all duration-75"
             style={{ left, top: y - 40 }}
         >
             <div className="flex items-center justify-between gap-4">
                 <span className="text-[9px] font-black text-gray-500 uppercase">TIME</span>
-                <span className="text-[10px] font-mono font-bold text-white">{formatTimeIST(tooltip.time)}</span>
+                <span className="text-[10px] font-mono font-bold text-primary">{formatTimeIST(tooltip.time)}</span>
             </div>
             <div className="h-px bg-white/5 my-0.5" />
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                 {[
-                    { l: 'O', v: ohlc.o, c: 'text-white' },
+                    { l: 'O', v: ohlc.o, c: 'text-primary' },
                     { l: 'H', v: ohlc.h, c: 'text-emerald-400' },
                     { l: 'L', v: ohlc.l, c: 'text-red-400' },
                     { l: 'C', v: ohlc.c, c: ohlc.c >= ohlc.o ? 'text-emerald-400' : 'text-red-400' }
@@ -125,16 +125,16 @@ function TradeBox({ entryPrice, symbol, ltp, onOrder, onClose }) {
     }, [onOrder, symbol, side, lots, entry, slVal, tpVal, onClose]);
 
     return (
-        <div className="absolute right-[80px] top-1/2 -translate-y-1/2 z-[60] w-[240px] bg-background border border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col font-sans">
+        <div className="absolute right-[80px] top-1/2 -translate-y-1/2 z-[60] w-[240px] bg-background border border-black/15 rounded-none shadow-2xl overflow-hidden flex flex-col font-sans">
             {/* Header */}
-            <div className="px-3 py-2 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                <span className="text-[9px] font-black uppercase tracking-[2px] text-white/40">Order Terminal</span>
-                <button onClick={onClose} className="p-1 hover:bg-white/5 rounded transition-colors"><X className="w-3 h-3 text-white/30" /></button>
+            <div className="px-3 py-2 border-b border-black/15 bg-white/[0.02] flex items-center justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[2px] text-secondary">Order Terminal</span>
+                <button onClick={onClose} className="p-1 hover:bg-white/5 rounded transition-colors"><X className="w-3 h-3 text-secondary" /></button>
             </div>
 
             <div className="p-4 flex flex-col gap-4">
                 {/* Side Toggle (Institutional Style) */}
-                <div className="flex border border-white/10 p-0.5 rounded bg-black/20">
+                <div className="flex border border-black/15 p-0.5 rounded bg-black/20">
                     {['buy', 'sell'].map(s => (
                         <button
                             key={s}
@@ -144,8 +144,8 @@ function TradeBox({ entryPrice, symbol, ltp, onOrder, onClose }) {
                                 setTp(parseFloat((entry * (s === 'buy' ? 1.008 : 0.992)).toFixed(2)));
                             }}
                             className={`flex-1 py-1.5 rounded text-[10px] font-black uppercase tracking-widest transition-all ${side === s
-                                ? s === 'buy' ? 'bg-[#22c55e] text-white' : 'bg-[#ef4444] text-white'
-                                : 'text-white/20 hover:text-white/50'}`}
+                                ? s === 'buy' ? 'bg-[#22c55e] text-primary' : 'bg-[#ef4444] text-primary'
+                                : 'text-secondary hover:text-secondary'}`}
                         >
                             {s}
                         </button>
@@ -154,52 +154,52 @@ function TradeBox({ entryPrice, symbol, ltp, onOrder, onClose }) {
 
                 {/* Price Display */}
                 <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Execution @</span>
-                    <span className="text-[12px] font-mono font-black text-white">{formatPrice(entry)}</span>
+                    <span className="text-[9px] font-bold text-secondary uppercase tracking-widest">Execution @</span>
+                    <span className="text-[12px] font-mono font-black text-primary">{formatPrice(entry)}</span>
                 </div>
 
                 {/* Inputs Stack */}
                 <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
                         <div className="flex justify-between items-center px-0.5">
-                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest">Stop Loss</label>
+                            <label className="text-[9px] font-black text-secondary uppercase tracking-widest">Stop Loss</label>
                             <span className="text-[9px] font-mono text-red-500/60">₹{riskRs}</span>
                         </div>
                         <input
                             type="number" value={sl} step="0.05"
                             onChange={e => setSl(parseFloat(e.target.value))}
-                            className="w-full bg-white/[0.03] border border-white/5 rounded p-2 text-[11px] font-mono font-bold text-red-400 focus:outline-none focus:border-red-500/30 transition-colors"
+                            className="w-full bg-white/[0.03] border border-black/15 rounded p-2 text-[11px] font-mono font-bold text-red-400 focus:outline-none focus:border-red-500/30 transition-colors"
                         />
                     </div>
 
                     <div className="flex flex-col gap-1">
                         <div className="flex justify-between items-center px-0.5">
-                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest">Take Profit</label>
+                            <label className="text-[9px] font-black text-secondary uppercase tracking-widest">Take Profit</label>
                             <span className="text-[9px] font-mono text-emerald-500/60">₹{rewardRs}</span>
                         </div>
                         <input
                             type="number" value={tp} step="0.05"
                             onChange={e => setTp(parseFloat(e.target.value))}
-                            className="w-full bg-white/[0.03] border border-white/5 rounded p-2 text-[11px] font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                            className="w-full bg-white/[0.03] border border-black/15 rounded p-2 text-[11px] font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500/30 transition-colors"
                         />
                     </div>
 
-                    <div className="flex items-center justify-between bg-black/20 border border-white/5 rounded p-2">
+                    <div className="flex items-center justify-between bg-black/20 border border-black/15 rounded p-2">
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-black text-white/20 uppercase tracking-tighter">Lots (Qty)</span>
+                            <span className="text-[8px] font-black text-secondary uppercase tracking-tighter">Lots (Qty)</span>
                             <div className="flex items-center gap-2 mt-1">
-                                <button onClick={() => setLots(l => Math.max(1, l - 1))} className="text-white/30 hover:text-white transition-colors">-</button>
+                                <button onClick={() => setLots(l => Math.max(1, l - 1))} className="text-secondary hover:text-primary transition-colors">-</button>
                                 <input
                                     type="number" value={lots} min={1}
                                     onChange={e => setLots(Math.max(1, parseInt(e.target.value) || 1))}
-                                    className="w-8 bg-transparent text-center text-[11px] font-mono font-black text-white focus:outline-none"
+                                    className="w-8 bg-transparent text-center text-[11px] font-mono font-black text-primary focus:outline-none"
                                 />
-                                <button onClick={() => setLots(l => l + 1)} className="text-white/30 hover:text-white transition-colors">+</button>
+                                <button onClick={() => setLots(l => l + 1)} className="text-secondary hover:text-primary transition-colors">+</button>
                             </div>
                         </div>
                         <div className="h-6 w-px bg-white/5 mx-2" />
                         <div className="flex flex-col items-end">
-                            <span className="text-[8px] font-black text-white/20 uppercase tracking-tighter">R:R Ratio</span>
+                            <span className="text-[8px] font-black text-secondary uppercase tracking-tighter">R:R Ratio</span>
                             <span className={`text-[11px] font-mono font-black mt-0.5 ${parseFloat(rr) >= 2 ? 'text-emerald-400' : 'text-yellow-500'}`}>1:{rr}</span>
                         </div>
                     </div>

@@ -51,9 +51,9 @@ export default function Settings({ user }) {
 
     return (
         <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold mb-8 text-white border-b border-white/10 pb-4">System Configuration</h2>
+            <h2 className="text-3xl font-bold mb-8 text-primary border-b border-black/15 pb-4">System Configuration</h2>
 
-            <div className="bg-white/5 border border-white/10 p-6 rounded-lg">
+            <div className="bg-white/5 border border-black/15 p-6 rounded-lg">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h3 className="text-xl font-bold text-cyber-cyan">Two-Factor Authentication</h3>
@@ -62,7 +62,7 @@ export default function Settings({ user }) {
                     {!qrCode && (
                         <button
                             onClick={enable2FA}
-                            className="px-4 py-2 bg-cyber-purple/20 border border-cyber-purple text-cyber-purple hover:bg-cyber-purple hover:text-white transition-all uppercase text-xs font-bold tracking-widest rounded"
+                            className="px-4 py-2 bg-cyber-purple/20 border border-cyber-purple text-cyber-purple hover:bg-cyber-purple hover:text-primary transition-all uppercase text-xs font-bold tracking-widest rounded"
                         >
                             Enable 2FA
                         </button>
@@ -70,9 +70,9 @@ export default function Settings({ user }) {
                 </div>
 
                 {qrCode && (
-                    <div className="bg-black/50 p-6 rounded border border-white/10 text-center animate-pulse-border">
+                    <div className="bg-black/50 p-6 rounded border border-black/15 text-center animate-pulse-border">
                         <p className="mb-4 text-sm text-gray-300">Scan this QR code with Google Authenticator:</p>
-                        <img src={qrCode} alt="2FA QR" className="mx-auto border-4 border-white mb-4 w-48 h-48" />
+                        <img src={qrCode} alt="2FA QR" className="mx-auto border-4 border-black/15 mb-4 w-48 h-48" />
 
                         <div className="max-w-xs mx-auto space-y-3">
                             <input
@@ -81,7 +81,7 @@ export default function Settings({ user }) {
                                 value={token}
                                 onChange={e => setToken(e.target.value)}
                                 maxLength="6"
-                                className="w-full bg-void border border-white/20 p-2 text-center text-white tracking-[0.5em] focus:border-cyber-cyan outline-none"
+                                className="w-full bg-void border border-black/15 p-2 text-center text-primary tracking-[0.5em] focus:border-cyber-cyan outline-none"
                             />
                             <button
                                 onClick={verifyAndActivate}

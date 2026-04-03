@@ -47,7 +47,7 @@ const CrystalPrism = ({ x, y, delay }) => {
             >
                 {/* FRONT FACE */}
                 <div
-                    className="absolute inset-0 border border-white/20 backdrop-blur-md"
+                    className="absolute inset-0 border border-black/15 backdrop-blur-md"
                     style={{
                         backgroundColor: `${color.current}10`,
                         transform: 'translateZ(25px)',
@@ -57,7 +57,7 @@ const CrystalPrism = ({ x, y, delay }) => {
 
                 {/* BACK FACE */}
                 <div
-                    className="absolute inset-0 border border-white/10"
+                    className="absolute inset-0 border border-black/15"
                     style={{
                         backgroundColor: `${color.current}05`,
                         transform: 'translateZ(-25px) rotateY(180deg)'
@@ -66,7 +66,7 @@ const CrystalPrism = ({ x, y, delay }) => {
 
                 {/* RIGHT FACE */}
                 <div
-                    className="absolute inset-0 border border-white/20"
+                    className="absolute inset-0 border border-black/15"
                     style={{
                         width: 50,
                         transform: 'rotateY(90deg) translateZ(25px)',
@@ -76,7 +76,7 @@ const CrystalPrism = ({ x, y, delay }) => {
 
                 {/* LEFT FACE */}
                 <div
-                    className="absolute inset-0 border border-white/20"
+                    className="absolute inset-0 border border-black/15"
                     style={{
                         width: 50,
                         transform: 'rotateY(-90deg) translateZ(25px)',
