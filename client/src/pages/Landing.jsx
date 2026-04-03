@@ -99,10 +99,10 @@ export default function Landing({ onAuthRequest }) {
                     <div className="md:col-span-7 lg:col-span-8 flex flex-col">
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2">
-                            <StatBlock value="8%" label="Max Trailing Drawdown" />
-                            <StatBlock value="4%" label="Hard Loss Stop" />
+                            <StatBlock value="3%" label="Max Trailing Drawdown" />
+                            <StatBlock value="2%" label="Hard Stop Loss" subtitle="Daily Trailing Drawdown" />
                             <StatBlock value="0" label="Zero Latency" subtitle="Direct Market Access" />
-                            <StatBlock value="80%" label="Institutional Payouts" />
+                            <StatBlock value="80/20" label="Profit Split" subtitle="Institutional Payouts" />
                         </div>
 
                         {/* Terminal Manifesto (FWA Editorial style substitution for "terminal graphic") */}
@@ -112,7 +112,7 @@ export default function Landing({ onAuthRequest }) {
                                 Optivon Command.
                             </h3>
                             <p className="text-lg text-secondary leading-relaxed max-w-md font-sans">
-                                A proprietary terminal designed for professional scale. Mirroring institutional order flows with absolute 0.0 latency spreads.
+                                Mirroring institutional order flows with absolute 0.0 latency spreads — helping retail traders reach their full potential.
                             </p>
                         </div>
 
@@ -147,7 +147,7 @@ export default function Landing({ onAuthRequest }) {
                 <div className="text-caption text-secondary mb-24 max-w-[1400px] mx-auto">03 Finalization</div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 border-t border-black/15 max-w-[1400px] mx-auto mb-48">
-                    <FinalPayoutCell value="10%" label="Targets" desc="Phase 1 Growth Target" />
+                    <FinalPayoutCell value="8%" label="Targets" desc="Profit Target" />
                     <FinalPayoutCell value="14D" label="Velocity" desc="Bi-Weekly Payout Cycle" />
                     <FinalPayoutCell value="SSL" label="Security" desc="Encrypted Transactions" />
                 </div>

@@ -70,15 +70,14 @@ export default function ChallengeSelector() {
                     
                     {/* Left Specs */}
                     <div className="p-12 md:p-16 border-b md:border-b-0 md:border-r border-black/15 grid grid-cols-1 sm:grid-cols-2 gap-y-16 gap-x-12">
-                        <SpecItem label="Phase 1 Target" value={activeData.target} subValue={calculateValue(activeData.target)} />
+                        <SpecItem label="Profit Target" value={activeData.target} subValue={calculateValue(activeData.target)} />
                         <SpecItem label="Daily Loss Limit" value={activeData.dailyDrawdown} subValue={calculateValue(activeData.dailyDrawdown)} />
                         <SpecItem label="Maximum Breach" value={activeData.maxDrawdown} subValue={calculateValue(activeData.maxDrawdown)} />
                         <SpecItem label="Performance Split" value={activeData.profitSplit} />
                         <SpecItem label="Risk Scaling" value={`${activeSize.maxLots} Lots`} />
-                        <SpecItem label="Minimum Period" value={activeData.minDays} />
                         
                         <div className="sm:col-span-2 flex flex-wrap gap-x-8 gap-y-4 pt-8 border-t border-black/15">
-                            {['Refundable Capital', 'Infinite Duration', 'News Protocol Active', 'EA Authorized'].map((tag, i) => (
+                            {['Infinite Duration', 'News Protocol Active'].map((tag, i) => (
                                 <span key={i} className="text-caption text-secondary">{tag}</span>
                             ))}
                         </div>
@@ -92,7 +91,7 @@ export default function ChallengeSelector() {
                                 <span className="text-3xl align-top mr-2 font-sans tracking-normal">₹</span>
                                 {activeSize.price.toLocaleString()}
                             </div>
-                            <p className="text-caption text-secondary">Standard Refund Protocol</p>
+
                         </div>
 
                         <div className="mt-16 sm:mt-32">

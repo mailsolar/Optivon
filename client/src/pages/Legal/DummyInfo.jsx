@@ -68,7 +68,7 @@ export default function DummyInfo({ title, subtitle, content }) {
                             <h3 className="text-[12px] font-bold uppercase tracking-[0.4em] mb-6 flex items-center gap-2">
                                 <Zap size={14} /> Quick Action
                             </h3>
-                            <button className="w-full py-5 bg-black text-primary font-bold uppercase tracking-[0.2em] text-[11px] hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-4">
+                            <button className="w-full py-5 bg-black text-white font-bold uppercase tracking-[0.2em] text-[11px] hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-4">
                                 Initialize Protocol <ArrowUpRight size={14} />
                             </button>
                         </div>

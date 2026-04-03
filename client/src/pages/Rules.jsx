@@ -69,7 +69,7 @@ export default function Rules() {
                                 <NavAnchor href="#risk" label="02 Risk Rules" />
                                 <NavAnchor href="#behavior" label="03 Trading Behavior" />
                                 <NavAnchor href="#execution" label="04 Execution" />
-                                <NavAnchor href="#stages" label="05 Challenge Stage" />
+                                <NavAnchor href="#stages" label="05 Evaluation Stage" />
                                 <NavAnchor href="#funded" label="06 Funded Stage" />
                                 <NavAnchor href="#disqualification" label="07 Disqualification" />
                                 <NavAnchor href="#anticheat" label="08 Anti-Cheating" />
@@ -88,9 +88,7 @@ export default function Rules() {
                                     <div>
                                         <h3 className="text-3xl font-display font-bold text-primary mb-6 uppercase tracking-tighter">1. Profit Targets</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <StatItem label="1-Phase Challenge" value="10%" />
-                                            <StatItem label="2-Phase Challenge (Phase 1)" value="8%" />
-                                            <StatItem label="2-Phase Challenge (Phase 2)" value="5%" />
+                                            <StatItem label="Evaluation Profit Target" value="8%" />
                                             <StatItem label="Funded Stage" value="No target" highlight />
                                         </div>
                                     </div>
@@ -101,14 +99,14 @@ export default function Rules() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                             <RuleBlock 
                                                 title="Max Daily Drawdown" 
-                                                value="4%" 
-                                                desc="Of starting balance. (e.g., ₹1,00,000 account → daily max loss = ₹4,000)" 
+                                                value="2% / 4%" 
+                                                desc="2% for Evaluation | 4% for Funded. Based on starting balance." 
                                                 accent 
                                             />
                                             <RuleBlock 
                                                 title="Max Overall Drawdown" 
-                                                value="8% / 10%" 
-                                                desc="8% for challenge | 10% for funded. If hit → violation → fail." 
+                                                value="3% / 10%" 
+                                                desc="3% for Evaluation | 10% for Funded. If hit → violation → fail." 
                                             />
                                         </div>
                                     </div>
@@ -155,7 +153,8 @@ export default function Rules() {
                                             'Copy trading from other prop firm accounts',
                                             'Multi-account duplication',
                                             'Using insider news to execute trades',
-                                            'Placing 50+ trades in 1 second'
+                                            'Placing 50+ trades in 1 second',
+                                            'Expert Advisors (EA) are strictly prohibited'
                                         ].map(item => (
                                             <li key={item} className="flex items-center gap-4 text-primary font-medium">
                                                 <Ban size={18} className="text-accent shrink-0" />
@@ -209,14 +208,12 @@ export default function Rules() {
                             </Section>
 
                             {/* 5. CHALLENGE STAGE RULES */}
-                            <Section id="stages" number="05" title="Challenge Stage" icon={TrendingUp}>
+                            <Section id="stages" number="05" title="Evaluation Stage" icon={TrendingUp}>
                                 <div className="p-12 bg-white/5 border border-black/15">
                                     <h4 className="text-[12px] font-bold uppercase tracking-[0.3em] text-secondary mb-8">Requirements for Funded Upgrade</h4>
                                     <ul className="space-y-6">
                                         {[
-                                            'Achieve target without violating DD',
-                                            'No minimum trading days',
-                                            'Must place a minimum of 2 trades',
+                                            'Achieve 8% profit target without violating DD',
                                             'Maintain risk discipline',
                                             'All positions close by 3:25 PM',
                                             'Must follow lot limit rules',

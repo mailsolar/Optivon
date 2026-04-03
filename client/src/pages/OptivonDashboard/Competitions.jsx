@@ -68,7 +68,7 @@ export default function Competitions() {
                             </div>
                         </div>
 
-                        <button className="bg-primary text-background font-black px-10 py-5 rounded-instrument hover:bg-accent transition-all flex items-center gap-3 uppercase text-xs tracking-widest  group/btn">
+                        <button className="bg-primary text-white font-black px-10 py-5 rounded-instrument hover:bg-accent transition-all flex items-center gap-3 uppercase text-xs tracking-widest  group/btn">
                             Initialize Protocol <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>

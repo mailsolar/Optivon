@@ -358,7 +358,7 @@ function SubmitButton({ children, loading }) {
         <button
             type="submit"
             disabled={loading}
-            className="w-full py-5 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-primary transition-all disabled:opacity-50 shadow-soft flex items-center justify-center gap-4 group"
+            className="w-full py-5 bg-accent text-white rounded-instrument font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-primary transition-all disabled:opacity-50 shadow-soft flex items-center justify-center gap-4 group"
         >
             {loading ? 'Processing...' : children}
             {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
