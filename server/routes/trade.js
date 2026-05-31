@@ -9,8 +9,8 @@ router.post('/purchase', authenticateToken, (req, res) => {
     const { type, size } = req.body;
 
     // Check for existing active/pending challenges of the same type/size
-    db.get('SELECT COUNT(*) as count FROM accounts WHERE user_id = ? AND size = ? AND status IN (?, ?)',
-        [req.user.id, size, 'pending', 'active'],
+    db.get('SELECT u.next_eligible_purchase_date, (SELECT COUNT(*) FROM accounts WHERE user_id = u.id AND size = ? AND status IN ("pending", "active")) as count FROM users u WHERE u.id = ?',
+        [size, req.user.id],
         (err, row) => {
             if (err) return res.status(500).send({ error: 'Database check failed' });
 
@@ -18,17 +18,42 @@ router.post('/purchase', authenticateToken, (req, res) => {
                 return res.status(400).send({ error: 'You already have an active or pending challenge of this level. Please complete or reset it first.' });
             }
 
-            // Create Account
-            db.run(`INSERT INTO accounts (user_id, type, size, balance, equity, daily_start_balance, status, phase) 
-                    VALUES (?, ?, ?, ?, ?, ?, 'pending', 1)`,
+            if (row.next_eligible_purchase_date && new Date(row.next_eligible_purchase_date) > new Date()) {
+                // Determine if they are trying to repurchase at a discount (needs to be handled if we pass a flag)
+                // For now, block it. They must pass the exam to reduce the timer, but even the reduced timer applies.
+                const resetDate = new Date(row.next_eligible_purchase_date).toLocaleString();
+                return res.status(403).send({ error: `Account purchase blocked. You must wait until ${resetDate} or pass the Learning Verification to reduce the timer.` });
+            }
+
+            // Create Account (Pass First, Pay Later Model)
+            db.run(`INSERT INTO accounts (user_id, type, size, balance, equity, daily_start_balance, status, phase, evaluation_fee_paid) 
+                    VALUES (?, ?, ?, ?, ?, ?, 'pending', 1, 1)`,
                 [req.user.id, type, size, size, size, size],
                 function (err) {
                     if (err) return res.status(500).send({ error: 'Purchase failed' });
-                    res.status(201).send({ message: 'Challenge Purchased', accountId: this.lastID });
+                    res.status(201).send({ message: 'Challenge Purchased (Entry Fee Paid)', accountId: this.lastID });
                 }
             );
         }
     );
+});
+
+// Pay Full Fee for Passed Challenge
+router.post('/pay-full-fee', authenticateToken, (req, res) => {
+    const { accountId } = req.body;
+
+    db.get('SELECT * FROM accounts WHERE id = ? AND user_id = ?', [accountId, req.user.id], (err, row) => {
+        if (err || !row) return res.status(404).send({ error: 'Account not found' });
+
+        if (row.status !== 'passed_pending_full_fee') {
+            return res.status(400).send({ error: 'Account is not eligible for full fee payment' });
+        }
+
+        db.run("UPDATE accounts SET status = 'funded', full_fee_paid = 1 WHERE id = ?", [accountId], (err) => {
+            if (err) return res.status(500).send({ error: 'Payment failed' });
+            res.send({ message: 'Full Fee Paid Successfully. Account is now Funded.' });
+        });
+    });
 });
 
 // Launch Session (24h Timer)

@@ -8,6 +8,7 @@ import Certificates from './pages/OptivonDashboard/Certificates'
 import Withdrawals from './pages/OptivonDashboard/Withdrawals'
 import OrderHistory from './pages/OptivonDashboard/OrderHistory'
 import AccountMetrics from './pages/OptivonDashboard/AccountMetrics'
+import AIReport from './pages/OptivonDashboard/AIReport'
 import OptivonLayout from './components/Dashboard/OptivonLayout'
 import TerminalLayout from './components/Terminal/TerminalLayout'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -62,6 +63,7 @@ function AppRoutes() {
                 }>
                     <Route index element={<AccountsOverview />} />
                     <Route path="account/:id" element={<AccountMetrics />} />
+                    <Route path="account/:id/report" element={<AIReport />} />
 
                     <Route path="certificates" element={<Certificates />} />
                     <Route path="withdrawals" element={<Withdrawals />} />

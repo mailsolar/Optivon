@@ -1,4 +1,5 @@
 const db = require('../database');
+const aiBridge = require('../ai_bridge');
 // const market = require('./market'); // Removed
 
 class RiskManager {
@@ -189,6 +190,9 @@ class RiskManager {
         // 3. Log Violation
         db.run("INSERT INTO violations (account_id, type, details, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
             [account.id, type, reason]);
+            
+        // 4. Trigger AI Analysis
+        aiBridge.triggerAnalysis(account.id);
     }
 
     async checkObjectives(account, currentEquity) {

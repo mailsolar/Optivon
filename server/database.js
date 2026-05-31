@@ -107,6 +107,33 @@ function initializeTables() {
                 // Column already exists — this is fine, ignore
             }
         });
+
+        // AI Reports
+        db.run(`CREATE TABLE IF NOT EXISTS ai_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id INTEGER UNIQUE,
+            status TEXT DEFAULT 'pending',
+            core_metrics TEXT,
+            behavioral_flags TEXT,
+            psychology_profile TEXT,
+            coaching_output TEXT,
+            failure_reason TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            completed_at DATETIME,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
+        )`);
+
+        // Behavior Flags
+        db.run(`CREATE TABLE IF NOT EXISTS behavior_flags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_id INTEGER,
+            behavior TEXT,
+            severity REAL,
+            count INTEGER,
+            evidence TEXT,
+            detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(account_id) REFERENCES accounts(id)
+        )`);
     });
 }
 

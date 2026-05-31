@@ -13,7 +13,10 @@ const initUtils = {
         two_fa_pin TEXT, -- 6-digit PIN hash
         two_fa_enabled INTEGER DEFAULT 0,
         email_verified INTEGER DEFAULT 0,
+        login_count INTEGER DEFAULT 0,
+        skipped_2fa BOOLEAN DEFAULT 0,
         ip_address TEXT,
+        next_eligible_purchase_date DATETIME, -- Reset timer
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
 
@@ -23,7 +26,9 @@ const initUtils = {
         type TEXT, -- '1-step', '2-step'
         balance REAL,
         equity REAL,
-        status TEXT DEFAULT 'active', -- 'active', 'passed', 'failed'
+        status TEXT DEFAULT 'pending_initial_fee', -- 'pending_initial_fee', 'active', 'failed', 'passed_pending_full_fee', 'funded'
+        evaluation_fee_paid INTEGER DEFAULT 0,
+        full_fee_paid INTEGER DEFAULT 0,
         start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(user_id) REFERENCES users(id)
       )`);
@@ -57,6 +62,36 @@ const initUtils = {
         type TEXT, -- 'registration', 'recovery'
         expires_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS courses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        type TEXT, -- 'free', 'paid'
+        status TEXT DEFAULT 'enrolled', -- 'enrolled', 'completed'
+        enrolled_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS exam_attempts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        score REAL,
+        passed INTEGER DEFAULT 0,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS leaderboards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        account_id INTEGER,
+        user_id INTEGER,
+        week_start DATETIME,
+        return_pct REAL,
+        is_public INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(account_id) REFERENCES accounts(id),
+        FOREIGN KEY(user_id) REFERENCES users(id)
       )`);
 
             console.log('Tables created');

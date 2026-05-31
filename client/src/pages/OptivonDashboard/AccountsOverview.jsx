@@ -6,7 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import { API_BASE_URL } from '../../config';
 
 // Simple Modal for Purchasing Challenge
-const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
+const PurchaseModal = ({ isOpen, onClose, onPurchase, hasPassedFirstChallenge }) => {
     const [selectedLevel, setSelectedLevel] = useState('5L');
     const [loading, setLoading] = useState(false);
 
@@ -44,26 +44,41 @@ const PurchaseModal = ({ isOpen, onClose, onPurchase }) => {
                     </div>
 
                     <div className="space-y-3 mb-10">
-                        {levels.map((level) => (
-                            <div
-                                key={level.id}
-                                onClick={() => setSelectedLevel(level.id)}
-                                className={`p-5 rounded-instrument border flex justify-between items-center transition-all ${selectedLevel === level.id
-                                    ? 'bg-accent/5 border-accent'
-                                    : 'bg-background/50 border-black/15 hover:border-black/15'
-                                    }`}
-                            >
-                                <div>
-                                    <h4 className={`text-sm font-bold uppercase tracking-widest ${selectedLevel === level.id ? 'text-accent' : 'text-primary'}`}>{level.label} Account</h4>
-                                    <p className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1">Allocation: ₹{level.size.toLocaleString('en-IN')}</p>
-                                    <p className="text-sm font-bold text-primary mt-2">₹{level.price.toLocaleString('en-IN')}</p>
+                        {levels.map((level, index) => {
+                            const isLocked = index > 0 && !hasPassedFirstChallenge;
+                            const displayPrice = (!hasPassedFirstChallenge && index === 0) ? 100 : level.price;
+
+                            return (
+                                <div
+                                    key={level.id}
+                                    onClick={() => !isLocked && setSelectedLevel(level.id)}
+                                    className={`p-5 rounded-instrument border flex justify-between items-center transition-all ${selectedLevel === level.id
+                                        ? 'bg-accent/5 border-accent'
+                                        : 'bg-background/50 border-black/15 hover:border-black/15'
+                                        } ${isLocked ? 'opacity-40 cursor-not-allowed grayscale' : 'cursor-pointer'}`}
+                                >
+                                    <div>
+                                        <h4 className={`text-sm font-bold uppercase tracking-widest ${selectedLevel === level.id ? 'text-accent' : 'text-primary'}`}>
+                                            {level.label} Account {isLocked && <span className="text-[8px] bg-red-500/10 text-red-500 px-2 py-0.5 ml-2 rounded-full border border-red-500/20">LOCKED</span>}
+                                        </h4>
+                                        <p className="text-[10px] text-muted uppercase tracking-widest font-bold mt-1">Allocation: ₹{level.size.toLocaleString('en-IN')}</p>
+                                        <p className="text-sm font-bold text-primary mt-2 flex items-center gap-2">
+                                            ₹{displayPrice.toLocaleString('en-IN')}
+                                            {!hasPassedFirstChallenge && index === 0 && (
+                                                <span className="text-[10px] text-muted line-through">₹{level.price.toLocaleString('en-IN')}</span>
+                                            )}
+                                        </p>
+                                        {!hasPassedFirstChallenge && index === 0 && (
+                                            <p className="text-[8px] text-accent font-bold uppercase tracking-widest mt-1">Entry Fee Only (Pay later)</p>
+                                        )}
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${selectedLevel === level.id ? 'border-accent bg-accent' : 'border-black/15'
+                                        }`}>
+                                        {selectedLevel === level.id && <div className="w-2.5 h-2.5 bg-background rounded-full" />}
+                                    </div>
                                 </div>
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${selectedLevel === level.id ? 'border-accent bg-accent' : 'border-black/15'
-                                    }`}>
-                                    {selectedLevel === level.id && <div className="w-2.5 h-2.5 bg-background rounded-full" />}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <button
@@ -284,6 +299,7 @@ export default function AccountsOverview() {
                 isOpen={showPurchase}
                 onClose={() => setShowPurchase(false)}
                 onPurchase={handlePurchase}
+                hasPassedFirstChallenge={user?.has_passed_first_challenge === true}
             />
         </div>
     );

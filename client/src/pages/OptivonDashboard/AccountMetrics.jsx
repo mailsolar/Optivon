@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Share2, Key } from 'lucide-react';
+import { ArrowLeft, Share2, Key, BrainCircuit, Activity } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     AreaChart,
@@ -161,6 +161,30 @@ export default function AccountMetrics() {
 
                 {/* Right: Objectives */}
                 <div className="xl:col-span-4 flex flex-col gap-10">
+
+                    {/* AI Analysis Card (If Failed) */}
+                    {(account.status === 'failed' || account.status === 'expired') && (
+                        <div className="bg-surface p-10 rounded-premium border border-accent/40 shadow-[0_0_30px_rgba(197,160,89,0.1)] relative overflow-hidden group hover:border-accent transition-colors cursor-pointer" onClick={() => navigate(`/dashboard/account/${account.id}/report`)}>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-accent/20 transition-colors" />
+                            <div className="flex flex-col gap-4 relative z-10">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-accent/10 rounded-full border border-accent/20">
+                                        <BrainCircuit size={20} className="text-accent" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-primary uppercase tracking-tight">Neural Analysis</h3>
+                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Available</span>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-secondary leading-relaxed">
+                                    Review the AI-generated post-mortem report for behavioral insights and a personalized recovery protocol.
+                                </p>
+                                <button className="mt-2 px-6 py-3 bg-accent text-background rounded-instrument font-bold text-[10px] uppercase tracking-[0.2em] shadow-soft hover:bg-primary transition-all w-full flex items-center justify-center gap-2">
+                                    <Activity size={14} /> View Report
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Info Card */}
                     <div className="bg-surface p-10 rounded-premium border border-black/15 shadow-2xl space-y-8">

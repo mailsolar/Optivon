@@ -10,26 +10,33 @@ export default function Dashboard({ user, onLogout }) {
 }
 
 // Reused & Adapted Pricing Component
-const PricingCard = ({ title, price, subtitle, features, isPopular, onSelect }) => (
-    <div className={`relative flex-1 bg-surface border ${isPopular ? 'border-accent shadow-[0_0_20px_rgba(197,0,34,0.15)]' : 'border-black/15'} p-8 rounded-none flex flex-col items-start w-full hover:border-accent/80 transition-all duration-300 group overflow-hidden ${isPopular ? 'bg-accent/5' : ''}`}>
+const PricingCard = ({ title, price, subtitle, features, isPopular, onSelect, isLocked, originalPrice }) => (
+    <div className={`relative flex-1 bg-surface border ${isPopular ? 'border-accent shadow-[0_0_20px_rgba(197,0,34,0.15)]' : 'border-black/15'} p-8 rounded-none flex flex-col items-start w-full transition-all duration-300 overflow-hidden ${isPopular ? 'bg-accent/5' : ''} ${isLocked ? 'opacity-40 grayscale pointer-events-none' : 'hover:border-accent/80 group'}`}>
         {isPopular && (
             <div className="absolute top-0 right-0 bg-accent text-primary px-4 py-1.5 rounded-none text-[10px] font-bold uppercase tracking-widest font-display">
                 Most Popular
             </div>
         )}
 
-        <h3 className="text-4xl font-display font-black mb-2 text-primary uppercase tracking-tighter">{title}</h3>
-        <div className="text-3xl font-black text-accent mb-1 font-mono tracking-tighter">{price} <span className="text-xs font-bold text-secondary tracking-widest uppercase">/ one-time</span></div>
+        <h3 className="text-4xl font-display font-black mb-2 text-primary uppercase tracking-tighter">
+            {title} {isLocked && <span className="text-sm bg-red-500/10 text-red-500 px-2 py-1 rounded-full border border-red-500/20 ml-2">LOCKED</span>}
+        </h3>
+        <div className="text-3xl font-black text-accent mb-1 font-mono tracking-tighter flex items-end">
+            {price}
+            {originalPrice && <span className="text-lg text-secondary line-through ml-3 mb-1 font-sans tracking-normal">{originalPrice}</span>}
+            <span className="text-[10px] font-bold text-secondary tracking-widest uppercase ml-3 mb-2">{originalPrice ? 'entry fee' : '/ one-time'}</span>
+        </div>
         <p className="text-secondary text-xs mb-8 font-medium font-display uppercase tracking-widest">{subtitle}</p>
 
         <button
             onClick={onSelect}
-            className={`w-full py-4 rounded-none font-bold uppercase tracking-widest text-[11px] transition-transform hover:scale-[1.02] active:scale-[0.98] ${isPopular
+            disabled={isLocked}
+            className={`w-full py-4 rounded-none font-bold uppercase tracking-widest text-[11px] transition-transform ${!isLocked && 'hover:scale-[1.02] active:scale-[0.98]'} ${isPopular && !isLocked
                 ? 'bg-accent text-primary shadow-lg shadow-accent/20'
-                : 'bg-white text-black group-hover:bg-accent group-hover:text-primary'
+                : isLocked ? 'bg-background border border-black/15 text-muted cursor-not-allowed' : 'bg-white text-black group-hover:bg-accent group-hover:text-primary'
                 }`}
         >
-            Select Protocol
+            {isLocked ? 'LOCKED' : 'Select Protocol'}
         </button>
 
         <ul className="space-y-4 w-full flex-1 mt-8">
@@ -56,6 +63,11 @@ function DashboardContent({ user, onLogout }) {
 
     // Computed Active Account
     const activeAccount = accounts.find(a => a.id === parseInt(selectedAccountId));
+
+    // 2FA Modal State
+    const [show2FAModal, setShow2FAModal] = useState(user?.recommend2FA || false);
+    const [pin2FA, setPin2FA] = useState('');
+    const [isSetupLoading, setIsSetupLoading] = useState(false);
 
     const fetchAccounts = async () => {
         try {
@@ -138,6 +150,25 @@ function DashboardContent({ user, onLogout }) {
         } catch (e) { addToast('Launch Failed', 'error'); }
     };
 
+    const handleSetup2FA = async () => {
+        setIsSetupLoading(true);
+        try {
+            const res = await fetch('/api/auth/setup-2fa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ pin: pin2FA })
+            });
+            if (res.ok) {
+                addToast('2FA Enabled Successfully', 'success');
+                setShow2FAModal(false);
+            } else {
+                const data = await res.json();
+                addToast(data.error || 'Setup failed', 'error');
+            }
+        } catch (e) { addToast('Setup Failed', 'error'); }
+        finally { setIsSetupLoading(false); }
+    };
+
     if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-accent font-black animate-pulse tracking-widest text-xs uppercase">System Initializing...</div>;
 
     const handleAccountSwitch = (e) => {
@@ -201,6 +232,45 @@ function DashboardContent({ user, onLogout }) {
             {/* MAIN CONTENT AREA */}
             <main className="flex-1 overflow-hidden relative">
                 <AlertProvider quotes={quotes}>
+
+                    {/* 2FA Reminder Modal */}
+                    {show2FAModal && (
+                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+                            <div className="bg-surface border border-accent p-12 max-w-md w-full text-center shadow-[0_0_50px_rgba(197,0,34,0.15)] relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-accent"></div>
+                                <ShieldCheck className="w-16 h-16 text-accent mx-auto mb-6" />
+                                <h3 className="text-2xl font-black text-primary font-display uppercase tracking-tight mb-2">Security Alert</h3>
+                                <p className="text-secondary text-sm mb-8 font-medium leading-relaxed">
+                                    You have logged in without Two-Factor Authentication. To protect your funded capital, we highly recommend securing your node now.
+                                </p>
+                                
+                                <input
+                                    type="password"
+                                    placeholder="••••••"
+                                    maxLength={6}
+                                    className="w-full bg-background border border-accent/20 px-6 py-4 text-center text-3xl tracking-[0.4em] font-bold text-accent focus:outline-none focus:border-accent transition-all mb-8 placeholder:text-accent/10"
+                                    value={pin2FA}
+                                    onChange={(e) => setPin2FA(e.target.value.replace(/\D/g, ''))}
+                                />
+
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={() => setShow2FAModal(false)}
+                                        className="flex-1 py-4 border border-black/15 text-muted hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-[0.2em]"
+                                    >
+                                        Dismiss
+                                    </button>
+                                    <button 
+                                        onClick={handleSetup2FA}
+                                        disabled={isSetupLoading || pin2FA.length < 6}
+                                        className="flex-[2] py-4 bg-accent text-background font-bold uppercase tracking-[0.2em] text-[10px] hover:shadow-soft transition-all disabled:opacity-50"
+                                    >
+                                        {isSetupLoading ? 'Encrypting...' : 'Secure Account'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* OVERVIEW TAB */}
                     {activeTab === 'overview' && (
@@ -321,7 +391,8 @@ function DashboardContent({ user, onLogout }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-full px-4 mb-20">
                                 <PricingCard
                                     title="5L Account"
-                                    price="₹3,000"
+                                    price={user?.has_passed_first_challenge ? "₹3,000" : "₹100"}
+                                    originalPrice={user?.has_passed_first_challenge ? null : "₹3,000"}
                                     subtitle="Starter Tier"
                                     features={[
                                         "₹5,00,000 simulated capital",
@@ -332,6 +403,7 @@ function DashboardContent({ user, onLogout }) {
                                         "Basic Support"
                                     ]}
                                     onSelect={() => handlePurchase('5L', 500000)}
+                                    isLocked={false}
                                 />
                                 <PricingCard
                                     title="10L Account"
@@ -347,6 +419,7 @@ function DashboardContent({ user, onLogout }) {
                                         "Priority Support"
                                     ]}
                                     onSelect={() => handlePurchase('10L', 1000000)}
+                                    isLocked={!user?.has_passed_first_challenge}
                                 />
                                 <PricingCard
                                     title="20L Account"
@@ -361,6 +434,7 @@ function DashboardContent({ user, onLogout }) {
                                         "Dedicated Manager"
                                     ]}
                                     onSelect={() => handlePurchase('20L', 2000000)}
+                                    isLocked={!user?.has_passed_first_challenge}
                                 />
                                 <PricingCard
                                     title="50L Account"
@@ -375,6 +449,7 @@ function DashboardContent({ user, onLogout }) {
                                         "Direct API Access"
                                     ]}
                                     onSelect={() => handlePurchase('50L', 5000000)}
+                                    isLocked={!user?.has_passed_first_challenge}
                                 />
                             </div>
                         </div>

@@ -33,6 +33,12 @@ app.use('/api/algo', algoRoutes);
 const upstoxRoutes = require('./routes/upstox');
 app.use('/api/upstox', upstoxRoutes);
 
+const aiRoutes = require('./routes/ai');
+app.use('/api/ai', aiRoutes);
+
+const learningRoutes = require('./routes/learning');
+app.use('/api/learning', learningRoutes);
+
 // ─── Socket.IO ────────────────────────────────────────────────────────────────
 const { Server } = require('socket.io');
 const io = new Server(server, {
@@ -57,6 +63,12 @@ upstoxService.init(io);
 
 const riskManager = require('./engine/riskManager');
 riskManager.start();
+
+const leaderboardService = require('./services/leaderboardService');
+leaderboardService.startCronJob();
+
+const copyTradingService = require('./services/copyTradingService');
+copyTradingService.startCronJob();
 
 // Market WebSocket Server (separate path /market — no conflict with Socket.IO)
 const MarketWebSocketServer = require('./engine/marketWebSocket');

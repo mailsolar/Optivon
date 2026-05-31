@@ -26,10 +26,10 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    const login = (userData, token) => {
+    const login = (userData, token, recommend2FA = false) => {
         console.log('[DEBUG] AuthContext: Login called', userData);
         localStorage.setItem('token', token);
-        setUser(userData);
+        setUser({ ...userData, recommend2FA });
     };
 
     const logout = () => {

@@ -17,9 +17,12 @@ export default function Checkout() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
-    const [authStep, setAuthStep] = useState('input');
+    const [pin2FA, setPin2FA] = useState('');
+    const [authStep, setAuthStep] = useState('input'); // 'input', 'verify', 'setup-2fa', 'done'
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
+    const [countdown, setCountdown] = useState(0);
 
     const activeModel = MODELS.find(m => m.id === selectedModelId);
     const activeSize = SIZES.find(s => s.id === selectedSizeId);
@@ -28,6 +31,14 @@ export default function Checkout() {
     useEffect(() => {
         if (user) setAuthStep('done');
     }, [user]);
+
+    useEffect(() => {
+        let timer;
+        if (countdown > 0) {
+            timer = setInterval(() => setCountdown(c => c - 1), 1000);
+        }
+        return () => clearInterval(timer);
+    }, [countdown]);
 
     const calculateValue = (percentageStr) => {
         const pct = parseInt(percentageStr) / 100;
@@ -47,6 +58,8 @@ export default function Checkout() {
             const data = await res.json();
             if (res.ok) {
                 setAuthStep('verify');
+                setSuccessMsg("The code has been sent to your mail");
+                setCountdown(120);
             } else {
                 setError(data.error);
             }
@@ -77,8 +90,8 @@ export default function Checkout() {
                 const loginData = await loginRes.json();
 
                 if (loginRes.ok) {
-                    login(loginData.user, loginData.token);
-                    setAuthStep('done');
+                    login(loginData.user, loginData.token, loginData.recommend2FA);
+                    setAuthStep('setup-2fa');
                 } else {
                     setError("Auto-login failed. Please login manually.");
                 }
@@ -90,6 +103,33 @@ export default function Checkout() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleSetup2FA = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/setup-2fa`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ pin: pin2FA })
+            });
+            if (res.ok) setAuthStep('done');
+            else {
+                const data = await res.json();
+                setError(data.error);
+            }
+        } catch (e) { setError("Failed to setup 2FA"); }
+        finally { setIsLoading(false); }
+    };
+
+    const handleSkip2FA = async () => {
+        try {
+            await fetch(`${API_BASE_URL}/api/auth/skip-2fa`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+        } catch (e) { console.error(e); }
+        setAuthStep('done');
     };
 
     const handleCreateOrder = async () => {
@@ -192,8 +232,11 @@ export default function Checkout() {
                                 <div className="text-[12px] font-bold text-accent uppercase tracking-[0.4em] font-display">{activeModel.label}</div>
                             </div>
                             <div className="text-right">
-                                <span className="block text-[10px] text-muted font-bold uppercase tracking-[0.2em] mb-2">Protocol Fee</span>
-                                <span className="text-5xl font-display font-black text-primary tracking-tighter">₹{activeSize.price.toLocaleString()}</span>
+                                <span className="block text-[10px] text-muted font-bold uppercase tracking-[0.2em] mb-2">Initial Entry Fee</span>
+                                <span className="text-5xl font-display font-black text-primary tracking-tighter flex items-end justify-end">
+                                    ₹100
+                                    <span className="text-sm font-sans text-secondary ml-3 pb-2 line-through">₹{activeSize.price.toLocaleString()}</span>
+                                </span>
                             </div>
                         </div>
 
@@ -239,13 +282,17 @@ export default function Checkout() {
                                             value={password}
                                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
                                         />
+                                        <div className="text-[9px] font-bold text-muted uppercase tracking-widest mt-2">
+                                            Minimum 8 chars • 1 Uppercase • 1 Symbol
+                                        </div>
                                     </div>
                                 </div>
                                 {error && <div className="text-red-400 text-[10px] font-bold uppercase tracking-widest text-center mb-6 bg-red-400/5 p-4 rounded-instrument border border-red-400/20">{error}</div>}
+                                {successMsg && authStep === 'input' && <div className="text-green-400 text-[10px] font-bold uppercase tracking-widest text-center mb-6 bg-green-400/5 p-4 rounded-instrument border border-green-400/20">{successMsg}</div>}
                                 <button
                                     onClick={handleSendOTP}
-                                    disabled={isLoading}
-                                    className="w-full py-5 bg-background border border-black/15 hover:border-accent/30 text-primary rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] transition-all"
+                                    disabled={isLoading || !/^(?=.*[A-Z])(?=.*[!@#$&*]).{8,}$/.test(password)}
+                                    className="w-full py-5 bg-background border border-black/15 hover:border-accent/30 text-primary rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] transition-all disabled:opacity-50"
                                 >
                                     {isLoading ? 'Processing...' : 'Verify Node Connectivity'}
                                 </button>
@@ -257,7 +304,8 @@ export default function Checkout() {
                                 <h3 className="text-2xl font-bold text-primary mb-2 uppercase tracking-tight">Matrix Verification</h3>
                                 <p className="text-secondary text-sm mb-10 font-medium tracking-tight">Enter the protocol key sent to <span className="text-primary font-bold">{email}</span></p>
 
-                                {error && <div className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-6 bg-red-400/5 p-4 rounded-instrument border border-red-400/20">{error}</div>}
+                                {successMsg && <div className="text-green-400 text-[10px] font-bold uppercase tracking-widest text-center mb-6 bg-green-400/5 p-4 rounded-instrument border border-green-400/20">{successMsg}</div>}
+                                {error && <div className="text-red-400 text-[10px] font-bold uppercase tracking-widest text-center mb-6 bg-red-400/5 p-4 rounded-instrument border border-red-400/20">{error}</div>}
 
                                 <input
                                     type="text"
@@ -283,10 +331,53 @@ export default function Checkout() {
                                         {isLoading ? 'Verifying...' : 'Authenticate'}
                                     </button>
                                 </div>
+                                <div className="mt-8">
+                                    <button
+                                        onClick={handleSendOTP}
+                                        disabled={countdown > 0 || isLoading}
+                                        className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted hover:text-primary transition-colors disabled:opacity-50"
+                                    >
+                                        {countdown > 0 ? `Resend Code in ${Math.floor(countdown / 60)}:${(countdown % 60).toString().padStart(2, '0')}` : 'Resend Code'}
+                                    </button>
+                                </div>
                             </div>
                         )}
 
-                        {(user || authStep === 'done') && (
+                        {user && authStep === 'setup-2fa' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 text-center">
+                                <h3 className="text-2xl font-bold text-primary mb-2 uppercase tracking-tight">Enhance Security (2FA)</h3>
+                                <p className="text-secondary text-sm mb-10 font-medium tracking-tight">Set a 6-digit PIN to secure your trading node.</p>
+
+                                {error && <div className="text-red-400 text-[10px] font-bold uppercase tracking-widest mb-6 bg-red-400/5 p-4 rounded-instrument border border-red-400/20">{error}</div>}
+
+                                <input
+                                    type="password"
+                                    placeholder="••••••"
+                                    maxLength={6}
+                                    className="w-64 bg-background border border-accent/20 rounded-instrument px-6 py-5 text-center text-4xl tracking-[0.4em] font-bold text-accent focus:outline-none focus:border-accent transition-all mb-10 placeholder:text-accent/10"
+                                    value={pin2FA}
+                                    onChange={(e) => { setPin2FA(e.target.value.replace(/\D/g, '')); setError(''); }}
+                                />
+
+                                <div className="flex gap-6 max-w-lg mx-auto">
+                                    <button
+                                        onClick={handleSkip2FA}
+                                        className="flex-1 py-4 text-muted hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-[0.3em]"
+                                    >
+                                        Later
+                                    </button>
+                                    <button
+                                        onClick={handleSetup2FA}
+                                        disabled={isLoading || pin2FA.length < 6}
+                                        className="flex-[2] py-5 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] hover:shadow-soft transition-all disabled:opacity-50"
+                                    >
+                                        {isLoading ? 'Encrypting...' : 'Secure Node'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {user && authStep === 'done' && (
                             <div className="animate-in fade-in zoom-in">
                                 <div className="flex items-center justify-between p-6 bg-accent/5 rounded-instrument border border-accent/20 mb-10">
                                     <div className="flex items-center gap-4">
@@ -305,7 +396,7 @@ export default function Checkout() {
                                     className="w-full py-6 bg-accent text-background rounded-instrument font-bold uppercase tracking-[0.3em] text-[11px] hover:bg-primary transition-all shadow-soft flex items-center justify-center gap-4"
                                 >
                                     <CreditCard size={18} />
-                                    Process Allocation Fee (₹{activeSize.price.toLocaleString()})
+                                    Pay Entry Fee (₹100)
                                 </button>
                             </div>
                         )}

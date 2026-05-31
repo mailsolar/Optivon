@@ -43,6 +43,12 @@ router.post('/send-otp-register', (req, res) => {
 router.post('/register', async (req, res) => {
     const { email, password, otp } = req.body;
 
+    // Strict Password Validation
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).send({ error: 'Password must be at least 8 characters, with 1 uppercase letter and 1 symbol.' });
+    }
+
     // Verify OTP
     db.get('SELECT * FROM otps WHERE email = ? AND type = ? ORDER BY created_at DESC LIMIT 1',
         [email, 'registration'],
@@ -92,9 +98,19 @@ router.post('/login', (req, res) => {
                 return res.send({ require2FA: true, userId: user.id });
             }
 
+            // Increment login count
+            db.run('UPDATE users SET login_count = login_count + 1 WHERE id = ?', [user.id]);
+            const newLoginCount = (user.login_count || 0) + 1;
+            const recommend2FA = (!user.two_fa_enabled && newLoginCount % 10 === 0);
+
             // Issue Token
             const token = jwt.sign({ id: user.id, email: user.email, isAdmin: user.is_admin }, SECRET_KEY, { expiresIn: '24h' });
-            res.send({ message: 'Login Successful', token, user: { id: user.id, email: user.email, is_admin: user.is_admin } });
+            res.send({ 
+                message: 'Login Successful', 
+                token, 
+                user: { id: user.id, email: user.email, is_admin: user.is_admin },
+                recommend2FA 
+            });
         } catch (error) {
             console.error('[Login] Error:', error);
             res.status(500).send({ error: 'Login failed: ' + error.message });
@@ -165,6 +181,12 @@ router.post('/forgot-password', (req, res) => {
 router.post('/reset-password', async (req, res) => {
     const { email, code, newPassword } = req.body;
 
+    // Strict Password Validation
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+        return res.status(400).send({ error: 'Password must be at least 8 characters, with 1 uppercase letter and 1 symbol.' });
+    }
+
     db.get('SELECT * FROM otps WHERE email = ? AND type = ? ORDER BY created_at DESC LIMIT 1',
         [email, 'recovery'],
         async (err, row) => {
@@ -205,12 +227,23 @@ router.get('/me', authenticateToken, (req, res) => {
                 console.warn('[Auth] /me User not found for ID:', req.user.id);
                 return res.status(404).send({ error: 'User not found' });
             }
-            res.send({ user });
+            db.get('SELECT COUNT(*) as count FROM accounts WHERE user_id = ? AND status IN ("passed_pending_full_fee", "funded")', [req.user.id], (err, passedRow) => {
+                const hasPassedFirstChallenge = passedRow ? passedRow.count > 0 : false;
+                res.send({ user: { ...user, has_passed_first_challenge: hasPassedFirstChallenge } });
+            });
         });
     } catch (e) {
         console.error('[Auth] /me Unexpected Error:', e);
         res.status(500).send({ error: 'Server Error' });
     }
+});
+
+// Skip 2FA Route
+router.post('/skip-2fa', authenticateToken, (req, res) => {
+    db.run('UPDATE users SET skipped_2fa = 1 WHERE id = ?', [req.user.id], (err) => {
+        if (err) return res.status(500).send({ error: 'Database error' });
+        res.send({ message: '2FA Skipped' });
+    });
 });
 
 module.exports = router;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 
 export const MODELS = [
     { id: 'standard', label: 'Optivon Challenge', desc: 'Prove your skills. Get funded.' },
@@ -26,8 +27,11 @@ export const DATA = {
 
 export default function ChallengeSelector() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [selectedModel, setSelectedModel] = useState('standard');
-    const [selectedSizeId, setSelectedSizeId] = useState('10L');
+    const [selectedSizeId, setSelectedSizeId] = useState('5L'); // Default to 5L (Starting Challenge)
+
+    const hasPassedFirstChallenge = user?.has_passed_first_challenge === true;
 
     const handleSelect = () => {
         navigate('/checkout', { state: { modelId: selectedModel, sizeId: selectedSizeId } });
@@ -50,17 +54,24 @@ export default function ChallengeSelector() {
                     <span className="text-caption text-secondary">Capital Size</span>
                 </div>
                 <div className="w-full md:w-2/3 flex overflow-x-auto hide-scrollbar">
-                    {SIZES.map((size) => (
-                        <button
-                            key={size.id}
-                            onClick={() => setSelectedSizeId(size.id)}
-                            className={`flex-1 min-w-[120px] py-8 text-center text-caption transition-all duration-500 border-b md:border-b-0 border-black/15 md:border-r last:border-r-0 ${
-                                selectedSizeId === size.id ? 'bg-accent text-background' : 'text-primary hover:bg-black/5'
-                            }`}
-                        >
-                            {size.label}
-                        </button>
-                    ))}
+                    {SIZES.map((size, index) => {
+                        const isLocked = index > 0 && !hasPassedFirstChallenge;
+                        return (
+                            <button
+                                key={size.id}
+                                disabled={isLocked}
+                                onClick={() => !isLocked && setSelectedSizeId(size.id)}
+                                className={`flex-1 min-w-[120px] py-8 text-center text-caption transition-all duration-500 border-b md:border-b-0 border-black/15 md:border-r last:border-r-0 ${
+                                    selectedSizeId === size.id ? 'bg-accent text-background' : 'text-primary hover:bg-black/5'
+                                } ${isLocked ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                                <div className="flex flex-col items-center gap-1">
+                                    <span>{size.label}</span>
+                                    {isLocked && <span className="text-[9px] uppercase tracking-widest text-muted">Locked</span>}
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -86,12 +97,15 @@ export default function ChallengeSelector() {
                     {/* Right Fee */}
                     <div className="p-12 md:p-16 flex flex-col justify-between">
                         <div>
-                            <div className="text-caption text-secondary mb-6">Allocation Fee</div>
-                            <div className="text-[clamp(4rem,8vw,7rem)] font-display text-primary leading-none tracking-[-0.03em] mb-4">
-                                <span className="text-3xl align-top mr-2 font-sans tracking-normal">₹</span>
-                                {activeSize.price.toLocaleString()}
+                            <div className="text-caption text-secondary mb-6">Initial Entry Fee (Pay Later Model)</div>
+                            <div className="text-[clamp(4rem,8vw,7rem)] font-display text-primary leading-none tracking-[-0.03em] mb-4 flex items-end">
+                                <span className="text-3xl align-top mr-2 font-sans tracking-normal pb-2">₹</span>
+                                100
+                                <span className="text-sm font-sans text-secondary ml-4 pb-3 line-through">₹{activeSize.price.toLocaleString()}</span>
                             </div>
-
+                            <div className="text-xs text-secondary max-w-sm mt-4 leading-relaxed font-medium">
+                                * Pay only ₹100 today to start the challenge. If you pass the evaluation, pay the remaining ₹{(activeSize.price - 100).toLocaleString()} to receive your funded account!
+                            </div>
                         </div>
 
                         <div className="mt-16 sm:mt-32">
