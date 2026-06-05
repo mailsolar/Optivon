@@ -235,7 +235,7 @@ export default function AccountsOverview() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/[0.03]">
-                                    {accounts.map((acc, i) => (
+                                    {accounts.slice(0, 20).map((acc, i) => (
                                         <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
                                             <td className="px-6 py-8">
                                                 <div className="flex flex-col gap-1">
@@ -257,9 +257,6 @@ export default function AccountsOverview() {
                                                     <span className="text-sm font-bold text-secondary uppercase tracking-tighter">
                                                         {new Date(acc.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                                     </span>
-                                                    {acc.session_expires && (
-                                                        <span className="text-[9px] text-red-400 font-bold uppercase tracking-widest">Expires in {Math.floor((new Date(acc.session_expires) - new Date()) / 3600000)}H</span>
-                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-8 text-center">

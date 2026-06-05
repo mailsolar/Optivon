@@ -181,6 +181,11 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
             if (checkAlerts) checkAlerts({ [activeSymbol]: { ltp: tick.ltp } });
         });
 
+        socket.on('disconnect', () => {
+            setSocketStatus('Disconnected');
+            setIsLive(false);
+        });
+
         return () => socket.disconnect();
     }, []);
 
@@ -354,6 +359,9 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
         if (symbol === selectedSymbol) return;
         chartDataRef.current = [];
         setChartData([]);
+        if (seriesAPI.current) {
+            seriesAPI.current.setData([]);
+        }
         setSelectedSymbol(symbol);
     };
 
@@ -406,6 +414,25 @@ function TerminalLayoutContent({ user, quotes: initialQuotes, account, setAccoun
                     </div>
 
                     <div className="flex-1 relative overflow-hidden" ref={chartContainerRef}>
+                        {!upstoxStatus.authenticated && (
+                            <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                                <div className="p-8 bg-surface border border-black/15 rounded-premium flex flex-col items-center max-w-md shadow-2xl">
+                                    <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-6">
+                                        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-primary mb-2 font-display uppercase tracking-tighter">Market Feed Offline</h3>
+                                    <p className="text-secondary text-xs text-center mb-8 font-medium">
+                                        Live data requires daily OAuth authorization. Connect your Upstox broker account to initialize the data stream and test strategies.
+                                    </p>
+                                    <a
+                                        href={`${getBackendUrl()}/api/upstox/login`}
+                                        className="w-full py-4 bg-white text-black font-bold text-[11px] uppercase tracking-widest rounded-instrument hover:bg-gray-200 transition-all text-center shadow-lg shadow-white/20 hover:scale-[1.02] active:scale-[0.98]"
+                                    >
+                                        CONNECT UPSTOX BROKER
+                                    </a>
+                                </div>
+                            </div>
+                        )}
                         <TerminalChart
                             data={chartData}
                             symbol={selectedSymbol}

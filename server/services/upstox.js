@@ -5,13 +5,7 @@ const https = require('https');
 const querystring = require('querystring');
 const WebSocket = require('ws');
 
-// Single instance engine access
-let orderManager;
-try {
-    orderManager = require('../engine/orderManager');
-} catch (e) {
-    console.warn('[Upstox] OrderManager not found yet, skipping linkage');
-}
+// OrderManager is required lazily to avoid circular dependency
 
 class UpstoxService {
     constructor() {
@@ -133,6 +127,13 @@ class UpstoxService {
                     let data = ''; res.on('data', d => data += d);
                     res.on('end', () => {
                         try {
+                            if (res.statusCode === 401) {
+                                console.warn('[Upstox] 401 Unauthorized. Token expired. Clearing token.');
+                                this.isAuthenticated = false;
+                                this.accessToken = null;
+                                if (this.pollInterval) clearInterval(this.pollInterval);
+                                return;
+                            }
                             if (res.statusCode === 429) {
                                 console.warn('[Upstox] 429 Rate Limit hit. Backing off for 15s...');
                                 this.isBackingOff = true;
@@ -154,9 +155,12 @@ class UpstoxService {
                                         };
                                         if (this.io) this.io.emit('stock_update', tick);
                                         this.latestQuotes.set(symbol, ltp);
-                                        if (orderManager && orderManager.processLiveTick) {
-                                            orderManager.processLiveTick(symbol, ltp);
-                                        }
+                                        try {
+                                            const orderManager = require('../engine/orderManager');
+                                            if (orderManager && orderManager.processLiveTick) {
+                                                orderManager.processLiveTick(symbol, ltp);
+                                            }
+                                        } catch(e) {}
                                     }
                                 });
                             }
@@ -200,6 +204,13 @@ class UpstoxService {
                 let d = ''; res.on('data', chunk => d += chunk);
                 res.on('end', () => {
                     try {
+                        if (res.statusCode === 401) {
+                            console.warn('[Upstox] 401 Unauthorized in history fetch. Token expired.');
+                            this.isAuthenticated = false;
+                            this.accessToken = null;
+                            resolve([]);
+                            return;
+                        }
                         const p = JSON.parse(d);
                         if (p.status === 'success') {
                             const candles = (p.data.candles || []).map(c => ({

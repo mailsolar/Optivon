@@ -20,19 +20,6 @@ class OrderManager {
         const maxLots = this.getMaxLots(accountSize, symbol);
         if (lots > maxLots) throw new Error(`Lot limit exceeded. Max is ${maxLots} lots.`);
 
-        // Get Price from Cache (Zero Latency / Zero API Hammering)
-        let ltp = upstoxService.latestQuotes.get(symbol);
-        if (!ltp) {
-            // If not in cache, try one quick burst fetch or fail
-            throw new Error('Waiting for market data connection... Try again in 2 seconds.');
-        }
-
-        // Inject Spread (Risk Management)
-        // Adding a 0.5 point spread to simulate realistic market conditions
-        const spread = 0.5;
-        const quote = { ask: ltp + spread, bid: ltp - spread, ltp: ltp };
-        const price = side === 'buy' ? quote.ask : quote.bid;
-
         // RULE: Trading Hours (09:15 - 15:25 IST)
         const istTime = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
         const totalMinutes = istTime.getUTCHours() * 60 + istTime.getUTCMinutes();
@@ -41,9 +28,38 @@ class OrderManager {
         const openPositions = await this.getOpenPositionsCount(accountId, symbol, side);
         if (openPositions >= 2) throw new Error(`Max entries reached (2).`);
 
+        // 1. SIMULATE LATENCY (100ms - 400ms)
+        const latency = Math.floor(Math.random() * 300) + 100;
+        await new Promise(resolve => setTimeout(resolve, latency));
+
+        // Get Price from Cache after Latency (Zero API Hammering)
+        let ltp = upstoxService.latestQuotes.get(symbol);
+        if (!ltp) {
+            // If not in cache, try one quick burst fetch or fail
+            throw new Error('Waiting for market data connection... Try again in 2 seconds.');
+        }
+
+        // 2. INJECT DYNAMIC SPREAD (1.5 to 3.0 points)
+        // Widens realistically to prevent arbitrage and zero-spread exploits
+        const spread = (Math.random() * 1.5) + 1.5;
+        const quote = { ask: ltp + spread, bid: ltp - spread, ltp: ltp };
+        let price = side === 'buy' ? quote.ask : quote.bid;
+
+        // 3. INJECT SLIPPAGE (Market Orders Only)
+        // Adds 2-6 points of slippage against the trader
+        if (type !== 'limit') {
+            const slippageBase = symbol.includes('BANK') ? 3 : 2;
+            const slippageRand = Math.random() * 3;
+            const slippage = slippageBase + slippageRand;
+            
+            // Slippage always hurts the trader
+            price = side === 'buy' ? price + slippage : price - slippage;
+        }
+
         const contractSize = symbol === 'NIFTY' ? 75 : 15; // Standard Lot Sizes
         const totalValue = price * lots * contractSize;
-        const leverage = (symbol.includes('CE') || symbol.includes('PE')) ? (side === 'buy' ? 10 : 5) : 3;
+        // Prop firms provide extremely high leverage for indices (1:100)
+        const leverage = 100;
         const marginRequired = totalValue / leverage;
 
         const account = await this.getAccount(accountId);
@@ -184,7 +200,9 @@ class OrderManager {
         db.all("SELECT * FROM limit_orders WHERE status = 'pending' AND symbol = ?", [symbol], (err, orders) => {
             if (err || !orders) return;
             orders.forEach(o => {
-                let triggered = o.side === 'buy' ? price <= o.limit_price : price >= o.limit_price;
+                // 4. LIMIT ORDER REALITY CHECK
+                // Price must trade THROUGH the limit price by at least 0.5 points to fill.
+                let triggered = o.side === 'buy' ? price <= (o.limit_price - 0.5) : price >= (o.limit_price + 0.5);
                 if (triggered) this.executeLimitOrder(o, price);
             });
         });

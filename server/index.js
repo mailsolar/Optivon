@@ -70,24 +70,6 @@ leaderboardService.startCronJob();
 const copyTradingService = require('./services/copyTradingService');
 copyTradingService.startCronJob();
 
-// Market WebSocket Server (separate path /market — no conflict with Socket.IO)
-const MarketWebSocketServer = require('./engine/marketWebSocket');
-const marketWS = new MarketWebSocketServer(); // No server passed (noServer mode)
-
-// Manual Upgrade Handling to separate Socket.IO and Market WS
-server.on('upgrade', (request, socket, head) => {
-    const { pathname } = require('url').parse(request.url);
-
-    if (pathname === '/market') {
-        marketWS.handleUpgrade(request, socket, head);
-    } else {
-        // Let Socket.IO handle it (it attaches its own listener)
-        // Do nothing here
-    }
-});
-
-console.log('✅ Market Data WebSocket Server initialized');
-
 app.get('/api/health', (req, res) => {
     res.send({ message: 'Optivon API Running', status: 'Active' });
 });
